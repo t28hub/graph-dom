@@ -15,14 +15,21 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "clean": "npx rimraf dist"
+    "start": "yarn run watch",
+    "clean": "npx rimraf dist",
+    "build": "npx webpack --config webpack.config.ts --mode production",
+    "watch": "npx webpack --config webpack.config.ts --mode development --watch"
   },
   "dependencies": {},
   "devDependencies": {
     "@types/aws-lambda": "^8.10.31",
     "@types/node": "^12.7.2",
+    "@types/webpack": "^4.32.2",
     "rimraf": "^3.0.0",
+    "ts-loader": "^6.0.4",
     "ts-node": "^8.3.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.6"
   }
 }
