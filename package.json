@@ -1,0 +1,23 @@
+{
+  "name": "aws-lambda-puppeteer",
+  "description": "This is a sample AWS lambda functions using the Puppeteer.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": {
+    "name": "Tatsuya Maki",
+    "email": "t28oogle@gmail.com",
+    "url": "https://github.com/t28hub"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:t28hub/aws-lambda-puppeteer.git"
+  },
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}
