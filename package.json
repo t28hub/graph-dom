@@ -2,7 +2,7 @@
   "name": "aws-lambda-puppeteer",
   "description": "This is a sample AWS lambda functions using the Puppeteer.",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.ts",
   "author": {
     "name": "Tatsuya Maki",
     "email": "t28oogle@gmail.com",
@@ -15,9 +15,14 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
+    "clean": "npx rimraf dist"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.31",
+    "@types/node": "^12.7.2",
+    "rimraf": "^3.0.0",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.3"
   }
 }
