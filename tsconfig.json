@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2017",
     "module": "commonjs",
+    "lib": ["es2017"],
     "allowJs": false,
     "declaration": true,
     "sourceMap": true,
@@ -16,8 +17,12 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     "moduleResolution": "node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ]
   },
-  "include": ["src/**/*"],
+  "include": ["./**/*.ts","src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

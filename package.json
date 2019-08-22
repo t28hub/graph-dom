@@ -15,10 +15,10 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "start": "yarn run watch",
-    "clean": "npx rimraf dist",
-    "build": "npx webpack --config webpack.config.ts --mode production",
-    "watch": "npx webpack --config webpack.config.ts --mode development --watch"
+    "clean": "npx rimraf dist yarn-error.log",
+    "build": "npx sls webpack --mode production",
+    "watch": "npx sls invoke local --watch --function ",
+    "invoke:local": "npx sls invoke local --function "
   },
   "dependencies": {},
   "devDependencies": {
@@ -26,6 +26,8 @@
     "@types/node": "^12.7.2",
     "@types/webpack": "^4.32.2",
     "rimraf": "^3.0.0",
+    "serverless": "^1.50.0",
+    "serverless-webpack": "^5.3.1",
     "ts-loader": "^6.0.4",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3",

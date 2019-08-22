@@ -1,0 +1,32 @@
+service:
+  name: aws-lambda-puppeteer
+frameworkVersion: ">=1.50.0 <2.0.0"
+
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: webpack.config.ts
+    includeModules: false
+    packager: yarn
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: ap-northeast-1
+  iamRoleStatements:
+  environment:
+
+functions:
+  hello:
+    handler: src/index.handler
+    memorySize: 128MB
+    timeout: 180
+    events:
+    environment:
+
+resources:
+  Resources:
+  Outputs:

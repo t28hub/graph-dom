@@ -1,11 +1,11 @@
 import {resolve} from 'path';
+import {lib} from 'serverless-webpack';
 import {Configuration} from 'webpack';
 
 const config: Configuration = {
+  mode: lib.webpack.isLocal ? 'development' : 'production',
+  entry: lib.entries,
   target: 'node',
-  entry: {
-    'app': resolve(__dirname, 'src/index.ts'),
-  },
   resolve: {
     extensions: ['.ts', '.js', '.json'],
   },
@@ -14,7 +14,7 @@ const config: Configuration = {
     path: resolve(__dirname, 'dist'),
     filename: '[name]/index.js',
   },
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   module: {
     rules: [
       {
@@ -27,4 +27,4 @@ const config: Configuration = {
   externals: [],
 };
 
-export default config;
+module.exports = config;
