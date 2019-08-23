@@ -15,16 +15,27 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "clean": "npx rimraf dist yarn-error.log",
+    "clean": "npx rimraf dist layers yarn-error.log",
     "build": "npx sls webpack --mode production",
-    "watch": "npx sls invoke local --watch --function ",
-    "invoke:local": "npx sls invoke local --function "
+    "build:layer": "npx mkdirp ./layers && yarn install --modules-folder ./layers/nodejs/node_modules --production",
+    "watch": "npx sls invoke local --watch --function",
+    "deploy:dev": "npx sls deploy --stage dev",
+    "invoke": "npx sls invoke --function",
+    "invoke:local": "npx sls invoke local --function"
   },
-  "dependencies": {},
+  "dependencies": {
+    "chrome-aws-lambda": "^1.19.0",
+    "puppeteer-core": "^1.19.0",
+    "source-map-support": "^0.5.13"
+  },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.31",
     "@types/node": "^12.7.2",
+    "@types/puppeteer-core": "^1.9.0",
+    "@types/source-map-support": "^0.5.0",
     "@types/webpack": "^4.32.2",
+    "@types/webpack-node-externals": "^1.6.3",
+    "mkdirp": "^0.5.1",
     "rimraf": "^3.0.0",
     "serverless": "^1.50.0",
     "serverless-webpack": "^5.3.1",
@@ -32,6 +43,7 @@
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3",
     "webpack": "^4.39.2",
-    "webpack-cli": "^3.3.6"
+    "webpack-cli": "^3.3.6",
+    "webpack-node-externals": "^1.7.2"
   }
 }

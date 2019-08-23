@@ -1,18 +1,19 @@
 import {resolve} from 'path';
 import {lib} from 'serverless-webpack';
 import {Configuration} from 'webpack';
+import nodeExternals from 'webpack-node-externals';
 
 const config: Configuration = {
   mode: lib.webpack.isLocal ? 'development' : 'production',
   entry: lib.entries,
   target: 'node',
   resolve: {
-    extensions: ['.ts', '.js', '.json'],
+    extensions: ['.ts', '.js', '.json', '.node'],
   },
   output: {
     libraryTarget: 'commonjs',
     path: resolve(__dirname, 'dist'),
-    filename: '[name]/index.js',
+    filename: '[name].js',
   },
   devtool: 'source-map',
   module: {
@@ -24,7 +25,7 @@ const config: Configuration = {
       },
     ],
   },
-  externals: [],
+  externals: [nodeExternals()],
 };
 
 module.exports = config;

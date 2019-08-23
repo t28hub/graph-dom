@@ -19,6 +19,19 @@ provider:
   iamRoleStatements:
   environment:
 
+layers:
+  nodeModules:
+    path: layers
+    package:
+      include:
+        - node_modules/**
+    compatibleRuntimes:
+      - nodejs8.10
+    licenseInfo: Apache-2.0
+    allowedAccounts:
+      - "*"
+    retain: false
+
 functions:
   hello:
     handler: src/index.handler
@@ -26,6 +39,8 @@ functions:
     timeout: 180
     events:
     environment:
+    layers:
+      - {Ref: NodeModulesLambdaLayer}
 
 resources:
   Resources:
