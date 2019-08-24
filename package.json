@@ -18,10 +18,10 @@
     "clean": "npx rimraf dist layers yarn-error.log",
     "build": "npx sls webpack --mode production",
     "build:layer": "npx mkdirp ./layers && yarn install --modules-folder ./layers/nodejs/node_modules --production",
-    "watch": "npx sls invoke local --watch --function",
+    "watch": "npx sls invoke local --stage local --watch --function",
     "deploy:dev": "npx sls deploy --stage dev",
     "invoke": "npx sls invoke --function",
-    "invoke:local": "npx sls invoke local --function"
+    "invoke:local": "npx sls invoke local --stage local --function"
   },
   "dependencies": {
     "chrome-aws-lambda": "^1.19.0",

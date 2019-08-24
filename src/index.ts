@@ -20,14 +20,14 @@ export const handler: Handler = async (event: APIGatewayEvent, context: Context,
     const launchOptions: LaunchOptions = {
       args: Chromium.args,
       defaultViewport: Chromium.defaultViewport,
-      executablePath: await Chromium.executablePath,
+      executablePath: process.env['PUPPETEER_EXECUTABLE_PATH'] || await Chromium.executablePath,
       headless: Chromium.headless,
     };
     browser = await Chromium.puppeteer.launch(launchOptions);
 
     page = await browser.newPage();
 
-    const url = 'https://speakerdeck.com/pirosikick/puppeteerdeiranaicsswoxiao-su';
+    const url = 'https://speakerdeck.com/pirosikick/o-19falsewebwomatomeruhui';
     const navigationOptions: NavigationOptions = {
       waitUntil: 'networkidle2'
     };
