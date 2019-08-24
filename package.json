@@ -15,6 +15,7 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
+    "start": "npx sls offline",
     "clean": "npx rimraf dist layers yarn-error.log",
     "build": "npx sls webpack --mode production",
     "build:layer": "npx mkdirp ./layers && yarn install --modules-folder ./layers/nodejs/node_modules --production",
@@ -38,6 +39,7 @@
     "mkdirp": "^0.5.1",
     "rimraf": "^3.0.0",
     "serverless": "^1.50.0",
+    "serverless-offline": "^5.10.1",
     "serverless-webpack": "^5.3.1",
     "ts-loader": "^6.0.4",
     "ts-node": "^8.3.0",

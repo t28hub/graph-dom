@@ -4,12 +4,15 @@ frameworkVersion: ">=1.50.0 <2.0.0"
 
 plugins:
   - serverless-webpack
+  - serverless-offline
 
 custom:
   webpack:
     webpackConfig: webpack.config.ts
     includeModules: false
     packager: yarn
+  serverless-offline:
+    port: 8080
   puppeteer:
     executablePath:
       local: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -41,6 +44,9 @@ functions:
     memorySize: 128MB
     timeout: 180
     events:
+      - http:
+          method: get
+          path: /hello
     environment:
       PUPPETEER_EXECUTABLE_PATH: ${self:custom.puppeteer.executablePath.${self:provider.stage},''}
     layers:
