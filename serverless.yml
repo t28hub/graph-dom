@@ -40,13 +40,14 @@ layers:
 
 functions:
   hello:
-    handler: src/index.handler
+    handler: src/handler.handler
     memorySize: 128MB
     timeout: 180
     events:
       - http:
-          method: get
-          path: /hello
+          method: post
+          path: /graphql
+          cors: true
     environment:
       PUPPETEER_EXECUTABLE_PATH: ${self:custom.puppeteer.executablePath.${self:provider.stage},''}
     layers:

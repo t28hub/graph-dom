@@ -2,7 +2,7 @@
   "name": "aws-lambda-puppeteer",
   "description": "This is a sample AWS lambda functions using the Puppeteer.",
   "version": "1.0.0",
-  "main": "src/index.ts",
+  "main": "src/handler.ts",
   "author": {
     "name": "Tatsuya Maki",
     "email": "t28oogle@gmail.com",
@@ -25,7 +25,9 @@
     "invoke:local": "npx sls invoke local --stage local --function"
   },
   "dependencies": {
+    "apollo-server-lambda": "^2.9.0",
     "chrome-aws-lambda": "^1.19.0",
+    "graphql": "^14.5.3",
     "puppeteer-core": "^1.19.0",
     "source-map-support": "^0.5.13"
   },
