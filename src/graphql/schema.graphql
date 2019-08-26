@@ -1,0 +1,5 @@
+#import './pageObject.graphql'
+
+type Query {
+    page(url: String!): PageObject!
+}

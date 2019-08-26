@@ -5,18 +5,10 @@ import {APIGatewayEvent, APIGatewayProxyResult, Handler} from 'aws-lambda';
 import Chromium from 'chrome-aws-lambda';
 import {Browser, LaunchOptions, NavigationOptions, Page, Response} from 'puppeteer-core';
 import {install} from 'source-map-support';
+import schema from './graphql/schema.graphql';
 
+console.info(schema);
 install();
-
-const schema = gql`
-    type Query {
-        page(url: String!): PageObject!
-    }
-
-    type PageObject {
-        title: String!
-    }
-`;
 
 interface PageObject {
   title: String;

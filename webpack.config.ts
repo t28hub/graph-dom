@@ -8,7 +8,7 @@ const config: Configuration = {
   entry: lib.entries,
   target: 'node',
   resolve: {
-    extensions: ['.ts', '.js', '.json', '.node'],
+    extensions: ['.ts', '.js', '.json', '.graphql'],
   },
   output: {
     libraryTarget: 'commonjs',
@@ -21,6 +21,12 @@ const config: Configuration = {
       {
         test: /\.ts$/,
         loader: 'ts-loader',
+        exclude: /node_modules/,
+      },
+      // https://www.apollographql.com/docs/react/recipes/webpack/
+      {
+        test: /\.graphql$/,
+        loader: 'graphql-tag/loader',
         exclude: /node_modules/,
       },
     ],
