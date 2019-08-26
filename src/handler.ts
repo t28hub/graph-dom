@@ -1,83 +1,100 @@
 import {format, parse, Url} from 'url';
 import {ApolloServer, Config, gql, IResolvers} from 'apollo-server-lambda';
+import {GraphQLResponse} from 'apollo-server-types';
 import {APIGatewayEvent, APIGatewayProxyResult, Handler} from 'aws-lambda';
 import Chromium from 'chrome-aws-lambda';
-import {Browser, LaunchOptions, NavigationOptions, Page} from 'puppeteer-core';
+import {Browser, LaunchOptions, NavigationOptions, Page, Response} from 'puppeteer-core';
 import {install} from 'source-map-support';
-import {requireNotNull} from './utils';
 
 install();
 
 const schema = gql`
     type Query {
-        page(url: String!): Response!
+        page(url: String!): PageObject!
     }
 
-    type Response {
-        title: String
+    type PageObject {
+        title: String!
     }
 `;
 
-interface Response {
-  title: String,
+interface PageObject {
+  title: String;
 }
 
-const fetch = async (url: Url): Promise<Response> => {
-  console.info(url);
-  let response: Response | undefined;
-  let browser: Browser | undefined;
-  let page: Page | undefined;
-  try {
-    const launchOptions: LaunchOptions = {
+interface Context {
+  browser: BrowserService;
+}
+
+interface BrowserService {
+  fetch(url: Url, options?: { [name: string]: any }): Promise<PageObject>
+
+  close(): Promise<void>
+}
+
+class ChromiumBrowserService implements BrowserService {
+  browser: Browser;
+
+  static async create(options: { [name: string]: any } = {}): Promise<ChromiumBrowserService> {
+    const defaultOptions: LaunchOptions = {
       args: Chromium.args,
       defaultViewport: Chromium.defaultViewport,
       executablePath: process.env['PUPPETEER_EXECUTABLE_PATH'] || await Chromium.executablePath,
       headless: Chromium.headless,
     };
-    browser = await Chromium.puppeteer.launch(launchOptions);
-
-    page = await browser.newPage();
-
-    const navigationOptions: NavigationOptions = {
-      waitUntil: 'networkidle2'
-    };
-    await page.goto(format(url), navigationOptions);
-
-    const title = await page.$('meta[property="og:title"]')
-      .then(element => {
-        const found = requireNotNull(element, 'element');
-        return found.getProperty('content')
-      })
-      .then(js => js.jsonValue());
-
-    response = {
-      title,
-    };
-    console.info(response);
-  } catch (e) {
-    console.warn('Unexpected error occurred', e);
-  } finally {
-    if (page) {
-      await page.close();
-    }
-    if (browser) {
-      browser.disconnect();
-      await browser.close();
-    }
+    const launchOptions: LaunchOptions = {...defaultOptions, ...options};
+    const browser: Browser = await Chromium.puppeteer.launch(launchOptions);
+    return new ChromiumBrowserService(browser);
   }
 
-  if (!response) {
-    throw new Error();
+  constructor(browser: Browser) {
+    this.browser = browser;
   }
-  return response;
+
+  async fetch(url: Url, options: { [name: string]: any } = {}): Promise<PageObject> {
+    const page: Page = await this.browser.newPage();
+    const navigationOptions: NavigationOptions = {waitUntil: 'networkidle2'};
+    const response: Response | null = await page.goto(format(url), navigationOptions);
+    if (response === null) {
+      throw new Error(`Received no response from ${url}`);
+    }
+    console.info(`Received ${response.status()} from ${format(url)}`);
+
+    return {
+      title: await page.title(),
+    };
+  }
+
+  async close(): Promise<void> {
+    const pages: Page[] = await this.browser.pages();
+    for (const page of pages) {
+      const url: string = page.url();
+      try {
+        await page.close();
+      } catch (e) {
+        console.warn(`Failed to close a page ${url}`);
+      }
+    }
+
+    try {
+      await this.browser.close();
+    } catch (e) {
+      console.warn(`Failed to close a browser`);
+    }
+    this.browser.disconnect();
+  }
+}
+
+const fetch = async (url: Url, browser: BrowserService): Promise<PageObject> => {
+  console.info(url);
+  return await browser.fetch(url);
 };
 
 const resolvers: IResolvers = {
   Query: {
-    page: async (source: any, args: { [name: string]: any }): Promise<Response> => {
-      const url = parse(args['url'] || '');
-      console.info(url);
-      return await fetch(url);
+    page: async (parent: any, args: { url: string }, context: Context): Promise<PageObject> => {
+      const url = parse(args['url']);
+      return await fetch(url, context.browser);
     }
   }
 };
@@ -85,6 +102,17 @@ const resolvers: IResolvers = {
 const config: Config = {
   typeDefs: schema,
   resolvers,
+  context: async (): Promise<Context> => {
+    return {
+      browser: await ChromiumBrowserService.create(),
+    }
+  },
+  formatResponse: (response: GraphQLResponse, options: { context: Context }): GraphQLResponse => {
+    options.context.browser.close()
+      .then(() => console.info('Browser service is closed'))
+      .catch((cause: Error) => console.warn('Failed to close BrowserService', cause));
+    return response;
+  },
   playground: true,
   tracing: true,
 };
