@@ -4,4 +4,6 @@ type PageObject {
     title: String!
 
     query(selector: String!): Node
+
+    queryAll(selector: String!): [Node]!
 }

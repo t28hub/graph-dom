@@ -18,40 +18,35 @@ class PageObject {
     this.title = title;
   }
 
+  public async queryAll(selector: string): Promise<Array<Node>> {
+    const found: ElementHandle<Element>[] = await this.page.$$(selector);
+    const promises: Promise<Node>[] = found.map(async (element: ElementHandle): Promise<Node> => await this.extractProperties(element));
+    return Promise.all(promises);
+  }
+
   public async query(selector: string): Promise<Node> {
     const found: ElementHandle | null = await this.page.$(selector);
     if (found === null) {
       throw new Error(`Could not find a element by ${selector}`);
     }
+    return await this.extractProperties(found);
+  }
 
-    interface NodeParams {
-      name: string;
-      type: NodeType;
-      text: string | null;
-      value: string | null;
-    }
-
-    const params: NodeParams = await this.page.evaluate((selector: string): NodeParams => {
-      // @ts-ignore
-      declare const document: any;
-      const selected = document.querySelector(selector);
-      if (selected === null) {
-        throw new Error(`Could not find an element by selector: ${selector}`);
-      }
-
+  private async extractProperties(element: ElementHandle): Promise<Node> {
+    const node = await this.page.evaluate((element: Element): SerializableNode => {
       return {
-        name: selected.nodeName,
-        type: selected.nodeType,
-        text: selected.textContent,
-        value: selected.nodeValue,
+        name: element.nodeName,
+        type: element.nodeType,
+        text: element.textContent,
+        value: element.nodeValue,
       };
-    }, selector);
+    }, element);
 
     return {
-      name: params.name,
-      type: params.type,
-      text: params.text,
-      value: params.value,
+      name: node.name,
+      type: node.type,
+      text: node.text,
+      value: node.value,
     };
   }
 }
@@ -76,6 +71,13 @@ enum NodeType {
   DOCUMENT_TYPE_NODE,
   DOCUMENT_FRAGMENT_NODE,
   NOTATION_NODE,
+}
+
+interface SerializableNode {
+  name: string;
+  type: NodeType;
+  text: string | null;
+  value: string | null;
 }
 
 interface Context {
@@ -155,7 +157,11 @@ const resolvers: IResolvers = {
     query: async (parent: PageObject, args: { selector: string }, context: Context): Promise<Node> => {
       const {selector} = args;
       return await parent.query(selector);
-    }
+    },
+    queryAll: async (parent: PageObject, args: { selector: string }, context: Context): Promise<Array<Node>> => {
+      const {selector} = args;
+      return await parent.queryAll(selector);
+    },
   },
   Node: {
     type: (values: { type: NodeType }) => {
