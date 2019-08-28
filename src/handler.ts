@@ -1,17 +1,81 @@
 import {format, parse, Url} from 'url';
-import {ApolloServer, Config, gql, IResolvers} from 'apollo-server-lambda';
+import {ApolloServer, Config, IResolvers} from 'apollo-server-lambda';
 import {GraphQLResponse} from 'apollo-server-types';
 import {APIGatewayEvent, APIGatewayProxyResult, Handler} from 'aws-lambda';
 import Chromium from 'chrome-aws-lambda';
-import {Browser, LaunchOptions, NavigationOptions, Page, Response} from 'puppeteer-core';
+import {Browser, ElementHandle, LaunchOptions, NavigationOptions, Page, Response} from 'puppeteer-core';
 import {install} from 'source-map-support';
 import schema from './graphql/schema.graphql';
 
-console.info(schema);
 install();
 
-interface PageObject {
-  title: String;
+class PageObject {
+  page: Page;
+  title: string;
+
+  constructor(page: Page, title: string) {
+    this.page = page;
+    this.title = title;
+  }
+
+  public async query(selector: string): Promise<Node> {
+    const found: ElementHandle | null = await this.page.$(selector);
+    if (found === null) {
+      throw new Error(`Could not find a element by ${selector}`);
+    }
+
+    interface NodeParams {
+      name: string;
+      type: NodeType;
+      text: string | null;
+      value: string | null;
+    }
+
+    const params: NodeParams = await this.page.evaluate((selector: string): NodeParams => {
+      // @ts-ignore
+      declare const document: any;
+      const selected = document.querySelector(selector);
+      if (selected === null) {
+        throw new Error(`Could not find an element by selector: ${selector}`);
+      }
+
+      return {
+        name: selected.nodeName,
+        type: selected.nodeType,
+        text: selected.textContent,
+        value: selected.nodeValue,
+      };
+    }, selector);
+
+    return {
+      name: params.name,
+      type: params.type,
+      text: params.text,
+      value: params.value,
+    };
+  }
+}
+
+interface Node {
+  name: string;
+  type: NodeType;
+  text: string | null;
+  value: string | null;
+}
+
+enum NodeType {
+  ELEMENT_NODE = 1,
+  ATTRIBUTE_NODE,
+  TEXT_NODE,
+  CDATA_SECTION_NODE,
+  ENTITY_REFERENCE_NODE,
+  ENTITY_NODE,
+  PROCESSING_INSTRUCTION_NODE,
+  COMMENT_NODE,
+  DOCUMENT_NODE,
+  DOCUMENT_TYPE_NODE,
+  DOCUMENT_FRAGMENT_NODE,
+  NOTATION_NODE,
 }
 
 interface Context {
@@ -52,9 +116,7 @@ class ChromiumBrowserService implements BrowserService {
     }
     console.info(`Received ${response.status()} from ${format(url)}`);
 
-    return {
-      title: await page.title(),
-    };
+    return new PageObject(page, await page.title());
   }
 
   async close(): Promise<void> {
@@ -88,7 +150,19 @@ const resolvers: IResolvers = {
       const url = parse(args['url']);
       return await fetch(url, context.browser);
     }
-  }
+  },
+  PageObject: {
+    query: async (parent: PageObject, args: { selector: string }, context: Context): Promise<Node> => {
+      const {selector} = args;
+      return await parent.query(selector);
+    }
+  },
+  Node: {
+    type: (values: { type: NodeType }) => {
+      const {type} = values;
+      return NodeType[type];
+    },
+  },
 };
 
 const config: Config = {

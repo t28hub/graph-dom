@@ -1,3 +1,7 @@
+#import './node.graphql'
+
 type PageObject {
     title: String!
+
+    query(selector: String!): Node
 }

@@ -1,0 +1,8 @@
+#import './nodeType.graphql'
+
+type Node {
+    name: String!
+    type: NodeType!
+    value: String
+    text: String
+}
