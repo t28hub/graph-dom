@@ -2,10 +2,11 @@
 #import './nodeType.graphql'
 
 type Node {
-    name: String!
-    type: NodeType!
-    value: String
-    text: String
+    baseURI: String!
+    nodeName: String!
+    nodeType: NodeType!
+    nodeValue: String
+    textContent: String
     attributes: [Attribute]!
 
     getAttribute(attributeName: String!): String
