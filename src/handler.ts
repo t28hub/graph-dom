@@ -20,7 +20,7 @@ class PageObject {
 
   public async queryAll(selector: string): Promise<Array<Node>> {
     const found: ElementHandle<Element>[] = await this.page.$$(selector);
-    const promises: Promise<Node>[] = found.map(async (element: ElementHandle): Promise<Node> => await this.extractProperties(element));
+    const promises: Promise<Node>[] = found.map(async (element: ElementHandle): Promise<Node> => await NodeImpl.create(this.page, element));
     return Promise.all(promises);
   }
 
@@ -29,25 +29,7 @@ class PageObject {
     if (found === null) {
       throw new Error(`Could not find a element by ${selector}`);
     }
-    return await this.extractProperties(found);
-  }
-
-  private async extractProperties(element: ElementHandle): Promise<Node> {
-    const node = await this.page.evaluate((element: Element): SerializableNode => {
-      return {
-        name: element.nodeName,
-        type: element.nodeType,
-        text: element.textContent,
-        value: element.nodeValue,
-      };
-    }, element);
-
-    return {
-      name: node.name,
-      type: node.type,
-      text: node.text,
-      value: node.value,
-    };
+    return await NodeImpl.create(this.page, found);
   }
 }
 
@@ -56,9 +38,68 @@ interface Node {
   type: NodeType;
   text: string | null;
   value: string | null;
+  attributes: Array<Attribute>
+
+  getAttribute(attributeName: string): Promise<string | null>
+}
+
+interface Attribute {
+  name: string;
+  value: string;
+}
+
+class NodeImpl implements Node {
+  page: Page;
+  element: ElementHandle;
+  name: string;
+  text: string | null;
+  type: NodeType;
+  value: string | null;
+  attributes: Array<Attribute>;
+
+  static async create(page: Page, element: ElementHandle): Promise<NodeImpl> {
+    const properties = await page.evaluate((element: Element): SerializableNode => {
+      const attributes = element.attributes;
+      const attributeSize = attributes.length;
+      const attributeList: Array<Attribute> = [];
+      for (let index = 0; index < attributeSize; index++) {
+        const attribute = attributes.item(index);
+        if (attribute === null) {
+          continue;
+        }
+        attributeList.push({name: attribute.name, value: attribute.value});
+      }
+
+      return {
+        name: element.nodeName,
+        type: element.nodeType,
+        text: element.textContent,
+        value: element.nodeValue,
+        attributes: attributeList,
+      };
+    }, element);
+    return new NodeImpl(page, element, properties);
+  }
+
+  private constructor(page: Page, element: ElementHandle, properties: SerializableNode) {
+    this.page = page;
+    this.element = element;
+    this.name = properties.name;
+    this.text = properties.text;
+    this.type = properties.type;
+    this.value = properties.value;
+    this.attributes = properties.attributes;
+  }
+
+  async getAttribute(attributeName: string): Promise<string | null> {
+    return await this.page.evaluate((element: Element, attributeName: string): string | null => {
+      return element.getAttribute(attributeName);
+    }, this.element, attributeName);
+  }
 }
 
 enum NodeType {
+  // noinspection JSUnusedGlobalSymbols
   ELEMENT_NODE = 1,
   ATTRIBUTE_NODE,
   TEXT_NODE,
@@ -78,6 +119,7 @@ interface SerializableNode {
   type: NodeType;
   text: string | null;
   value: string | null;
+  attributes: Array<Attribute>;
 }
 
 interface Context {
@@ -164,9 +206,13 @@ const resolvers: IResolvers = {
     },
   },
   Node: {
-    type: (values: { type: NodeType }) => {
+    type: (values: { type: NodeType }): string => {
       const {type} = values;
       return NodeType[type];
+    },
+    getAttribute: async (parent: Node, args: { attributeName: string }, context: Context): Promise<string | null> => {
+      const {attributeName} = args;
+      return parent.getAttribute(attributeName);
     },
   },
 };

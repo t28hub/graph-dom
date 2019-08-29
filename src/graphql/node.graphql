@@ -1,3 +1,4 @@
+#import './attribute.graphql'
 #import './nodeType.graphql'
 
 type Node {
@@ -5,4 +6,7 @@ type Node {
     type: NodeType!
     value: String
     text: String
+    attributes: [Attribute]!
+
+    getAttribute(attributeName: String!): String
 }
