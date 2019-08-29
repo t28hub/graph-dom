@@ -6,6 +6,7 @@ import Chromium from 'chrome-aws-lambda';
 import {Browser, ElementHandle, LaunchOptions, NavigationOptions, Page, Response} from 'puppeteer-core';
 import {install} from 'source-map-support';
 import schema from './graphql/schema.graphql';
+import {Optional} from './util';
 
 install();
 
@@ -25,11 +26,11 @@ class PageObject {
   }
 
   public async query(selector: string): Promise<Node> {
-    const found: ElementHandle | null = await this.page.$(selector);
-    if (found === null) {
-      throw new Error(`Could not find a element by ${selector}`);
-    }
-    return await NodeImpl.create(this.page, found);
+    return await Optional.ofNullable<ElementHandle<Element>>(await this.page.$(selector))
+      .map(async (value: ElementHandle): Promise<Node> => {
+        return await NodeImpl.create(this.page, value);
+      })
+      .orElseThrow(() => new Error(`Could not find a element by ${selector}`));
   }
 }
 
@@ -63,11 +64,13 @@ class NodeImpl implements Node {
       const attributeSize = attributes.length;
       const attributeList: Array<Attribute> = [];
       for (let index = 0; index < attributeSize; index++) {
-        const attribute = attributes.item(index);
+        const attribute: Attr | null = attributes.item(index);
         if (attribute === null) {
           continue;
         }
-        attributeList.push({name: attribute.name, value: attribute.value});
+
+        const {name, value} = attribute;
+        attributeList.push({name, value});
       }
 
       return {
@@ -154,10 +157,8 @@ class ChromiumBrowserService implements BrowserService {
   async fetch(url: Url, options: { [name: string]: any } = {}): Promise<PageObject> {
     const page: Page = await this.browser.newPage();
     const navigationOptions: NavigationOptions = {waitUntil: 'networkidle2'};
-    const response: Response | null = await page.goto(format(url), navigationOptions);
-    if (response === null) {
-      throw new Error(`Received no response from ${url}`);
-    }
+    const response: Response = Optional.ofNullable<Response>(await page.goto(format(url), navigationOptions))
+      .orElseThrow(() => new Error(`Received no response from ${url}`));
     console.info(`Received ${response.status()} from ${format(url)}`);
 
     return new PageObject(page, await page.title());
