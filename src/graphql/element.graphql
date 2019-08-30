@@ -10,4 +10,12 @@ type Element implements Node {
     attributes: [Attribute]!
 
     getAttribute(attributeName: String!): String
+
+    getElementsByClassName(name: String!): [Element]!
+
+    getElementsByTagName(name: String!): [Element]!
+
+    querySelector(selector: String!): Element
+
+    querySelectorAll(selector: String!): [Element]!
 }

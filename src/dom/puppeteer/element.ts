@@ -76,4 +76,27 @@ export class Element implements IElement {
       return element.getAttribute(attributeName);
     }, this.element, attributeName);
   }
+
+  public async getElementsByClassName(name: string): Promise<Array<IElement>> {
+    // https://github.com/GoogleChrome/puppeteer/issues/461
+    return await this.querySelectorAll(`.${name}`);
+  }
+
+  public async getElementsByTagName(name: string): Promise<Array<IElement>> {
+    return await this.querySelectorAll(`${name}`);
+  }
+
+  public async querySelector(selector: string): Promise<IElement | null> {
+    const found = await this.element.$(selector);
+    if (found === null) {
+      return null;
+    }
+    return Element.create(this.page, found);
+  }
+
+  public async querySelectorAll(selector: string): Promise<Array<IElement>> {
+    const found: ElementHandle<DOMElement>[] = await this.element.$$(selector);
+    const promises: Promise<Element>[] = found.map(async (element: ElementHandle): Promise<Element> => await Element.create(this.page, element));
+    return Promise.all(promises);
+  }
 }

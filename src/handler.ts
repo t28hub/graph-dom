@@ -120,6 +120,22 @@ const resolvers: IResolvers = {
       const {attributeName} = args;
       return element.getAttribute(attributeName);
     },
+    getElementsByClassName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
+      const {name} = args;
+      return element.getElementsByClassName(name);
+    },
+    getElementsByTagName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
+      const {name} = args;
+      return element.getElementsByTagName(name);
+    },
+    querySelector: async (element: Element, args: { selector: string }): Promise<Element | null> => {
+      const {selector} = args;
+      return await element.querySelector(selector);
+    },
+    querySelectorAll: async (element: Element, args: { selector: string }): Promise<Array<Element>> => {
+      const {selector} = args;
+      return await element.querySelectorAll(selector);
+    },
   },
 };
 
