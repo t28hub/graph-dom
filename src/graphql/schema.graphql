@@ -1,5 +1,5 @@
-#import './pageObject.graphql'
+#import './document.graphql'
 
 type Query {
-    page(url: String!): PageObject!
+    page(url: String!): Document!
 }

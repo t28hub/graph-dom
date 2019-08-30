@@ -1,11 +1,17 @@
-import {Node, NodeType, SerializableNode} from '../node';
 import {ElementHandle, Page} from 'puppeteer';
 import {Attribute} from '../attribute';
+import {DOMElement} from '../browser';
+import {Element as IElement, SerializableElement} from '../element';
+import {NodeType, Visitor} from '../node';
 
-export class PuppeteerNode implements Node {
+export class Element implements IElement {
   private readonly page: Page;
   private readonly element: ElementHandle;
-  private readonly properties: SerializableNode;
+  private readonly properties: SerializableElement;
+
+  get id(): string {
+    return this.properties.id;
+  }
 
   get baseURI(): string {
     return this.properties.baseURI;
@@ -31,8 +37,8 @@ export class PuppeteerNode implements Node {
     return this.properties.attributes;
   }
 
-  static async create(page: Page, element: ElementHandle): Promise<PuppeteerNode> {
-    const properties = await page.evaluate((element: Element): SerializableNode => {
+  static async create(page: Page, element: ElementHandle): Promise<Element> {
+    const properties = await page.evaluate((element: DOMElement): SerializableElement => {
       const attributes = element.attributes;
       const attributeSize = attributes.length;
       const attributeList: Array<Attribute> = [];
@@ -46,23 +52,27 @@ export class PuppeteerNode implements Node {
         attributeList.push({name, value});
       }
 
-      const {baseURI, nodeName, nodeType, nodeValue, textContent} = element;
+      const {id, baseURI, nodeName, nodeType, nodeValue, textContent} = element;
       return {
-        baseURI, nodeName, nodeType, nodeValue, textContent,
+        id, baseURI, nodeName, nodeType, nodeValue, textContent,
         attributes: attributeList,
       };
     }, element);
-    return new PuppeteerNode(page, element, properties);
+    return new Element(page, element, properties);
   }
 
-  private constructor(page: Page, element: ElementHandle, properties: SerializableNode) {
+  private constructor(page: Page, element: ElementHandle, properties: SerializableElement) {
     this.page = page;
     this.element = element;
     this.properties = properties;
   }
 
-  async getAttribute(attributeName: string): Promise<string | null> {
-    return await this.page.evaluate((element: Element, attributeName: string): string | null => {
+  public accept<T>(visitor: Visitor<T>): T {
+    return visitor.visitElement(this);
+  }
+
+  public async getAttribute(attributeName: string): Promise<string | null> {
+    return await this.page.evaluate((element: DOMElement, attributeName: string): string | null => {
       return element.getAttribute(attributeName);
     }, this.element, attributeName);
   }

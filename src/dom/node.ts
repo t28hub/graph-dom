@@ -1,4 +1,5 @@
-import {Attribute} from './attribute';
+import {Document} from './document';
+import {Element} from './element';
 
 export interface Node {
   readonly baseURI: string;
@@ -6,10 +7,11 @@ export interface Node {
   readonly nodeType: NodeType;
   readonly nodeValue: string | null;
   readonly textContent: string | null;
-  readonly attributes: Array<Attribute>
 
-  getAttribute(attributeName: string): Promise<string | null>
+  accept<R>(visitor: Visitor<R>): R
 }
+
+export type SerializableNode = Pick<Node, 'baseURI' | 'nodeName' | 'nodeType' | 'textContent' | 'nodeValue'>
 
 export enum NodeType {
   // noinspection JSUnusedGlobalSymbols
@@ -27,4 +29,10 @@ export enum NodeType {
   NOTATION_NODE,
 }
 
-export type SerializableNode = Pick<Node, 'baseURI' | 'nodeName' | 'nodeType' | 'textContent' | 'nodeValue' | 'attributes'>
+export interface Visitor<T> {
+  visitElement(element: Element): T;
+
+  visitDocument(document: Document): T;
+
+  defaultAction(node: Node): T;
+}

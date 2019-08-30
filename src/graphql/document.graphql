@@ -1,0 +1,15 @@
+#import './element.graphql'
+#import './node.graphql'
+
+type Document implements Node {
+    title: String!
+    baseURI: String!
+    nodeName: String!
+    nodeType: NodeType!
+    nodeValue: String
+    textContent: String
+
+    querySelector(selector: String!): Element
+
+    querySelectorAll(selector: String!): [Element]!
+}

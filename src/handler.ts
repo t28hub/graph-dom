@@ -3,45 +3,20 @@ import {ApolloServer, Config, IResolvers} from 'apollo-server-lambda';
 import {GraphQLResponse} from 'apollo-server-types';
 import {APIGatewayEvent, APIGatewayProxyResult, Handler} from 'aws-lambda';
 import Chromium from 'chrome-aws-lambda';
-import {Browser, ElementHandle, LaunchOptions, NavigationOptions, Page, Response} from 'puppeteer-core';
+import {Browser, LaunchOptions, NavigationOptions, Page, Response} from 'puppeteer-core';
 import {install} from 'source-map-support';
+import {Document, Element, Node, NodeType, PuppeteerDocument} from './dom';
 import schema from './graphql/schema.graphql';
 import {Optional} from './util';
-import {Node, NodeType} from './dom';
-import {PuppeteerNode} from './dom/puppeteer/puppeteerNode';
 
 install();
-
-class PageObject {
-  page: Page;
-  title: string;
-
-  constructor(page: Page, title: string) {
-    this.page = page;
-    this.title = title;
-  }
-
-  public async queryAll(selector: string): Promise<Array<Node>> {
-    const found: ElementHandle<Element>[] = await this.page.$$(selector);
-    const promises: Promise<Node>[] = found.map(async (element: ElementHandle): Promise<Node> => await PuppeteerNode.create(this.page, element));
-    return Promise.all(promises);
-  }
-
-  public async query(selector: string): Promise<Node> {
-    return await Optional.ofNullable<ElementHandle<Element>>(await this.page.$(selector))
-      .map(async (value: ElementHandle): Promise<Node> => {
-        return await PuppeteerNode.create(this.page, value);
-      })
-      .orElseThrow(() => new Error(`Could not find a element by ${selector}`));
-  }
-}
 
 interface Context {
   browser: BrowserService;
 }
 
 interface BrowserService {
-  fetch(url: Url, options?: { [name: string]: any }): Promise<PageObject>
+  fetch(url: Url, options?: { [name: string]: any }): Promise<Document>
 
   close(): Promise<void>
 }
@@ -65,14 +40,13 @@ class ChromiumBrowserService implements BrowserService {
     this.browser = browser;
   }
 
-  async fetch(url: Url, options: { [name: string]: any } = {}): Promise<PageObject> {
+  public async fetch(url: Url, options: { [name: string]: any } = {}): Promise<Document> {
     const page: Page = await this.browser.newPage();
     const navigationOptions: NavigationOptions = {waitUntil: 'networkidle2'};
     const response: Response = Optional.ofNullable<Response>(await page.goto(format(url), navigationOptions))
       .orElseThrow(() => new Error(`Received no response from ${url}`));
     console.info(`Received ${response.status()} from ${format(url)}`);
-
-    return new PageObject(page, await page.title());
+    return PuppeteerDocument.create(page);
   }
 
   async close(): Promise<void> {
@@ -95,36 +69,56 @@ class ChromiumBrowserService implements BrowserService {
   }
 }
 
-const fetch = async (url: Url, browser: BrowserService): Promise<PageObject> => {
+const fetch = async (url: Url, browser: BrowserService): Promise<Document> => {
   console.info(url);
   return await browser.fetch(url);
 };
 
 const resolvers: IResolvers = {
   Query: {
-    page: async (parent: any, args: { url: string }, context: Context): Promise<PageObject> => {
+    page: async (parent: any, args: { url: string }, context: Context): Promise<Document> => {
       const url = parse(args['url']);
       return await fetch(url, context.browser);
     }
   },
-  PageObject: {
-    query: async (parent: PageObject, args: { selector: string }, context: Context): Promise<Node> => {
-      const {selector} = args;
-      return await parent.query(selector);
-    },
-    queryAll: async (parent: PageObject, args: { selector: string }, context: Context): Promise<Array<Node>> => {
-      const {selector} = args;
-      return await parent.queryAll(selector);
+  Node: {
+    // noinspection JSUnusedLocalSymbols
+    __resolveType: (node: Node): string | null => {
+      return node.accept<string>({
+        visitDocument(document: Document): string {
+          return 'Document';
+        },
+        visitElement(element: Element): string {
+          return 'Element';
+        },
+        defaultAction(node: Node): string {
+          return '';
+        }
+      });
     },
   },
-  Node: {
-    nodeType: (node: Node): string => {
-      const {nodeType} = node;
+  Document: {
+    nodeType: (document: Document): string => {
+      const {nodeType} = document;
       return NodeType[nodeType];
     },
-    getAttribute: async (parent: Node, args: { attributeName: string }, context: Context): Promise<string | null> => {
+    querySelector: async (document: Document, args: { selector: string }): Promise<Element | null> => {
+      const {selector} = args;
+      return await document.querySelector(selector);
+    },
+    querySelectorAll: async (document: Document, args: { selector: string }): Promise<Array<Element>> => {
+      const {selector} = args;
+      return await document.querySelectorAll(selector);
+    },
+  },
+  Element: {
+    nodeType: (element: Element): string => {
+      const {nodeType} = element;
+      return NodeType[nodeType];
+    },
+    getAttribute: async (element: Element, args: { attributeName: string }, context: Context): Promise<string | null> => {
       const {attributeName} = args;
-      return parent.getAttribute(attributeName);
+      return element.getAttribute(attributeName);
     },
   },
 };

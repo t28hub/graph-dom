@@ -1,0 +1,13 @@
+#import './attribute.graphql'
+
+type Element implements Node {
+    id: String!
+    baseURI: String!
+    nodeName: String!
+    nodeType: NodeType!
+    nodeValue: String
+    textContent: String
+    attributes: [Attribute]!
+
+    getAttribute(attributeName: String!): String
+}
