@@ -3,7 +3,6 @@ import {DOMElement} from '../browser';
 import {Document as IDocument, SerializableDocument} from '../document';
 import {Element} from './element';
 import {Element as IElement} from '../element';
-import {Optional} from '../../util';
 import {NodeType, Visitor} from '../node';
 
 export class Document implements IDocument {
@@ -53,12 +52,22 @@ export class Document implements IDocument {
     return visitor.visitDocument(this);
   }
 
+  public async getElementById(id: string): Promise<IElement | null> {
+    return await this.querySelector(`#${id}`);
+  }
+
+  public async getElementsByClassName(name: string): Promise<Array<IElement>> {
+    // https://github.com/GoogleChrome/puppeteer/issues/461
+    return await this.querySelectorAll(`.${name}`);
+  }
+
+  public async getElementsByTagName(name: string): Promise<Array<IElement>> {
+    return await this.querySelectorAll(`${name}`);
+  }
+
   public async querySelector(selector: string): Promise<IElement | null> {
-    return await Optional.ofNullable<ElementHandle<DOMElement>>(await this.page.$(selector))
-      .map(async (value: ElementHandle): Promise<Element> => {
-        return await Element.create(this.page, value);
-      })
-      .orElseThrow(() => new Error(`Could not find a element by ${selector}`));
+    const found = await this.page.$(selector);
+    return found === null ? null : await Element.create(this.page, found);
   }
 
   public async querySelectorAll(selector: string): Promise<Array<IElement>> {

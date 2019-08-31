@@ -1,4 +1,7 @@
+#import './attribute.graphql'
 #import './document.graphql'
+#import './element.graphql'
+#import './node.graphql'
 
 type Query {
     page(url: String!): Document!

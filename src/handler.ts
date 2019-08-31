@@ -102,6 +102,18 @@ const resolvers: IResolvers = {
       const {nodeType} = document;
       return NodeType[nodeType];
     },
+    getElementById: async (document: Document, args: { id: string }): Promise<Element | null> => {
+      const {id} = args;
+      return await document.getElementById(id);
+    },
+    getElementsByClassName: async (document: Document, args: { name: string }): Promise<Array<Element>> => {
+      const {name} = args;
+      return document.getElementsByClassName(name);
+    },
+    getElementsByTagName: async (document: Document, args: { name: string }): Promise<Array<Element>> => {
+      const {name} = args;
+      return document.getElementsByTagName(name);
+    },
     querySelector: async (document: Document, args: { selector: string }): Promise<Element | null> => {
       const {selector} = args;
       return await document.querySelector(selector);

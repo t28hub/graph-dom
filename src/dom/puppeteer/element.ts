@@ -88,10 +88,7 @@ export class Element implements IElement {
 
   public async querySelector(selector: string): Promise<IElement | null> {
     const found = await this.element.$(selector);
-    if (found === null) {
-      return null;
-    }
-    return Element.create(this.page, found);
+    return found === null ? null : await Element.create(this.page, found);
   }
 
   public async querySelectorAll(selector: string): Promise<Array<IElement>> {

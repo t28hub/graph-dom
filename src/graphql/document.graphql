@@ -1,6 +1,3 @@
-#import './element.graphql'
-#import './node.graphql'
-
 type Document implements Node {
     title: String!
     baseURI: String!
@@ -8,6 +5,12 @@ type Document implements Node {
     nodeType: NodeType!
     nodeValue: String
     textContent: String
+
+    getElementById(id: String!): Element
+
+    getElementsByClassName(name: String!): [Element]!
+
+    getElementsByTagName(name: String!): [Element]!
 
     querySelector(selector: String!): Element
 
