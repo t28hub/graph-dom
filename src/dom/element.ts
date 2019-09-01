@@ -3,7 +3,8 @@ import {Node, SerializableNode} from './node';
 
 export interface Element extends Node {
   readonly id: string;
-  readonly attributes: Array<Attribute>
+
+  attributes(): Promise<Array<Attribute>>
 
   getAttribute(attributeName: string): Promise<string | null>
 
@@ -16,4 +17,4 @@ export interface Element extends Node {
   querySelectorAll(selector: string): Promise<Array<Element>>
 }
 
-export type SerializableElement = Pick<Element, 'id' | 'attributes' | keyof SerializableNode>
+export type SerializableElement = Pick<Element, 'id' | keyof SerializableNode>

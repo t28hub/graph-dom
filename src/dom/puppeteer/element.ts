@@ -33,30 +33,11 @@ export class Element implements IElement {
     return this.properties.textContent;
   }
 
-  get attributes(): Array<Attribute> {
-    return this.properties.attributes;
-  }
 
   static async create(page: Page, element: ElementHandle): Promise<Element> {
     const properties = await page.evaluate((element: DOMElement): SerializableElement => {
-      const attributes = element.attributes;
-      const attributeSize = attributes.length;
-      const attributeList: Array<Attribute> = [];
-      for (let index = 0; index < attributeSize; index++) {
-        const attribute: Attr | null = attributes.item(index);
-        if (attribute === null) {
-          continue;
-        }
-
-        const {name, value} = attribute;
-        attributeList.push({name, value});
-      }
-
       const {id, baseURI, nodeName, nodeType, nodeValue, textContent} = element;
-      return {
-        id, baseURI, nodeName, nodeType, nodeValue, textContent,
-        attributes: attributeList,
-      };
+      return {id, baseURI, nodeName, nodeType, nodeValue, textContent};
     }, element);
     return new Element(page, element, properties);
   }
@@ -69,6 +50,23 @@ export class Element implements IElement {
 
   public accept<T>(visitor: Visitor<T>): T {
     return visitor.visitElement(this);
+  }
+
+  public async attributes(): Promise<Array<Attribute>> {
+    return await this.page.evaluate((element: DOMElement): Array<Attribute> => {
+      const items = element.attributes;
+      const itemSize = items.length;
+      const attributes: Array<Attribute> = [];
+      for (let index = 0; index < itemSize; index++) {
+        const item: Attr | null = items.item(index);
+        if (item === null) {
+          continue;
+        }
+        const {name, value} = item;
+        attributes.push({name, value});
+      }
+      return attributes;
+    }, this.element);
   }
 
   public async getAttribute(attributeName: string): Promise<string | null> {

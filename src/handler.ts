@@ -8,6 +8,7 @@ import {install} from 'source-map-support';
 import {Document, Element, Node, NodeType, PuppeteerDocument} from './dom';
 import schema from './graphql/schema.graphql';
 import {Optional} from './util';
+import {Attribute} from './dom/attribute';
 
 install();
 
@@ -130,6 +131,9 @@ const resolvers: IResolvers = {
     },
   },
   Element: {
+    attributes: async (element: Element): Promise<Array<Attribute>> => {
+      return element.attributes();
+    },
     nodeType: (element: Element): string => {
       const {nodeType} = element;
       return NodeType[nodeType];
