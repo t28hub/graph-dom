@@ -1,24 +1,27 @@
 import {Attribute} from './attribute';
 import {Node, SerializableNode} from './node';
+import {Data} from './data';
 
 export interface Element extends Node {
   readonly id: string;
 
-  attributes(): Promise<Array<Attribute>>
+  attributes(): Promise<Array<Attribute>>;
 
-  innerHTML(): Promise<string>
+  dataset(): Promise<Array<Data>>;
 
-  outerHTML(): Promise<string>
+  innerHTML(): Promise<string>;
 
-  getAttribute(attributeName: string): Promise<string | null>
+  outerHTML(): Promise<string>;
 
-  getElementsByClassName(name: string): Promise<Array<Element>>
+  getAttribute(attributeName: string): Promise<string | null>;
 
-  getElementsByTagName(name: string): Promise<Array<Element>>
+  getElementsByClassName(name: string): Promise<Array<Element>>;
 
-  querySelector(selector: string): Promise<Element | null>
+  getElementsByTagName(name: string): Promise<Array<Element>>;
 
-  querySelectorAll(selector: string): Promise<Array<Element>>
+  querySelector(selector: string): Promise<Element | null>;
+
+  querySelectorAll(selector: string): Promise<Array<Element>>;
 }
 
 export type SerializableElement = Pick<Element, 'id' | keyof SerializableNode>

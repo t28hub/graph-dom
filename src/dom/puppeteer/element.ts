@@ -3,6 +3,7 @@ import {Attribute} from '../attribute';
 import {DOMElement} from '../browser';
 import {Element as IElement, SerializableElement} from '../element';
 import {NodeType, Visitor} from '../node';
+import {Data} from '../data';
 
 export class Element implements IElement {
   private readonly page: Page;
@@ -68,16 +69,26 @@ export class Element implements IElement {
     }, this.element);
   }
 
+  public async dataset(): Promise<Array<Data>> {
+    return await this.page.evaluate((element: DOMElement): Array<Data> => {
+      if (!(element instanceof HTMLElement)) {
+        return [];
+      }
+
+      const {dataset} = (element as HTMLElement);
+      return Object.keys(dataset).map((key: string): Data => {
+        const value = dataset[key];
+        return {name: key, value};
+      });
+    }, this.element);
+  }
+
   public async innerHTML(): Promise<string> {
-    const html = await this.page.evaluate((element: DOMElement): string => element.innerHTML, this.element);
-    console.warn({html});
-    return html;
+    return await this.page.evaluate((element: DOMElement): string => element.innerHTML, this.element);
   }
 
   public async outerHTML(): Promise<string> {
-    const html = await this.page.evaluate((element: DOMElement): string => element.outerHTML, this.element);
-    console.warn({html});
-    return html;
+    return await this.page.evaluate((element: DOMElement): string => element.outerHTML, this.element);
   }
 
   public async getAttribute(attributeName: string): Promise<string | null> {

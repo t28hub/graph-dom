@@ -6,6 +6,7 @@ type Element implements Node {
     nodeValue: String
     textContent: String
     attributes: [Attribute]!
+    dataset: [Data]!
     innerHTML: String!
     outerHTML: String!
 

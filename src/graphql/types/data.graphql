@@ -1,0 +1,4 @@
+type Data {
+    name: String!
+    value: String
+}

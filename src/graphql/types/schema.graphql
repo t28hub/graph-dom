@@ -1,4 +1,5 @@
 #import './attribute.graphql'
+#import './data.graphql'
 #import './document.graphql'
 #import './element.graphql'
 #import './node.graphql'

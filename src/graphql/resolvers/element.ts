@@ -2,10 +2,14 @@ import {IResolverObject} from 'graphql-tools';
 import {Element, NodeType} from '../../dom';
 import {Attribute} from '../../dom/attribute';
 import {Context} from '../context';
+import {Data} from '../../dom/data';
 
 export const resolver: IResolverObject = {
   attributes: async (element: Element): Promise<Array<Attribute>> => {
     return element.attributes();
+  },
+  dataset: async (element: Element): Promise<Array<Data>> => {
+    return element.dataset();
   },
   innerHTML: async (element: Element): Promise<string> => {
     return element.innerHTML();
