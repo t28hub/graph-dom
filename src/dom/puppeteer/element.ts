@@ -33,7 +33,6 @@ export class Element implements IElement {
     return this.properties.textContent;
   }
 
-
   static async create(page: Page, element: ElementHandle): Promise<Element> {
     const properties = await page.evaluate((element: DOMElement): SerializableElement => {
       const {id, baseURI, nodeName, nodeType, nodeValue, textContent} = element;
@@ -67,6 +66,18 @@ export class Element implements IElement {
       }
       return attributes;
     }, this.element);
+  }
+
+  public async innerHTML(): Promise<string> {
+    const html = await this.page.evaluate((element: DOMElement): string => element.innerHTML, this.element);
+    console.warn({html});
+    return html;
+  }
+
+  public async outerHTML(): Promise<string> {
+    const html = await this.page.evaluate((element: DOMElement): string => element.outerHTML, this.element);
+    console.warn({html});
+    return html;
   }
 
   public async getAttribute(attributeName: string): Promise<string | null> {

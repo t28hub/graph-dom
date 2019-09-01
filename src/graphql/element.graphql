@@ -6,6 +6,8 @@ type Element implements Node {
     nodeValue: String
     textContent: String
     attributes: [Attribute]!
+    innerHTML: String!
+    outerHTML: String!
 
     getAttribute(attributeName: String!): String
 

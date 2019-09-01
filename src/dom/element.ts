@@ -6,6 +6,10 @@ export interface Element extends Node {
 
   attributes(): Promise<Array<Attribute>>
 
+  innerHTML(): Promise<string>
+
+  outerHTML(): Promise<string>
+
   getAttribute(attributeName: string): Promise<string | null>
 
   getElementsByClassName(name: string): Promise<Array<Element>>

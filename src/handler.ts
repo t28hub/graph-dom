@@ -134,6 +134,12 @@ const resolvers: IResolvers = {
     attributes: async (element: Element): Promise<Array<Attribute>> => {
       return element.attributes();
     },
+    innerHTML: async (element: Element): Promise<string> => {
+      return element.innerHTML();
+    },
+    outerHTML: async (element: Element): Promise<string> => {
+      return element.outerHTML();
+    },
     nodeType: (element: Element): string => {
       const {nodeType} = element;
       return NodeType[nodeType];
