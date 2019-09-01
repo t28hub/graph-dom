@@ -1,5 +1,7 @@
 type Document implements Node {
     title: String!
+    head: Element
+    body: Element
     baseURI: String!
     nodeName: String!
     nodeType: NodeType!

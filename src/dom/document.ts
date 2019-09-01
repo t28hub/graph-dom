@@ -4,6 +4,10 @@ import {Node, SerializableNode} from './node';
 export interface Document extends Node {
   readonly title: string;
 
+  head(): Promise<Element | null>;
+
+  body(): Promise<Element | null>;
+
   getElementById(id: string): Promise<Element | null>
 
   getElementsByClassName(name: string): Promise<Array<Element>>

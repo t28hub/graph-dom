@@ -1,5 +1,5 @@
-import {ElementHandle, Page} from 'puppeteer';
-import {DOMElement} from '../browser';
+import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import {DOMDocument, DOMElement} from '../browser';
 import {Document as IDocument, SerializableDocument} from '../document';
 import {Element} from './element';
 import {Element as IElement} from '../element';
@@ -7,7 +7,12 @@ import {NodeType, Visitor} from '../node';
 
 export class Document implements IDocument {
   private readonly page: Page;
+  private readonly element: ElementHandle;
   private readonly properties: SerializableDocument;
+
+  get title(): string {
+    return this.properties.title;
+  }
 
   get baseURI(): string {
     return this.properties.baseURI;
@@ -29,23 +34,36 @@ export class Document implements IDocument {
     return this.properties.textContent;
   }
 
-  get title(): string {
-    return this.properties.title;
-  }
-
   public static async create(page: Page): Promise<Document> {
-    const properties = await page.evaluate((): SerializableDocument => {
-      const {title, baseURI, nodeName, nodeType, nodeValue, textContent} = window.document;
-      return {
-        title, baseURI, nodeName, nodeType, nodeValue, textContent,
-      };
-    });
-    return new Document(page, properties);
+    const document: ElementHandle | null = await page.evaluateHandle((): DOMDocument => window.document)
+      .then((document: JSHandle) => document.asElement());
+    if (document === null) {
+      throw new TypeError('window.document does not exist');
+    }
+
+    const properties = await page.evaluate((document: DOMDocument): SerializableDocument => {
+      const {title, baseURI, nodeName, nodeType, nodeValue, textContent} = document;
+      return {title, baseURI, nodeName, nodeType, nodeValue, textContent,};
+    }, document);
+    return new Document(page, document, properties);
   }
 
-  private constructor(page: Page, properties: SerializableDocument) {
+  private constructor(page: Page, element: ElementHandle, properties: SerializableDocument) {
     this.page = page;
+    this.element = element;
     this.properties = properties;
+  }
+
+  public async head(): Promise<IElement | null> {
+    const found = await this.page.evaluateHandle((document: DOMDocument): DOMElement => document.head, this.element);
+    const element = found.asElement();
+    return element !== null ? await Element.create(this.page, element) : null;
+  }
+
+  public async body(): Promise<IElement | null> {
+    const found = await this.page.evaluateHandle((document: DOMDocument): DOMElement => document.body, this.element);
+    const element = found.asElement();
+    return element !== null ? await Element.create(this.page, element) : null;
   }
 
   public accept<T>(visitor: Visitor<T>): T {

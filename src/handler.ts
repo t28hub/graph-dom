@@ -98,6 +98,12 @@ const resolvers: IResolvers = {
     },
   },
   Document: {
+    head: async (document: Document): Promise<Element | null> => {
+      return await document.head();
+    },
+    body: async (document: Document): Promise<Element | null> => {
+      return await document.body();
+    },
     nodeType: (document: Document): string => {
       const {nodeType} = document;
       return NodeType[nodeType];
