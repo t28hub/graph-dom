@@ -1,5 +1,7 @@
 type Element implements Node {
     id: String!
+    className: String!
+    classList: [String]!
     baseURI: String!
     nodeName: String!
     nodeType: NodeType!

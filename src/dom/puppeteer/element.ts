@@ -14,6 +14,14 @@ export class Element implements IElement {
     return this.properties.id;
   }
 
+  get className(): string {
+    return this.properties.className;
+  }
+
+  get classList(): Array<string> {
+    return this.properties.classList;
+  }
+
   get baseURI(): string {
     return this.properties.baseURI;
   }
@@ -36,8 +44,8 @@ export class Element implements IElement {
 
   static async create(page: Page, element: ElementHandle): Promise<Element> {
     const properties = await page.evaluate((element: DOMElement): SerializableElement => {
-      const {id, baseURI, nodeName, nodeType, nodeValue, textContent} = element;
-      return {id, baseURI, nodeName, nodeType, nodeValue, textContent};
+      const {id, className, classList, baseURI, nodeName, nodeType, nodeValue, textContent} = element;
+      return {id, className, classList: Array.from(classList), baseURI, nodeName, nodeType, nodeValue, textContent};
     }, element);
     return new Element(page, element, properties);
   }
