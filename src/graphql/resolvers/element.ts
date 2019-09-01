@@ -1,12 +1,15 @@
 import {IResolverObject} from 'graphql-tools';
 import {Element, NodeType} from '../../dom';
 import {Attribute} from '../../dom/attribute';
-import {Context} from '../context';
 import {Data} from '../../dom/data';
 
+// noinspection JSUnusedGlobalSymbols
 export const resolver: IResolverObject = {
   attributes: async (element: Element): Promise<Array<Attribute>> => {
     return element.attributes();
+  },
+  children: async (element: Element): Promise<Array<Element>> => {
+    return element.children();
   },
   dataset: async (element: Element): Promise<Array<Data>> => {
     return element.dataset();
@@ -21,7 +24,7 @@ export const resolver: IResolverObject = {
     const {nodeType} = element;
     return NodeType[nodeType];
   },
-  getAttribute: async (element: Element, args: { attributeName: string }, context: Context): Promise<string | null> => {
+  getAttribute: async (element: Element, args: { attributeName: string }): Promise<string | null> => {
     const {attributeName} = args;
     return element.getAttribute(attributeName);
   },

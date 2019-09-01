@@ -3,6 +3,7 @@ type Document implements Node {
     head: Element
     body: Element
     baseURI: String!
+    children: [Element]!
     nodeName: String!
     nodeType: NodeType!
     nodeValue: String

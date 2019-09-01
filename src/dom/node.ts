@@ -9,6 +9,8 @@ export interface Node {
   readonly textContent: string | null;
 
   accept<R>(visitor: Visitor<R>): R
+
+  children(): Promise<Array<Node>>
 }
 
 export type SerializableNode = Pick<Node, 'baseURI' | 'nodeName' | 'nodeType' | 'textContent' | 'nodeValue'>

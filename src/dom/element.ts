@@ -9,6 +9,8 @@ export interface Element extends Node {
 
   attributes(): Promise<Array<Attribute>>;
 
+  children(): Promise<Array<Element>>;
+
   dataset(): Promise<Array<Data>>;
 
   innerHTML(): Promise<string>;

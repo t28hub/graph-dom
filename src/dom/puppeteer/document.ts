@@ -54,6 +54,10 @@ export class Document implements IDocument {
     this.properties = properties;
   }
 
+  public accept<T>(visitor: Visitor<T>): T {
+    return visitor.visitDocument(this);
+  }
+
   public async head(): Promise<IElement | null> {
     const found = await this.page.evaluateHandle((document: DOMDocument): DOMElement => document.head, this.element);
     const element = found.asElement();
@@ -66,8 +70,20 @@ export class Document implements IDocument {
     return element !== null ? await Element.create(this.page, element) : null;
   }
 
-  public accept<T>(visitor: Visitor<T>): T {
-    return visitor.visitDocument(this);
+  public async children(): Promise<Array<IElement>> {
+    const {page, element} = this;
+    const collection = await page.evaluateHandle((element: DOMElement): HTMLCollection => element.children, element);
+    const properties = await collection.getProperties();
+    const promises = Array.from(properties.values())
+      .map((handle: JSHandle): ElementHandle | null => handle.asElement())
+      .filter((element: ElementHandle | null): boolean => element !== null)
+      .map(async (element: ElementHandle | null): Promise<IElement> => {
+        if (element === null) {
+          throw new Error();
+        }
+        return await Element.create(page, element)
+      });
+    return Promise.all(promises);
   }
 
   public async getElementById(id: string): Promise<IElement | null> {

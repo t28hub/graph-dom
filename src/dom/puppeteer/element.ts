@@ -1,9 +1,9 @@
-import {ElementHandle, Page} from 'puppeteer';
+import {ElementHandle, JSHandle, Page} from 'puppeteer';
 import {Attribute} from '../attribute';
 import {DOMElement} from '../browser';
+import {Data} from '../data';
 import {Element as IElement, SerializableElement} from '../element';
 import {NodeType, Visitor} from '../node';
-import {Data} from '../data';
 
 export class Element implements IElement {
   private readonly page: Page;
@@ -75,6 +75,22 @@ export class Element implements IElement {
       }
       return attributes;
     }, this.element);
+  }
+
+  public async children(): Promise<Array<IElement>> {
+    const {page, element} = this;
+    const collection = await page.evaluateHandle((element: DOMElement): HTMLCollection => element.children, element);
+    const properties = await collection.getProperties();
+    const promises = Array.from(properties.values())
+      .map((handle: JSHandle): ElementHandle | null => handle.asElement())
+      .filter((element: ElementHandle | null): boolean => element !== null)
+      .map(async (element: ElementHandle | null): Promise<IElement> => {
+        if (element === null) {
+          throw new Error();
+        }
+        return await Element.create(page, element)
+      });
+    return Promise.all(promises);
   }
 
   public async dataset(): Promise<Array<Data>> {

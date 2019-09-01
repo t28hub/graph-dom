@@ -3,10 +3,13 @@ import {Document, Element, NodeType} from '../../dom';
 
 export const resolver: IResolverObject = {
   head: async (document: Document): Promise<Element | null> => {
-    return await document.head();
+    return document.head();
   },
   body: async (document: Document): Promise<Element | null> => {
-    return await document.body();
+    return document.body();
+  },
+  children: async (document: Document): Promise<Array<Element>> => {
+    return document.children();
   },
   nodeType: (document: Document): string => {
     const {nodeType} = document;
@@ -14,7 +17,7 @@ export const resolver: IResolverObject = {
   },
   getElementById: async (document: Document, args: { id: string }): Promise<Element | null> => {
     const {id} = args;
-    return await document.getElementById(id);
+    return document.getElementById(id);
   },
   getElementsByClassName: async (document: Document, args: { name: string }): Promise<Array<Element>> => {
     const {name} = args;
@@ -26,10 +29,10 @@ export const resolver: IResolverObject = {
   },
   querySelector: async (document: Document, args: { selector: string }): Promise<Element | null> => {
     const {selector} = args;
-    return await document.querySelector(selector);
+    return document.querySelector(selector);
   },
   querySelectorAll: async (document: Document, args: { selector: string }): Promise<Array<Element>> => {
     const {selector} = args;
-    return await document.querySelectorAll(selector);
+    return document.querySelectorAll(selector);
   },
 };

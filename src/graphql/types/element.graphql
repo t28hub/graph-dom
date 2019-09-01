@@ -8,6 +8,7 @@ type Element implements Node {
     nodeValue: String
     textContent: String
     attributes: [Attribute]!
+    children: [Element]!
     dataset: [Data]!
     innerHTML: String!
     outerHTML: String!

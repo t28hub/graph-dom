@@ -1,5 +1,6 @@
 interface Node {
     baseURI: String!
+    children: [Node]!
     nodeName: String!
     nodeType: NodeType!
     nodeValue: String
