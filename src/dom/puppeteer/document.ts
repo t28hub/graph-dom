@@ -1,36 +1,14 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
-import {DOMDocument} from '../web';
-import {Delegation} from './delegation';
+import {DOMDocument, DOMElement} from '../web';
 import {Document as IDocument, SerializableDocument} from '../document';
 import {Element as IElement} from '../element';
-import {NodeType, Visitor} from '../node';
+import {Visitor} from '../node';
+import {Node} from './node';
+import {Element} from './element';
 
-export class Document implements IDocument {
-  private readonly delegation: Delegation;
-  private readonly properties: SerializableDocument;
-
-  get title(): string {
+export class Document extends Node<SerializableDocument> implements IDocument {
+  public get title(): string {
     return this.properties.title;
-  }
-
-  get baseURI(): string {
-    return this.properties.baseURI;
-  }
-
-  get nodeName(): string {
-    return this.properties.nodeName;
-  }
-
-  get nodeType(): NodeType {
-    return this.properties.nodeType;
-  }
-
-  get nodeValue(): string | null {
-    return this.properties.nodeValue;
-  }
-
-  get textContent(): string | null {
-    return this.properties.textContent;
   }
 
   public static async create(page: Page): Promise<Document> {
@@ -40,52 +18,69 @@ export class Document implements IDocument {
       throw new TypeError('window.document does not exist');
     }
 
-    const delegation = new Delegation(page, document);
     const properties = await page.evaluate((document: DOMDocument): SerializableDocument => {
       const {title, baseURI, nodeName, nodeType, nodeValue, textContent} = document;
       return {title, baseURI, nodeName, nodeType, nodeValue, textContent,};
     }, document);
-    return new Document(delegation, properties);
+    return new Document(page, document, properties);
   }
 
-  private constructor(delegation: Delegation, properties: SerializableDocument) {
-    this.delegation = delegation;
-    this.properties = properties;
+  private constructor(page: Page, element: ElementHandle, properties: SerializableDocument) {
+    super(page, element, properties);
+  }
+
+  public async head(): Promise<IElement | null> {
+    const {page, element} = this;
+    const handle = await page.evaluateHandle((document: DOMDocument): DOMElement | null => {
+      return document.head;
+    }, element);
+    const head = handle.asElement();
+    return head !== null ? await Element.create(page, head) : null;
+  }
+
+  public async body(): Promise<IElement | null> {
+    const {page, element} = this;
+    const handle = await page.evaluateHandle((document: DOMDocument): DOMElement | null => {
+      return document.body;
+    }, element);
+    const body = handle.asElement();
+    return body !== null ? await Element.create(page, body) : null;
+  }
+
+  public async getElementById(id: string): Promise<IElement | null> {
+    const {page, element} = this;
+    const handle = await page.evaluateHandle((document: DOMDocument, id: string): HTMLElement | null => {
+      return document.getElementById(id);
+    }, element, id);
+    if (handle === null) {
+      return null;
+    }
+
+    const found = handle.asElement();
+    return found === null ? null : await Element.create(page, found);
+  }
+
+  public async getElementsByClassName(name: string): Promise<Array<IElement>> {
+    return super.getElementsByClassName(name);
+  }
+
+  public async getElementsByTagName(name: string): Promise<Array<IElement>> {
+    return super.getElementsByTagName(name);
+  }
+
+  public async querySelector(selector: string): Promise<IElement | null> {
+    return super.querySelector(selector);
+  }
+
+  public async querySelectorAll(selector: string): Promise<Array<IElement>> {
+    return super.querySelectorAll(selector);
   }
 
   public accept<T>(visitor: Visitor<T>): T {
     return visitor.visitDocument(this);
   }
 
-  public async head(): Promise<IElement | null> {
-    return this.delegation.head();
-  }
-
-  public async body(): Promise<IElement | null> {
-    return this.delegation.body();
-  }
-
-  public async children(): Promise<Array<IElement>> {
-    return this.delegation.children();
-  }
-
-  public async getElementById(id: string): Promise<IElement | null> {
-    return this.delegation.getElementById(id);
-  }
-
-  public async getElementsByClassName(name: string): Promise<Array<IElement>> {
-    return this.delegation.getElementsByClassName(name);
-  }
-
-  public async getElementsByTagName(name: string): Promise<Array<IElement>> {
-    return this.delegation.getElementsByTagName(name);
-  }
-
-  public async querySelector(selector: string): Promise<IElement | null> {
-    return this.delegation.querySelector(selector);
-  }
-
-  public async querySelectorAll(selector: string): Promise<Array<IElement>> {
-    return this.delegation.querySelectorAll(selector);
+  protected async createElement(page: Page, element: ElementHandle): Promise<Element> {
+    return Element.create(page, element);
   }
 }

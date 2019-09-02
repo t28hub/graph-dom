@@ -11,6 +11,8 @@ export interface Element extends Node {
 
   children(): Promise<Array<Element>>;
 
+  childNodes(): Promise<Array<Element>>;
+
   dataset(): Promise<Array<Data>>;
 
   innerHTML(): Promise<string>;
@@ -28,4 +30,4 @@ export interface Element extends Node {
   querySelectorAll(selector: string): Promise<Array<Element>>;
 }
 
-export type SerializableElement = Pick<Element, 'id' | 'className' | 'classList' | keyof SerializableNode>
+export type SerializableElement = Pick<Element, 'id' | 'className' | 'classList' | keyof SerializableNode>;

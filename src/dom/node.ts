@@ -8,12 +8,26 @@ export interface Node {
   readonly nodeValue: string | null;
   readonly textContent: string | null;
 
-  accept<R>(visitor: Visitor<R>): R
+  accept<R>(visitor: Visitor<R>): R;
 
-  children(): Promise<Array<Node>>
+  children(): Promise<Array<Node>>;
+
+  childNodes(): Promise<Array<Node>>;
+
+  firstChild(): Promise<Node | null>;
+
+  lastChild(): Promise<Node | null>;
+
+  parentNode(): Promise<Node | null>;
+
+  parentElement(): Promise<Element | null>;
+
+  nextSibling(): Promise<Node | null>;
+
+  previousSibling(): Promise<Node | null>;
 }
 
-export type SerializableNode = Pick<Node, 'baseURI' | 'nodeName' | 'nodeType' | 'textContent' | 'nodeValue'>
+export type SerializableNode = Pick<Node, 'baseURI' | 'nodeName' | 'nodeType' | 'nodeValue' | 'textContent'>;
 
 export enum NodeType {
   // noinspection JSUnusedGlobalSymbols

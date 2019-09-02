@@ -11,6 +11,9 @@ export const resolver: IResolverObject = {
   children: async (element: Element): Promise<Array<Element>> => {
     return element.children();
   },
+  childNodes: async (element: Element): Promise<Array<Element>> => {
+    return element.childNodes();
+  },
   dataset: async (element: Element): Promise<Array<Data>> => {
     return element.dataset();
   },

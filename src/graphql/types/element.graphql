@@ -9,6 +9,7 @@ type Element implements Node {
     textContent: String
     attributes: [Attribute]!
     children: [Element]!
+    childNodes: [Node]!
     dataset: [Data]!
     innerHTML: String!
     outerHTML: String!

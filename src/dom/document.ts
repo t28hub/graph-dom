@@ -10,6 +10,8 @@ export interface Document extends Node {
 
   children(): Promise<Array<Element>>;
 
+  childNodes(): Promise<Array<Element>>;
+
   getElementById(id: string): Promise<Element | null>
 
   getElementsByClassName(name: string): Promise<Array<Element>>
@@ -21,4 +23,4 @@ export interface Document extends Node {
   querySelectorAll(selector: string): Promise<Array<Element>>
 }
 
-export type SerializableDocument = Pick<Document, 'title' | keyof SerializableNode>
+export type SerializableDocument = Pick<Document, 'title' | keyof SerializableNode>;

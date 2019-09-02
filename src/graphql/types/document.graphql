@@ -4,6 +4,7 @@ type Document implements Node {
     body: Element
     baseURI: String!
     children: [Element]!
+    childNodes: [Node]!
     nodeName: String!
     nodeType: NodeType!
     nodeValue: String
