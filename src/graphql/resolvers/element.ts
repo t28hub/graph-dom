@@ -1,5 +1,5 @@
 import {IResolverObject} from 'graphql-tools';
-import {Element, NodeType} from '../../dom';
+import {Element, Node, NodeType} from '../../dom';
 import {Attribute} from '../../dom/attribute';
 import {Data} from '../../dom/data';
 
@@ -8,11 +8,29 @@ export const resolver: IResolverObject = {
   attributes: async (element: Element): Promise<Array<Attribute>> => {
     return element.attributes();
   },
-  children: async (element: Element): Promise<Array<Element>> => {
+  children: async (element: Element): Promise<Array<Node>> => {
     return element.children();
   },
-  childNodes: async (element: Element): Promise<Array<Element>> => {
+  childNodes: async (element: Element): Promise<Array<Node>> => {
     return element.childNodes();
+  },
+  firstChild: async (element: Element): Promise<Node | null> => {
+    return element.firstChild();
+  },
+  lastChild: async (element: Element): Promise<Node | null> => {
+    return element.lastChild();
+  },
+  nextSibling: async (element: Element): Promise<Node | null> => {
+    return element.nextSibling();
+  },
+  previousSibling: async (element: Element): Promise<Node | null> => {
+    return element.previousSibling();
+  },
+  parentElement: async (element: Element): Promise<Element | null> => {
+    return element.parentElement();
+  },
+  parentNode: async (element: Element): Promise<Node | null> => {
+    return element.parentNode();
   },
   dataset: async (element: Element): Promise<Array<Data>> => {
     return element.dataset();

@@ -10,6 +10,12 @@ type Element implements Node {
     attributes: [Attribute]!
     children: [Element]!
     childNodes: [Node]!
+    firstChild: Node
+    lastChild: Node
+    nextSibling: Node
+    previousSibling: Node
+    parentElement: Node
+    parentNode: Node
     dataset: [Data]!
     innerHTML: String!
     outerHTML: String!

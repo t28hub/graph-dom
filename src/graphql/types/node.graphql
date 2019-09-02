@@ -2,6 +2,12 @@ interface Node {
     baseURI: String!
     children: [Node]!
     childNodes: [Node]!
+    firstChild: Node
+    lastChild: Node
+    nextSibling: Node
+    previousSibling: Node
+    parentElement: Node
+    parentNode: Node
     nodeName: String!
     nodeType: NodeType!
     nodeValue: String

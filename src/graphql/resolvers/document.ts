@@ -1,5 +1,5 @@
 import {IResolverObject} from 'graphql-tools';
-import {Document, Element, NodeType} from '../../dom';
+import {Document, Element, Node, NodeType} from '../../dom';
 
 export const resolver: IResolverObject = {
   head: async (document: Document): Promise<Element | null> => {
@@ -8,11 +8,29 @@ export const resolver: IResolverObject = {
   body: async (document: Document): Promise<Element | null> => {
     return document.body();
   },
-  children: async (document: Document): Promise<Array<Element>> => {
+  children: async (document: Document): Promise<Array<Node>> => {
     return document.children();
   },
-  childNodes: async (document: Document): Promise<Array<Element>> => {
+  childNodes: async (document: Document): Promise<Array<Node>> => {
     return document.childNodes();
+  },
+  firstChild: async (document: Document): Promise<Node | null> => {
+    return document.firstChild();
+  },
+  lastChild: async (document: Document): Promise<Node | null> => {
+    return document.lastChild();
+  },
+  nextSibling: async (document: Document): Promise<Node | null> => {
+    return document.nextSibling();
+  },
+  previousSibling: async (document: Document): Promise<Node | null> => {
+    return document.previousSibling();
+  },
+  parentElement: async (document: Document): Promise<Element | null> => {
+    return document.parentElement();
+  },
+  parentNode: async (document: Document): Promise<Node | null> => {
+    return document.parentNode();
   },
   nodeType: (document: Document): string => {
     const {nodeType} = document;

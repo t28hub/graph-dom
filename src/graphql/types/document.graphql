@@ -5,6 +5,12 @@ type Document implements Node {
     baseURI: String!
     children: [Element]!
     childNodes: [Node]!
+    firstChild: Node
+    lastChild: Node
+    nextSibling: Node
+    previousSibling: Node
+    parentElement: Node
+    parentNode: Node
     nodeName: String!
     nodeType: NodeType!
     nodeValue: String

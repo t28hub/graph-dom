@@ -8,10 +8,6 @@ export interface Document extends Node {
 
   body(): Promise<Element | null>;
 
-  children(): Promise<Array<Element>>;
-
-  childNodes(): Promise<Array<Element>>;
-
   getElementById(id: string): Promise<Element | null>
 
   getElementsByClassName(name: string): Promise<Array<Element>>
