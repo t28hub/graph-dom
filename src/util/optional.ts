@@ -1,15 +1,18 @@
 export class Optional<T> {
   private readonly value?: T;
 
-  static empty<T>(): Optional<T> {
+  public static empty<T>(): Optional<T> {
     return new Optional<T>();
   }
 
-  static of<T>(value: T): Optional<T> {
+  public static of<T>(value: T): Optional<T> {
+    if (value === null || value === undefined) {
+      throw new TypeError('Value must not be null or undefined');
+    }
     return new Optional<T>(value);
   }
 
-  static ofNullable<T>(value: T | null | undefined): Optional<T> {
+  public static ofNullable<T>(value: T | null | undefined): Optional<T> {
     if (value === null || value === undefined) {
       return new Optional<T>();
     }
