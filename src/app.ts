@@ -1,11 +1,10 @@
-import {ApolloServer, Config} from 'apollo-server-lambda';
-import {GraphQLResponse} from 'apollo-server-types';
-import {APIGatewayEvent, APIGatewayProxyResult, Handler} from 'aws-lambda';
-import {install} from 'source-map-support';
-import {Context, typeDefs, resolvers} from './graphql';
+import {Config, GraphQLResponse} from 'apollo-server-core';
+import {ApolloServer} from 'apollo-server-express';
+import express from 'express';
+import {Context, resolvers, typeDefs} from './graphql';
 import {ChromiumBrowserService} from './service/browser';
 
-install();
+const app = express();
 
 const config: Config = {
   typeDefs,
@@ -25,8 +24,6 @@ const config: Config = {
   tracing: true,
 };
 const server = new ApolloServer(config);
+server.applyMiddleware({app});
 
-// noinspection JSUnusedGlobalSymbols
-export const handler: Handler<APIGatewayEvent, APIGatewayProxyResult> = server.createHandler({
-  cors: {origin: '*'},
-});
+export default app;
