@@ -1,13 +1,13 @@
-import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import {Attribute} from '../attribute';
-import {DOMElement} from '../browser';
+import {DOMElement} from '../web';
 import {Data} from '../data';
 import {Element as IElement, SerializableElement} from '../element';
 import {NodeType, Visitor} from '../node';
+import {Delegation} from './delegation';
 
 export class Element implements IElement {
-  private readonly page: Page;
-  private readonly element: ElementHandle;
+  private readonly delegation: Delegation;
   private readonly properties: SerializableElement;
 
   get id(): string {
@@ -43,16 +43,16 @@ export class Element implements IElement {
   }
 
   static async create(page: Page, element: ElementHandle): Promise<Element> {
+    const delegation = new Delegation(page, element);
     const properties = await page.evaluate((element: DOMElement): SerializableElement => {
       const {id, className, classList, baseURI, nodeName, nodeType, nodeValue, textContent} = element;
       return {id, className, classList: Array.from(classList), baseURI, nodeName, nodeType, nodeValue, textContent};
     }, element);
-    return new Element(page, element, properties);
+    return new Element(delegation, properties);
   }
 
-  private constructor(page: Page, element: ElementHandle, properties: SerializableElement) {
-    this.page = page;
-    this.element = element;
+  private constructor(delegation: Delegation, properties: SerializableElement) {
+    this.delegation = delegation;
     this.properties = properties;
   }
 
@@ -61,83 +61,42 @@ export class Element implements IElement {
   }
 
   public async attributes(): Promise<Array<Attribute>> {
-    return await this.page.evaluate((element: DOMElement): Array<Attribute> => {
-      const items = element.attributes;
-      const itemSize = items.length;
-      const attributes: Array<Attribute> = [];
-      for (let index = 0; index < itemSize; index++) {
-        const item: Attr | null = items.item(index);
-        if (item === null) {
-          continue;
-        }
-        const {name, value} = item;
-        attributes.push({name, value});
-      }
-      return attributes;
-    }, this.element);
+    return this.delegation.attributes();
   }
 
   public async children(): Promise<Array<IElement>> {
-    const {page, element} = this;
-    const collection = await page.evaluateHandle((element: DOMElement): HTMLCollection => element.children, element);
-    const properties = await collection.getProperties();
-    const promises = Array.from(properties.values())
-      .map((handle: JSHandle): ElementHandle | null => handle.asElement())
-      .filter((element: ElementHandle | null): boolean => element !== null)
-      .map(async (element: ElementHandle | null): Promise<IElement> => {
-        if (element === null) {
-          throw new Error();
-        }
-        return await Element.create(page, element)
-      });
-    return Promise.all(promises);
+    return this.delegation.children();
   }
 
   public async dataset(): Promise<Array<Data>> {
-    return await this.page.evaluate((element: DOMElement): Array<Data> => {
-      if (!(element instanceof HTMLElement)) {
-        return [];
-      }
-
-      const {dataset} = (element as HTMLElement);
-      return Object.keys(dataset).map((key: string): Data => {
-        const value = dataset[key];
-        return {name: key, value};
-      });
-    }, this.element);
+    return this.delegation.dataset();
   }
 
   public async innerHTML(): Promise<string> {
-    return await this.page.evaluate((element: DOMElement): string => element.innerHTML, this.element);
+    return this.delegation.innerHTML();
   }
 
   public async outerHTML(): Promise<string> {
-    return await this.page.evaluate((element: DOMElement): string => element.outerHTML, this.element);
+    return this.delegation.outerHTML();
   }
 
   public async getAttribute(attributeName: string): Promise<string | null> {
-    return await this.page.evaluate((element: DOMElement, attributeName: string): string | null => {
-      return element.getAttribute(attributeName);
-    }, this.element, attributeName);
+    return this.delegation.getAttribute(attributeName);
   }
 
   public async getElementsByClassName(name: string): Promise<Array<IElement>> {
-    // https://github.com/GoogleChrome/puppeteer/issues/461
-    return await this.querySelectorAll(`.${name}`);
+    return this.delegation.getElementsByClassName(name);
   }
 
   public async getElementsByTagName(name: string): Promise<Array<IElement>> {
-    return await this.querySelectorAll(`${name}`);
+    return this.delegation.getElementsByTagName(name);
   }
 
   public async querySelector(selector: string): Promise<IElement | null> {
-    const found = await this.element.$(selector);
-    return found === null ? null : await Element.create(this.page, found);
+    return this.delegation.querySelector(selector);
   }
 
   public async querySelectorAll(selector: string): Promise<Array<IElement>> {
-    const found: ElementHandle<DOMElement>[] = await this.element.$$(selector);
-    const promises: Promise<Element>[] = found.map(async (element: ElementHandle): Promise<Element> => await Element.create(this.page, element));
-    return Promise.all(promises);
+    return this.delegation.querySelectorAll(selector);
   }
 }

@@ -1,13 +1,12 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
-import {DOMDocument, DOMElement} from '../browser';
+import {DOMDocument} from '../web';
+import {Delegation} from './delegation';
 import {Document as IDocument, SerializableDocument} from '../document';
-import {Element} from './element';
 import {Element as IElement} from '../element';
 import {NodeType, Visitor} from '../node';
 
 export class Document implements IDocument {
-  private readonly page: Page;
-  private readonly element: ElementHandle;
+  private readonly delegation: Delegation;
   private readonly properties: SerializableDocument;
 
   get title(): string {
@@ -41,16 +40,16 @@ export class Document implements IDocument {
       throw new TypeError('window.document does not exist');
     }
 
+    const delegation = new Delegation(page, document);
     const properties = await page.evaluate((document: DOMDocument): SerializableDocument => {
       const {title, baseURI, nodeName, nodeType, nodeValue, textContent} = document;
       return {title, baseURI, nodeName, nodeType, nodeValue, textContent,};
     }, document);
-    return new Document(page, document, properties);
+    return new Document(delegation, properties);
   }
 
-  private constructor(page: Page, element: ElementHandle, properties: SerializableDocument) {
-    this.page = page;
-    this.element = element;
+  private constructor(delegation: Delegation, properties: SerializableDocument) {
+    this.delegation = delegation;
     this.properties = properties;
   }
 
@@ -59,54 +58,34 @@ export class Document implements IDocument {
   }
 
   public async head(): Promise<IElement | null> {
-    const found = await this.page.evaluateHandle((document: DOMDocument): DOMElement => document.head, this.element);
-    const element = found.asElement();
-    return element !== null ? await Element.create(this.page, element) : null;
+    return this.delegation.head();
   }
 
   public async body(): Promise<IElement | null> {
-    const found = await this.page.evaluateHandle((document: DOMDocument): DOMElement => document.body, this.element);
-    const element = found.asElement();
-    return element !== null ? await Element.create(this.page, element) : null;
+    return this.delegation.body();
   }
 
   public async children(): Promise<Array<IElement>> {
-    const {page, element} = this;
-    const collection = await page.evaluateHandle((element: DOMElement): HTMLCollection => element.children, element);
-    const properties = await collection.getProperties();
-    const promises = Array.from(properties.values())
-      .map((handle: JSHandle): ElementHandle | null => handle.asElement())
-      .filter((element: ElementHandle | null): boolean => element !== null)
-      .map(async (element: ElementHandle | null): Promise<IElement> => {
-        if (element === null) {
-          throw new Error();
-        }
-        return await Element.create(page, element)
-      });
-    return Promise.all(promises);
+    return this.delegation.children();
   }
 
   public async getElementById(id: string): Promise<IElement | null> {
-    return await this.querySelector(`#${id}`);
+    return this.delegation.getElementById(id);
   }
 
   public async getElementsByClassName(name: string): Promise<Array<IElement>> {
-    // https://github.com/GoogleChrome/puppeteer/issues/461
-    return await this.querySelectorAll(`.${name}`);
+    return this.delegation.getElementsByClassName(name);
   }
 
   public async getElementsByTagName(name: string): Promise<Array<IElement>> {
-    return await this.querySelectorAll(`${name}`);
+    return this.delegation.getElementsByTagName(name);
   }
 
   public async querySelector(selector: string): Promise<IElement | null> {
-    const found = await this.page.$(selector);
-    return found === null ? null : await Element.create(this.page, found);
+    return this.delegation.querySelector(selector);
   }
 
   public async querySelectorAll(selector: string): Promise<Array<IElement>> {
-    const found: ElementHandle<DOMElement>[] = await this.page.$$(selector);
-    const promises: Promise<Element>[] = found.map(async (element: ElementHandle): Promise<Element> => await Element.create(this.page, element));
-    return Promise.all(promises);
+    return this.delegation.querySelectorAll(selector);
   }
 }
