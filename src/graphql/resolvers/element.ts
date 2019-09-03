@@ -45,9 +45,9 @@ export const resolver: IResolverObject = {
     const {nodeType} = element;
     return NodeType[nodeType];
   },
-  getAttribute: async (element: Element, args: { attributeName: string }): Promise<string | null> => {
-    const {attributeName} = args;
-    return element.getAttribute(attributeName);
+  getAttribute: async (element: Element, args: { name: string }): Promise<string | null> => {
+    const {name} = args;
+    return element.getAttribute(name);
   },
   getElementsByClassName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
     const {name} = args;

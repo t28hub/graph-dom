@@ -1,32 +1,96 @@
+"""
+Element representing HTML element
+
+https://developer.mozilla.org/en-US/docs/Web/API/Element
+"""
 type Element implements Node {
+    "The ID of the element"
     id: String!
-    className: String!
-    classList: [String]!
-    baseURI: String!
-    nodeName: String!
-    nodeType: NodeType!
-    nodeValue: String
-    textContent: String
+
+    "The list of attributes"
     attributes: [Attribute]!
-    children: [Element]!
-    childNodes: [Node]!
-    firstChild: Node
-    lastChild: Node
-    nextSibling: Node
-    previousSibling: Node
-    parentElement: Node
-    parentNode: Node
+
+    "The list of custom data attributes"
     dataset: [Data]!
+
+    "The list of class name"
+    classList: [String]!
+
+    "The class name"
+    className: String!
+
+    "The HTML content of the element"
     innerHTML: String!
+
+    "The HTML of the element including its content"
     outerHTML: String!
 
-    getAttribute(attributeName: String!): String
+    "The absolute base URL"
+    baseURI: String!
 
-    getElementsByClassName(name: String!): [Element]!
+    "All of the child elements"
+    children: [Element]!
 
-    getElementsByTagName(name: String!): [Element]!
+    "All of the child nodes"
+    childNodes: [Node]!
 
-    querySelector(selector: String!): Element
+    "The first direct child node"
+    firstChild: Node
 
-    querySelectorAll(selector: String!): [Element]!
+    "The last direct child node"
+    lastChild: Node
+
+    "The next node in the tree"
+    nextSibling: Node
+
+    "The previous node in the tree"
+    previousSibling: Node
+
+    "The parent element"
+    parentElement: Node
+
+    "The parent node"
+    parentNode: Node
+
+    "The name of node"
+    nodeName: String!
+
+    "The type of node"
+    nodeType: NodeType!
+
+    "The value of node"
+    nodeValue: String
+
+    "The textual content"
+    textContent: String
+
+    "Return an attribute value by attribute name"
+    getAttribute(
+        "The name of the attribute"
+        name: String!
+    ): String
+
+    "Return a list of elements with the class name"
+    getElementsByClassName(
+        "The name of the class"
+        name: String!
+    ): [Element]!
+
+    "Return a list of elements with the tag name"
+    getElementsByTagName(
+        "The name of the tag"
+        name: String!
+    ): [Element]!
+
+    "Return a first element that matches the selector"
+    querySelector(
+        "The selector to match"
+        selector: String!
+    ): Element
+
+    "Return a list of all elements that match the selector"
+    querySelectorAll(
+        "The selector to match"
+        selector: String!
+    ): [Element]!
 }

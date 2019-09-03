@@ -1,4 +1,10 @@
+"""
+Attribute of a DOM element
+"""
 type Attribute {
+    "The name of the attribute"
     name: String!
+
+    "The value of the attribute"
     value: String!
 }

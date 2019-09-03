@@ -81,11 +81,11 @@ export class Element extends Node<SerializableElement> implements IElement {
     return await page.evaluate((element: DOMElement): string => element.outerHTML, element);
   }
 
-  public async getAttribute(attributeName: string): Promise<string | null> {
+  public async getAttribute(name: string): Promise<string | null> {
     const {page, element} = this;
-    return page.evaluate((element: DOMElement, attributeName: string): string | null => {
-      return element.getAttribute(attributeName);
-    }, element, attributeName);
+    return page.evaluate((element: DOMElement, name: string): string | null => {
+      return element.getAttribute(name);
+    }, element, name);
   }
 
   public async getElementsByClassName(name: string): Promise<Array<IElement>> {

@@ -1,30 +1,88 @@
+"""
+DOM Node inherited by DOM API objects
+
+https://developer.mozilla.org/en-US/docs/Web/API/Node
+"""
 interface Node {
+    "The absolute base URL"
     baseURI: String!
+
+    "All of the child elements"
     children: [Node]!
+
+    "All of the child nodes"
     childNodes: [Node]!
+
+    "The first direct child node"
     firstChild: Node
+
+    "The last direct child node"
     lastChild: Node
+
+    "The next node in the tree"
     nextSibling: Node
+
+    "The previous node in the tree"
     previousSibling: Node
-    parentElement: Node
+
+    "The parent node"
     parentNode: Node
+
+    "The parent element"
+    parentElement: Node
+
+    "The name of node"
     nodeName: String!
+
+    "The type of node"
     nodeType: NodeType!
+
+    "The value of node"
     nodeValue: String
+
+    "The textual content"
     textContent: String
 }
 
+"""
+Type of node
+
+https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
+"""
 enum NodeType {
+    "An element node (e.g. <div>, <p> and <nav>)"
     ELEMENT_NODE
+
+    "An attribute element (Deprecated)"
     ATTRIBUTE_NODE
+
+    "A text node"
     TEXT_NODE
+
+    "A CDATA section node (e.g. <!CDATA[[ ... ]]>)"
     CDATA_SECTION_NODE
+
+    "An XML entity reference node (Deprecated)"
     ENTITY_REFERENCE_NODE
+
+    "An XML entity node (Deprecated)"
     ENTITY_NODE
+
+    "An XML processing instruction node (e.g. <?xml-stylesheet ... ?>)"
     PROCESSING_INSTRUCTION_NODE
+
+    "A comment node (e.g. <!-- ... -->)"
     COMMENT_NODE
+
+    "A document node"
     DOCUMENT_NODE
+
+    "A document type node (e.g. <!DOCTYPE html>.)"
     DOCUMENT_TYPE_NODE
+
+    "A document fragment node"
     DOCUMENT_FRAGMENT_NODE
+
+    "An XML notation node (Deprecated)"
     NOTATION_NODE
 }

@@ -1,4 +1,10 @@
+"""
+Custom data attribute (data-*) of a DOM element
+"""
 type Data {
+    "The ustom data attribute name"
     name: String!
+
+    "The custom data attribute value"
     value: String
 }

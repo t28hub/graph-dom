@@ -15,7 +15,7 @@ export interface Element extends Node {
 
   outerHTML(): Promise<string>;
 
-  getAttribute(attributeName: string): Promise<string | null>;
+  getAttribute(name: string): Promise<string | null>;
 
   getElementsByClassName(name: string): Promise<Array<Element>>;
 

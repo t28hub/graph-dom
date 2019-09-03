@@ -4,6 +4,13 @@
 #import './element.graphql'
 #import './node.graphql'
 
+"""
+The root query
+"""
 type Query {
-    page(url: String!): Document!
+    "Return the document by URL"
+    page(
+        "URL to be fetched"
+        url: String!
+    ): Document!
 }
