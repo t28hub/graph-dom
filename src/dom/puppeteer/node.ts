@@ -1,8 +1,8 @@
-import {ElementHandle, JSHandle, Page} from 'puppeteer';
-import {Element as IElement} from '../element';
-import {Node as INode, NodeType, SerializableNode, Visitor} from '../node';
-import {DOMElement, DOMNode} from '../web';
-import {Element} from './element';
+import { ElementHandle, JSHandle, Page } from 'puppeteer';
+import { Element as IElement } from '../element';
+import { Node as INode, NodeType, SerializableNode, Visitor } from '../node';
+import { DOMElement, DOMNode } from '../web';
+import { Element } from './element';
 
 export abstract class Node<T extends SerializableNode> implements INode {
   public get baseURI(): string {
@@ -36,15 +36,15 @@ export abstract class Node<T extends SerializableNode> implements INode {
   }
 
   public async children(): Promise<Array<IElement>> {
-    const {page, element} = this;
+    const { page, element } = this;
     const collection = await page.evaluateHandle((element: DOMElement): HTMLCollection => {
-      return element.children
+      return element.children;
     }, element);
     return this.toElements(collection);
   }
 
   public async childNodes(): Promise<Array<IElement>> {
-    const {page, element} = this;
+    const { page, element } = this;
     const collection = await page.evaluateHandle((element: DOMElement): NodeListOf<ChildNode> => {
       return element.childNodes;
     }, element);
@@ -52,7 +52,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
   }
 
   public async firstChild(): Promise<IElement | null> {
-    const {page, element} = this;
+    const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.firstChild;
     }, element);
@@ -60,7 +60,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
   }
 
   public async lastChild(): Promise<IElement | null> {
-    const {page, element} = this;
+    const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.lastChild;
     }, element);
@@ -68,7 +68,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
   }
 
   public async nextSibling(): Promise<IElement | null> {
-    const {page, element} = this;
+    const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.nextSibling;
     }, element);
@@ -76,7 +76,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
   }
 
   public async previousSibling(): Promise<IElement | null> {
-    const {page, element} = this;
+    const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.previousSibling;
     }, element);
@@ -84,7 +84,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
   }
 
   public async parentElement(): Promise<IElement | null> {
-    const {page, element} = this;
+    const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.parentElement;
     }, element);
@@ -92,7 +92,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
   }
 
   public async parentNode(): Promise<IElement | null> {
-    const {page, element} = this;
+    const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.parentNode;
     }, element);
@@ -102,33 +102,43 @@ export abstract class Node<T extends SerializableNode> implements INode {
   public abstract accept<R>(visitor: Visitor<R>): R;
 
   protected async getElementsByClassName(name: string): Promise<Array<IElement>> {
-    const {page, element} = this;
-    const collection = await page.evaluateHandle((element: DOMElement, name: string): HTMLCollection => {
-      return element.getElementsByClassName(name);
-    }, element, name);
+    const { page, element } = this;
+    const collection = await page.evaluateHandle(
+      (element: DOMElement, name: string): HTMLCollection => {
+        return element.getElementsByClassName(name);
+      },
+      element,
+      name
+    );
     return this.toElements(collection);
   }
 
   protected async getElementsByTagName(name: string): Promise<Array<IElement>> {
-    const {page, element} = this;
-    const collection = await page.evaluateHandle((element: DOMElement, name: string): HTMLCollection => {
-      return element.getElementsByTagName(name);
-    }, element, name);
+    const { page, element } = this;
+    const collection = await page.evaluateHandle(
+      (element: DOMElement, name: string): HTMLCollection => {
+        return element.getElementsByTagName(name);
+      },
+      element,
+      name
+    );
     return this.toElements(collection);
   }
 
   protected async querySelector(selector: string): Promise<IElement | null> {
-    const {page, element} = this;
+    const { page, element } = this;
     const found = await element.$(selector);
     return found === null ? null : await this.createElement(page, found);
   }
 
   protected async querySelectorAll(selector: string): Promise<Array<IElement>> {
-    const {page, element} = this;
+    const { page, element } = this;
     const found: ElementHandle<DOMElement>[] = await element.$$(selector);
-    const promises: Promise<IElement>[] = found.map(async (element: ElementHandle): Promise<IElement> => {
-      return await this.createElement(page, element);
-    });
+    const promises: Promise<IElement>[] = found.map(
+      async (element: ElementHandle): Promise<IElement> => {
+        return await this.createElement(page, element);
+      }
+    );
     return Promise.all(promises);
   }
 
@@ -142,12 +152,14 @@ export abstract class Node<T extends SerializableNode> implements INode {
     const promises = Array.from(properties.values())
       .map((handle: JSHandle): ElementHandle | null => handle.asElement())
       .filter((element: ElementHandle | null): boolean => element !== null)
-      .map(async (element: ElementHandle | null): Promise<IElement> => {
-        if (element === null) {
-          throw new Error();
+      .map(
+        async (element: ElementHandle | null): Promise<IElement> => {
+          if (element === null) {
+            throw new Error();
+          }
+          return await this.createElement(this.page, element);
         }
-        return await this.createElement(this.page, element)
-      });
+      );
     return Promise.all(promises);
   }
 

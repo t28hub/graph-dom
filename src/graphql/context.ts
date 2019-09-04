@@ -1,4 +1,4 @@
-import {BrowserService} from '../service/browser';
+import { BrowserService } from '../service/browser';
 
 export interface Context {
   browser: BrowserService;

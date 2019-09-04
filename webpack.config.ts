@@ -1,13 +1,13 @@
-import {resolve} from 'path';
-import {lib} from 'serverless-webpack';
-import {Configuration, Entry} from 'webpack';
+import { resolve } from 'path';
+import { lib } from 'serverless-webpack';
+import { Configuration, Entry } from 'webpack';
 import nodeExternals from 'webpack-node-externals';
 
 const config: Configuration = {
   mode: lib.webpack.isLocal ? 'development' : 'production',
   entry: {
     'src/server': './src/server.ts',
-    ...lib.entries as Entry
+    ...(lib.entries as Entry),
   },
   target: 'node',
   resolve: {

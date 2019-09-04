@@ -1,5 +1,5 @@
-import {Document} from './document';
-import {Element} from './element';
+import { Document } from './document';
+import { Element } from './element';
 
 export interface Node {
   readonly baseURI: string;

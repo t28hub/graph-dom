@@ -1,5 +1,5 @@
-import {Element} from './element';
-import {Node, SerializableNode} from './node';
+import { Element } from './element';
+import { Node, SerializableNode } from './node';
 
 export interface Document extends Node {
   readonly title: string;
@@ -8,15 +8,15 @@ export interface Document extends Node {
 
   body(): Promise<Element | null>;
 
-  getElementById(id: string): Promise<Element | null>
+  getElementById(id: string): Promise<Element | null>;
 
-  getElementsByClassName(name: string): Promise<Array<Element>>
+  getElementsByClassName(name: string): Promise<Array<Element>>;
 
-  getElementsByTagName(name: string): Promise<Array<Element>>
+  getElementsByTagName(name: string): Promise<Array<Element>>;
 
-  querySelector(selector: string): Promise<Element | null>
+  querySelector(selector: string): Promise<Element | null>;
 
-  querySelectorAll(selector: string): Promise<Array<Element>>
+  querySelectorAll(selector: string): Promise<Array<Element>>;
 }
 
 export type SerializableDocument = Pick<Document, 'title' | keyof SerializableNode>;

@@ -1,5 +1,4 @@
-AWS Lambda Puppeteer
-=====
+# AWS Lambda Puppeteer
 This is a sample AWS lambda functions using the Puppeteer.
 
 ## License

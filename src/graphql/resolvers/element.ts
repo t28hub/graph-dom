@@ -1,7 +1,7 @@
-import {IResolverObject} from 'graphql-tools';
-import {Element, Node, NodeType} from '../../dom';
-import {Attribute} from '../../dom/attribute';
-import {Data} from '../../dom/data';
+import { IResolverObject } from 'graphql-tools';
+import { Element, Node, NodeType } from '../../dom';
+import { Attribute } from '../../dom/attribute';
+import { Data } from '../../dom/data';
 
 // noinspection JSUnusedGlobalSymbols
 export const resolver: IResolverObject = {
@@ -42,27 +42,27 @@ export const resolver: IResolverObject = {
     return element.outerHTML();
   },
   nodeType: (element: Element): string => {
-    const {nodeType} = element;
+    const { nodeType } = element;
     return NodeType[nodeType];
   },
   getAttribute: async (element: Element, args: { name: string }): Promise<string | null> => {
-    const {name} = args;
+    const { name } = args;
     return element.getAttribute(name);
   },
   getElementsByClassName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
-    const {name} = args;
+    const { name } = args;
     return element.getElementsByClassName(name);
   },
   getElementsByTagName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
-    const {name} = args;
+    const { name } = args;
     return element.getElementsByTagName(name);
   },
   querySelector: async (element: Element, args: { selector: string }): Promise<Element | null> => {
-    const {selector} = args;
+    const { selector } = args;
     return await element.querySelector(selector);
   },
   querySelectorAll: async (element: Element, args: { selector: string }): Promise<Array<Element>> => {
-    const {selector} = args;
+    const { selector } = args;
     return await element.querySelectorAll(selector);
   },
 };

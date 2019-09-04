@@ -2,4 +2,3 @@
 export type DOMDocument = Document;
 export type DOMElement = Element;
 export type DOMNode = Node;
-

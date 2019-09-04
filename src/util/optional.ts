@@ -99,7 +99,7 @@ export class Optional<T> {
 }
 
 interface Visitor<T, U> {
-  visitValue(value: T): U
+  visitValue(value: T): U;
 
-  visitUndefined():U
+  visitUndefined(): U;
 }

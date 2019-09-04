@@ -1,4 +1,4 @@
-import {install} from 'source-map-support';
+import { install } from 'source-map-support';
 import app from './app';
 
 install();

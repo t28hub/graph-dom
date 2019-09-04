@@ -1,6 +1,6 @@
-import {Attribute} from './attribute';
-import {Data} from './data';
-import {Node, SerializableNode} from './node';
+import { Attribute } from './attribute';
+import { Data } from './data';
+import { Node, SerializableNode } from './node';
 
 export interface Element extends Node {
   readonly id: string;

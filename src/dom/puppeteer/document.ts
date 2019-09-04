@@ -1,10 +1,10 @@
-import {ElementHandle, JSHandle, Page} from 'puppeteer';
-import {DOMDocument, DOMElement} from '../web';
-import {Document as IDocument, SerializableDocument} from '../document';
-import {Element as IElement} from '../element';
-import {Visitor} from '../node';
-import {Node} from './node';
-import {Element} from './element';
+import { ElementHandle, JSHandle, Page } from 'puppeteer';
+import { DOMDocument, DOMElement } from '../web';
+import { Document as IDocument, SerializableDocument } from '../document';
+import { Element as IElement } from '../element';
+import { Visitor } from '../node';
+import { Node } from './node';
+import { Element } from './element';
 
 export class Document extends Node<SerializableDocument> implements IDocument {
   public get title(): string {
@@ -12,15 +12,16 @@ export class Document extends Node<SerializableDocument> implements IDocument {
   }
 
   public static async create(page: Page): Promise<Document> {
-    const document: ElementHandle | null = await page.evaluateHandle((): DOMDocument => window.document)
+    const document: ElementHandle | null = await page
+      .evaluateHandle((): DOMDocument => window.document)
       .then((document: JSHandle) => document.asElement());
     if (document === null) {
       throw new TypeError('window.document does not exist');
     }
 
     const properties = await page.evaluate((document: DOMDocument): SerializableDocument => {
-      const {title, baseURI, nodeName, nodeType, nodeValue, textContent} = document;
-      return {title, baseURI, nodeName, nodeType, nodeValue, textContent,};
+      const { title, baseURI, nodeName, nodeType, nodeValue, textContent } = document;
+      return { title, baseURI, nodeName, nodeType, nodeValue, textContent };
     }, document);
     return new Document(page, document, properties);
   }
@@ -30,7 +31,7 @@ export class Document extends Node<SerializableDocument> implements IDocument {
   }
 
   public async head(): Promise<IElement | null> {
-    const {page, element} = this;
+    const { page, element } = this;
     const handle = await page.evaluateHandle((document: DOMDocument): DOMElement | null => {
       return document.head;
     }, element);
@@ -39,7 +40,7 @@ export class Document extends Node<SerializableDocument> implements IDocument {
   }
 
   public async body(): Promise<IElement | null> {
-    const {page, element} = this;
+    const { page, element } = this;
     const handle = await page.evaluateHandle((document: DOMDocument): DOMElement | null => {
       return document.body;
     }, element);
@@ -48,10 +49,14 @@ export class Document extends Node<SerializableDocument> implements IDocument {
   }
 
   public async getElementById(id: string): Promise<IElement | null> {
-    const {page, element} = this;
-    const handle = await page.evaluateHandle((document: DOMDocument, id: string): HTMLElement | null => {
-      return document.getElementById(id);
-    }, element, id);
+    const { page, element } = this;
+    const handle = await page.evaluateHandle(
+      (document: DOMDocument, id: string): HTMLElement | null => {
+        return document.getElementById(id);
+      },
+      element,
+      id
+    );
     if (handle === null) {
       return null;
     }

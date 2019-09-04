@@ -1,5 +1,5 @@
-import {IResolverObject} from 'graphql-tools';
-import {Document, Element, Node} from '../../dom';
+import { IResolverObject } from 'graphql-tools';
+import { Document, Element, Node } from '../../dom';
 
 type Type = 'Document' | 'Element' | null;
 

@@ -18,19 +18,9 @@
     "alwaysStrict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types"
-    ],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "types": ["node", "jest"]
   },
-  "include": [
-    "**/*.ts",
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "test"
-  ]
+  "include": ["**/*.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist", "test"]
 }

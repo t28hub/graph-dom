@@ -23,7 +23,15 @@
     "watch": "npx sls invoke local --stage local --watch --function",
     "deploy:dev": "npx sls deploy --stage dev",
     "invoke": "npx sls invoke --function",
-    "invoke:local": "npx sls invoke local --stage local --function"
+    "invoke:local": "npx sls invoke local --stage local --function",
+    "format": "npx prettier --write 'src/**/*.ts' '*.{js,json,ts}'",
+    "format:check": "npx prettier --check 'src/**/*.ts' '*.{js,json,ts}'"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn run format",
+      "pre-push": "yarn run test"
+    }
   },
   "dependencies": {
     "apollo-server-express": "^2.9.3",
@@ -45,8 +53,10 @@
     "@types/webpack": "^4.32.2",
     "@types/webpack-node-externals": "^1.6.3",
     "graphql-tag": "^2.10.1",
+    "husky": "^3.0.5",
     "jest": "^24.9.0",
     "mkdirp": "^0.5.1",
+    "prettier": "^1.18.2",
     "rimraf": "^3.0.0",
     "serverless": "^1.50.0",
     "serverless-offline": "^5.10.1",

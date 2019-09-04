@@ -1,2 +1,2 @@
-export {Document} from './document';
-export {Element} from './element';
+export { Document } from './document';
+export { Element } from './element';
