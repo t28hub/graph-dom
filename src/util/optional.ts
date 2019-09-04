@@ -38,7 +38,7 @@ export class Optional<T> {
     return this.value !== undefined;
   }
 
-  public ifPresent(consumer: (value: T) => void) {
+  public ifPresent(consumer: (value: T) => void): void {
     this.visit<void>({
       visitValue(value: T) {
         consumer(value);

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { format, Url } from 'url';
 import { Document, PuppeteerDocument } from '../dom';
 import { Browser, LaunchOptions, NavigationOptions, Page, Response } from 'puppeteer';
@@ -10,10 +11,11 @@ export interface BrowserService {
   close(): Promise<void>;
 }
 
+// TODO: Refactor implementation and define as a single class
 export class ChromiumBrowserService implements BrowserService {
   private readonly browser: Browser;
 
-  static async create(options: { [name: string]: any } = {}): Promise<ChromiumBrowserService> {
+  public static async create(options: { [name: string]: any } = {}): Promise<ChromiumBrowserService> {
     const defaultOptions: LaunchOptions = {
       args: Chromium.args,
       defaultViewport: Chromium.defaultViewport,
@@ -25,7 +27,7 @@ export class ChromiumBrowserService implements BrowserService {
     return new ChromiumBrowserService(browser);
   }
 
-  constructor(browser: Browser) {
+  public constructor(browser: Browser) {
     this.browser = browser;
   }
 

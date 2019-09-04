@@ -16,6 +16,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "npx sls offline",
+    "lint": "npx eslint src/**/*.ts",
     "test": "npx jest",
     "clean": "npx rimraf coverage dist layers yarn-error.log",
     "build": "npx sls webpack --mode production",
@@ -29,7 +30,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn run format",
+      "pre-commit": "yarn run lint && yarn run format",
       "pre-push": "yarn run test"
     }
   },
@@ -52,6 +53,11 @@
     "@types/source-map-support": "^0.5.0",
     "@types/webpack": "^4.32.2",
     "@types/webpack-node-externals": "^1.6.3",
+    "@typescript-eslint/eslint-plugin": "^2.1.0",
+    "@typescript-eslint/parser": "^2.1.0",
+    "eslint": "^6.3.0",
+    "eslint-config-prettier": "^6.2.0",
+    "eslint-plugin-prettier": "^3.1.0",
     "graphql-tag": "^2.10.1",
     "husky": "^3.0.5",
     "jest": "^24.9.0",
