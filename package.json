@@ -1,5 +1,5 @@
 {
-  "name": "aws-lambda-puppeteer",
+  "name": "graph-dom",
   "description": "This is a sample AWS lambda functions using the Puppeteer.",
   "version": "1.0.0",
   "main": "src/lambda.ts",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:t28hub/aws-lambda-puppeteer.git"
+    "url": "git@github.com:t28hub/graph-dom.git"
   },
   "private": true,
   "license": "Apache-2.0",
