@@ -2,7 +2,7 @@ import { Config, GraphQLResponse } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import { Context, resolvers, typeDefs } from './graphql';
-import { ChromiumBrowserService } from './service/browser';
+import { ChromiumBrowserService } from './service/chromiumBrowserService';
 
 const app = express();
 

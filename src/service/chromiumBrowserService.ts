@@ -1,20 +1,12 @@
-/* eslint-disable */
-import { format, Url } from 'url';
-import { Document, PuppeteerDocument } from '../dom';
 import { Browser, LaunchOptions, NavigationOptions, Page, Response } from 'puppeteer';
 import Chromium from 'chrome-aws-lambda';
+import { format, Url } from 'url';
+import { Document, PuppeteerDocument } from '../dom';
 import { Optional } from '../util';
+import { BrowserService, Options } from './browserService';
 
-export interface BrowserService {
-  fetch(url: Url, options?: { [name: string]: any }): Promise<Document>;
-
-  close(): Promise<void>;
-}
-
-// TODO: Refactor implementation and define as a single class
 export class ChromiumBrowserService implements BrowserService {
-  private readonly browser: Browser;
-
+  /* eslint-disable-next-line */
   public static async create(options: { [name: string]: any } = {}): Promise<ChromiumBrowserService> {
     const defaultOptions: LaunchOptions = {
       args: Chromium.args,
@@ -27,12 +19,18 @@ export class ChromiumBrowserService implements BrowserService {
     return new ChromiumBrowserService(browser);
   }
 
-  public constructor(browser: Browser) {
-    this.browser = browser;
-  }
+  public constructor(private readonly browser: Browser) {}
 
-  public async fetch(url: Url, options: { [name: string]: any } = {}): Promise<Document> {
+  public async fetch(url: Url, options: Options = {}): Promise<Document> {
     const page: Page = await this.browser.newPage();
+    const { timeout, userAgent } = options;
+    if (timeout !== undefined) {
+      page.setDefaultTimeout(timeout);
+    }
+    if (userAgent !== undefined) {
+      await page.setUserAgent(userAgent);
+    }
+
     const navigationOptions: NavigationOptions = { waitUntil: 'networkidle2' };
     const response: Response = Optional.ofNullable<Response>(
       await page.goto(format(url), navigationOptions)
