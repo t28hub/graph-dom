@@ -1,12 +1,13 @@
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { format, Url, UrlObject } from 'url';
+import { RobotsTxt } from './robotsTxt';
 
 const STATUS_CODE_OK = 200;
 
 export class RobotsFetcher {
   public constructor(private readonly axios: AxiosInstance) {}
 
-  public async fetch(url: Url): Promise<string> {
+  public async fetch(url: Url): Promise<RobotsTxt> {
     const robotsUrl: string = RobotsFetcher.buildRobotsUrl(url);
     console.info(`Fetching robots.txt file from ${robotsUrl}`);
 
@@ -17,7 +18,7 @@ export class RobotsFetcher {
     if (status !== STATUS_CODE_OK) {
       throw new Error(`Received unexpected status '${status} ${statusText}' from ${robotsUrl}`);
     }
-    return response.data;
+    return RobotsTxt.parse(url, response.data);
   }
 
   private async fetchText(urlString: string): Promise<AxiosResponse<string>> {

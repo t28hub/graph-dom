@@ -42,6 +42,7 @@
     "express": "^4.17.1",
     "graphql": "^14.5.3",
     "puppeteer-core": "^1.19.0",
+    "robots-parser": "^2.1.1",
     "source-map-support": "^0.5.13"
   },
   "devDependencies": {
@@ -62,6 +63,7 @@
     "graphql-tag": "^2.10.1",
     "husky": "^3.0.5",
     "jest": "^24.9.0",
+    "jest-each": "^24.9.0",
     "mkdirp": "^0.5.1",
     "prettier": "^1.18.2",
     "rimraf": "^3.0.0",

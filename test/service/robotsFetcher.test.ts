@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { parse } from 'url';
 import { RobotsFetcher } from '../../src/service/robotsFetcher';
+import each from 'jest-each';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -9,19 +10,31 @@ describe('RobotsFetcher', () => {
   describe('fetch', () => {
     const fetcher = new RobotsFetcher(axios);
 
-    test('should fetch robots.txt', async () => {
+    each([
+      'https://example.com',
+      'https://example.com/',
+      'https://example.com:443/',
+      'https://example.com/test/',
+      'https://example.com/test/index.html',
+      'https://example.com/test/index.html?query=example',
+      'https://example.com/test/index.html?query=example#title',
+    ]).test('should fetch robots.txt from %s', async (url: string) => {
       // Arrange
       mockedAxios.get.mockImplementation(async () => {
-        const data = 'This is a robots.txt.';
+        const data = `
+          User-Agent: *
+          Allow: /
+        `;
         return { status: 200, statusText: 'OK', data };
       });
 
       // Act
-      const actual = await fetcher.fetch(parse('https://example.com'));
+      const parsed = parse(url);
+      const actual = await fetcher.fetch(parsed);
 
       // Assert
       expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });
-      expect(actual).toBe('This is a robots.txt.');
+      expect(actual).toBeDefined();
     });
 
     test('should throw an Error string when a request failed', async () => {
