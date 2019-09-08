@@ -8,10 +8,15 @@ import { BrowserService, Options } from './browserService';
 export class ChromiumBrowserService implements BrowserService {
   /* eslint-disable-next-line */
   public static async create(options: { [name: string]: any } = {}): Promise<ChromiumBrowserService> {
+    // TODO: Remove temporary implementation
+    const browserPath =
+      process.env.NODE_ENV === 'development'
+        ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+        : await Chromium.executablePath;
     const defaultOptions: LaunchOptions = {
       args: Chromium.args,
       defaultViewport: Chromium.defaultViewport,
-      executablePath: process.env['PUPPETEER_EXECUTABLE_PATH'] || (await Chromium.executablePath),
+      executablePath: browserPath,
       headless: Chromium.headless,
     };
     const launchOptions: LaunchOptions = { ...defaultOptions, ...options };

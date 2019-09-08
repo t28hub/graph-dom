@@ -2,7 +2,7 @@
   "name": "graph-dom",
   "description": "This is a sample AWS lambda functions using the Puppeteer.",
   "version": "1.0.0",
-  "main": "src/lambda.ts",
+  "main": "dist/server.js",
   "author": {
     "name": "Tatsuya Maki",
     "email": "t28oogle@gmail.com",
@@ -15,16 +15,12 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "start": "npx sls offline",
+    "start": "npx now dev --debug",
     "lint": "npx eslint src/**/*.ts",
     "test": "npx jest",
-    "clean": "npx rimraf coverage dist layers yarn-error.log",
-    "build": "npx sls webpack --mode production",
-    "build:layer": "npx mkdirp ./layers && yarn install --modules-folder ./layers/nodejs/node_modules --production",
-    "watch": "npx sls invoke local --stage local --watch --function",
-    "deploy:dev": "npx sls deploy --stage dev",
-    "invoke": "npx sls invoke --function",
-    "invoke:local": "npx sls invoke local --stage local --function",
+    "clean": "npx rimraf coverage dist yarn-error.log",
+    "build": "npx webpack --mode production --progress",
+    "watch": "npx webpack --mode development --progress --watch",
     "format": "npx prettier --write 'src/**/*.ts' '*.{js,json,ts}'",
     "format:check": "npx prettier --check 'src/**/*.ts' '*.{js,json,ts}'"
   },
@@ -36,7 +32,6 @@
   },
   "dependencies": {
     "apollo-server-express": "^2.9.3",
-    "aws-serverless-express": "^3.3.6",
     "axios": "^0.19.0",
     "chrome-aws-lambda": "^1.19.0",
     "express": "^4.17.1",
@@ -46,8 +41,6 @@
     "source-map-support": "^0.5.13"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.31",
-    "@types/aws-serverless-express": "^3.3.1",
     "@types/express": "^4.17.1",
     "@types/jest": "^24.0.18",
     "@types/node": "^12.7.2",
@@ -64,12 +57,9 @@
     "husky": "^3.0.5",
     "jest": "^24.9.0",
     "jest-each": "^24.9.0",
-    "mkdirp": "^0.5.1",
+    "now": "^16.2.0",
     "prettier": "^1.18.2",
     "rimraf": "^3.0.0",
-    "serverless": "^1.50.0",
-    "serverless-offline": "^5.10.1",
-    "serverless-webpack": "^5.3.1",
     "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.4",
     "ts-node": "^8.3.0",
@@ -77,5 +67,8 @@
     "webpack": "^4.39.2",
     "webpack-cli": "^3.3.6",
     "webpack-node-externals": "^1.7.2"
+  },
+  "optionalDependencies": {
+    "iltorb": "^2.4.3"
   }
 }
