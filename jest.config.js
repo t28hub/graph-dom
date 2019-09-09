@@ -10,9 +10,11 @@ module.exports = {
   },
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.ts'],
-  coverageDirectory: 'coverage',
+  coverageDirectory: 'reports/coverage',
+  coverageReporters: ['lcov', 'text'],
   moduleFileExtensions: ['js', 'ts'],
   testEnvironment: 'node',
   testMatch: ['**/test/**/*.test.ts'],
+  reporters: ['default', ['jest-junit', { outputDirectory: 'reports/test', outputName: 'jest.xml' }]],
   verbose: true,
 };

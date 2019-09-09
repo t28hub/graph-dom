@@ -1,4 +1,6 @@
+.circleci/
 .idea/
+reports/
 test/
 LICENSE.txt
 README.md

@@ -35,7 +35,15 @@ jobs:
       - restore_cache: *restore-cache
       - run: *install-dependencies
       - save_cache: *save-cache
-      - run: yarn test
+      - run: yarn test --ci
+      - store_test_results:
+          path: ./reports/test
+      - store_artifacts:
+          path: ./reports/test
+          destination: jest
+      - store_artifacts:
+          path: ./reports/coverage/lcov-report
+          destination: lcov
 
   build:
     docker:
