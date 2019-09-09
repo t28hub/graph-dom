@@ -3,9 +3,9 @@ import { Document, Element, Node } from '../../dom';
 
 type Type = 'Document' | 'Element' | null;
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export const resolver: IResolverObject = {
   __resolveType: (node: Node): Type => {
-    // noinspection JSUnusedLocalSymbols
     return node.accept<Type>({
       visitDocument(document: Document): Type {
         return 'Document';

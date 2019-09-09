@@ -4,6 +4,7 @@ import { Context } from '../context';
 import { Document } from '../../dom';
 
 export const resolver: IResolverObject = {
+  /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
   page: async (parent: any, args: { url: string }, context: Context): Promise<Document> => {
     const { url } = args;
     const parsed = parse(url);

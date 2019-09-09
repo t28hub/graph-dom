@@ -7,15 +7,15 @@ import { Visitor } from '../node';
 import { Node } from './node';
 
 export class Element extends Node<SerializableElement> implements IElement {
-  get id(): string {
+  public get id(): string {
     return this.properties.id;
   }
 
-  get className(): string {
+  public get className(): string {
     return this.properties.className;
   }
 
-  get classList(): Array<string> {
+  public get classList(): Array<string> {
     return this.properties.classList;
   }
 
@@ -67,7 +67,7 @@ export class Element extends Node<SerializableElement> implements IElement {
         return [];
       }
 
-      const { dataset } = element as HTMLElement;
+      const { dataset } = element;
       return Object.keys(dataset).map(
         (name: string): Data => {
           const value = dataset[name];
@@ -89,7 +89,7 @@ export class Element extends Node<SerializableElement> implements IElement {
 
   public async getAttribute(name: string): Promise<string | null> {
     const { page, element } = this;
-    return page.evaluate(
+    return await page.evaluate(
       (element: DOMElement, name: string): string | null => {
         return element.getAttribute(name);
       },

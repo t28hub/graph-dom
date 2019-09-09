@@ -16,17 +16,17 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "npx now dev --debug",
-    "lint": "npx eslint src/**/*.ts",
+    "lint": "yarn lint:eslint && yarn lint:prettier",
+    "lint:eslint": "npx eslint 'src/**/*.ts'",
+    "lint:prettier": "npx prettier --check '*.{js,json,ts}'",
     "test": "npx jest",
     "clean": "npx rimraf coverage dist yarn-error.log",
     "build": "npx webpack --mode production --progress",
-    "watch": "npx webpack --mode development --progress --watch",
-    "format": "npx prettier --write 'src/**/*.ts' '*.{js,json,ts}'",
-    "format:check": "npx prettier --check 'src/**/*.ts' '*.{js,json,ts}'"
+    "watch": "npx webpack --mode development --progress --watch"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn run lint && yarn run format",
+      "pre-commit": "yarn run lint",
       "pre-push": "yarn run test"
     }
   },

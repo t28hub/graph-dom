@@ -2,7 +2,6 @@ import { ElementHandle, JSHandle, Page } from 'puppeteer';
 import { Element as IElement } from '../element';
 import { Node as INode, NodeType, SerializableNode, Visitor } from '../node';
 import { DOMElement, DOMNode } from '../web';
-import { Element } from './element';
 
 export abstract class Node<T extends SerializableNode> implements INode {
   public get baseURI(): string {

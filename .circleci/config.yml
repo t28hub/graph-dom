@@ -1,0 +1,61 @@
+aliases:
+  - &install-dependencies
+    name: Intall all dependencies
+    command: yarn install --ignore-optional --frozen-lockfile
+  - &restore-cache
+    keys:
+      - v2-dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}
+      - v2-dependencies-{{ .Branch }}-
+  - &save-cache
+    paths:
+      - node_modules
+    key: v2-dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}
+
+version: 2
+jobs:
+  lint:
+    docker:
+      - image: circleci/node:12
+    working_directory: ~/graph-dom
+    steps:
+      - checkout
+      - restore_cache: *restore-cache
+      - run: *install-dependencies
+      - save_cache: *save-cache
+      - run:
+          name: Check code format & run lint
+          command: yarn lint
+
+  test:
+    docker:
+      - image: circleci/node:12
+    working_directory: ~/graph-dom
+    steps:
+      - checkout
+      - restore_cache: *restore-cache
+      - run: *install-dependencies
+      - save_cache: *save-cache
+      - run: yarn test
+
+  build:
+    docker:
+      - image: circleci/node:12
+    working_directory: ~/graph-dom
+    steps:
+      - checkout
+      - restore_cache: *restore-cache
+      - run: *install-dependencies
+      - save_cache: *save-cache
+      - run: yarn build
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - lint
+      - test
+      - build:
+          requires:
+            - lint
+            - test
+
