@@ -1,4 +1,4 @@
-# GraphDOM
+# GraphDOM [![CircleCI Build Status](https://circleci.com/gh/t28hub/graph-dom/tree/master.svg?style=shield&circle-token=af937781f52f3988d85743c0c65dac4602660765)](https://circleci.com/gh/t28hub/graph-dom/tree/master)
 Web scraping and DOM traversing API with GraphQL.
 
 ## License
