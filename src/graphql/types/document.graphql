@@ -1,84 +1,98 @@
+# Copyright 2019 Tatsuya Maki
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
 Document representing HTML document
 
 https://developer.mozilla.org/en-US/docs/Web/API/Document
 """
 type Document implements Node {
-    "The title of the document"
-    title: String!
+  "The title of the document"
+  title: String!
 
-    "The <head> element"
-    head: Element
+  "The <head> element"
+  head: Element
 
-    "The <body> element"
-    body: Element
+  "The <body> element"
+  body: Element
 
-    "The absolute base URL"
-    baseURI: String!
+  "The absolute base URL"
+  baseURI: String!
 
-    "All of the child elements"
-    children: [Element]!
+  "All of the child elements"
+  children: [Element]!
 
-    "All of the child nodes"
-    childNodes: [Node]!
+  "All of the child nodes"
+  childNodes: [Node]!
 
-    "The first direct child node"
-    firstChild: Node
+  "The first direct child node"
+  firstChild: Node
 
-    "The last direct child node"
-    lastChild: Node
+  "The last direct child node"
+  lastChild: Node
 
-    "The next node in the tree"
-    nextSibling: Node
+  "The next node in the tree"
+  nextSibling: Node
 
-    "The previous node in the tree"
-    previousSibling: Node
+  "The previous node in the tree"
+  previousSibling: Node
 
-    "The parent element"
-    parentElement: Node
+  "The parent element"
+  parentElement: Node
 
-    "The parent node"
-    parentNode: Node
+  "The parent node"
+  parentNode: Node
 
-    "The name of node"
-    nodeName: String!
+  "The name of node"
+  nodeName: String!
 
-    "The type of node"
-    nodeType: NodeType!
+  "The type of node"
+  nodeType: NodeType!
 
-    "The value of node"
-    nodeValue: String
+  "The value of node"
+  nodeValue: String
 
-    "The textual content"
-    textContent: String
+  "The textual content"
+  textContent: String
 
-    "Return the element by ID"
-    getElementById(
-        "The ID of the element"
-        id: String!
-    ): Element
+  "Return the element by ID"
+  getElementById(
+    "The ID of the element"
+    id: String!
+  ): Element
 
-    "Return a list of elements with the class name"
-    getElementsByClassName(
-        "The name of the class"
-        name: String!
-    ): [Element]!
+  "Return a list of elements with the class name"
+  getElementsByClassName(
+    "The name of the class"
+    name: String!
+  ): [Element]!
 
-    "Return a list of elements with the tag name"
-    getElementsByTagName(
-        "The tag of the class"
-        name: String!
-    ): [Element]!
+  "Return a list of elements with the tag name"
+  getElementsByTagName(
+    "The tag of the class"
+    name: String!
+  ): [Element]!
 
-    "Return a first element that matches the selector"
-    querySelector(
-        "The selector to match"
-        selector: String!
-    ): Element
+  "Return a first element that matches the selector"
+  querySelector(
+    "The selector to match"
+    selector: String!
+  ): Element
 
-    "Return a list of all elements that match the selector"
-    querySelectorAll(
-        "The selector to match"
-        selector: String!
-    ): [Element]!
+  "Return a list of all elements that match the selector"
+  querySelectorAll(
+    "The selector to match"
+    selector: String!
+  ): [Element]!
 }
