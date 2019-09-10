@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-import { install } from 'source-map-support';
-import app from './app';
-import { getLogger } from './util/logger';
+export enum Level {
+  DEBUG,
+  INFO,
+  WARN,
+  ERROR,
+  TRACE,
+}
 
-install();
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+export interface Logger {
+  setLevel(level: Level): void;
 
-const DEFAULT_PORT = 8081;
+  debug(message: string, ...args: any[]): void;
 
-const port = app.get('port') || DEFAULT_PORT;
-const env = app.get('env');
-app.listen(port, () => {
-  getLogger().info('Application is running at http://localhost:%d in %s mode', port, env);
-});
+  info(message: string, ...args: any[]): void;
 
-export default app;
+  warn(message: string, ...args: any[]): void;
+
+  error(message: string, ...args: any[]): void;
+
+  trace(message: string, ...args: any[]): void;
+}

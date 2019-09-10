@@ -15,32 +15,37 @@
  */
 
 import { Browser, LaunchOptions, NavigationOptions, Page, Response } from 'puppeteer';
-import Chromium from 'chrome-aws-lambda';
+import Chrome from 'chrome-aws-lambda';
 import { format, Url } from 'url';
 import { Document, PuppeteerDocument } from '../dom';
 import { Optional } from '../util';
 import { BrowserService, Options } from './browserService';
+import { Logger } from '../util/logger/logger';
+import { getLogger } from '../util/logger';
 
-export class ChromiumBrowserService implements BrowserService {
+export class ChromeBrowserService implements BrowserService {
   /* eslint-disable-next-line */
-  public static async create(options: { [name: string]: any } = {}): Promise<ChromiumBrowserService> {
+  public static async create(options: { [name: string]: any } = {}): Promise<ChromeBrowserService> {
     // TODO: Remove temporary implementation
     const browserPath =
       process.env.NODE_ENV === 'development'
         ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-        : await Chromium.executablePath;
+        : await Chrome.executablePath;
     const defaultOptions: LaunchOptions = {
-      args: Chromium.args,
-      defaultViewport: Chromium.defaultViewport,
+      args: Chrome.args,
+      defaultViewport: Chrome.defaultViewport,
       executablePath: browserPath,
-      headless: Chromium.headless,
+      headless: Chrome.headless,
     };
     const launchOptions: LaunchOptions = { ...defaultOptions, ...options };
-    const browser: Browser = await Chromium.puppeteer.launch(launchOptions);
-    return new ChromiumBrowserService(browser);
+    const browser: Browser = await Chrome.puppeteer.launch(launchOptions);
+    return new ChromeBrowserService(browser);
   }
 
-  public constructor(private readonly browser: Browser) {}
+  public constructor(
+    private readonly browser: Browser,
+    private readonly logger: Logger = getLogger(ChromeBrowserService.name)
+  ) {}
 
   public async fetch(url: Url, options: Options = {}): Promise<Document> {
     const page: Page = await this.browser.newPage();
@@ -56,7 +61,9 @@ export class ChromiumBrowserService implements BrowserService {
     const response: Response = Optional.ofNullable<Response>(
       await page.goto(format(url), navigationOptions)
     ).orElseThrow(() => new Error(`Received no response from ${url}`));
-    console.info(`Received ${response.status()} from ${format(url)}`);
+
+    const { status } = response;
+    this.logger.info('Received %d from %s', status, format(url));
     return PuppeteerDocument.create(page);
   }
 
@@ -67,14 +74,14 @@ export class ChromiumBrowserService implements BrowserService {
       try {
         await page.close();
       } catch (e) {
-        console.warn(`Failed to close a page ${url}`);
+        this.logger.warn('Failed to close a page %s: %s', url, e);
       }
     }
 
     try {
       await this.browser.close();
     } catch (e) {
-      console.warn(`Failed to close a browser`);
+      this.logger.warn('Failed to close a browser: %s', e);
     }
     this.browser.disconnect();
   }

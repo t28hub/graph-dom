@@ -20,6 +20,7 @@
   },
   "rules": {
     "prettier/prettier": "error",
+    "no-console": "error",
     "@typescript-eslint/explicit-member-accessibility": "error",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-inferrable-types": "error",

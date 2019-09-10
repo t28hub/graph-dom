@@ -19,26 +19,29 @@ import { Config, GraphQLResponse } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import { Context, resolvers, typeDefs } from './graphql';
-import { ChromiumBrowserService } from './service/chromiumBrowserService';
+import { ChromeBrowserService } from './service/chromeBrowserService';
 import { RobotsFetcher } from './service/robotsFetcher';
+import { Logger } from './util/logger/logger';
+import { getLogger } from './util/logger';
 
 const app = express();
 
+const logger: Logger = getLogger();
 const config: Config = {
   typeDefs,
   resolvers,
   context: async (): Promise<Context> => {
     const axiosClient: AxiosInstance = axios.create();
     return {
-      browserService: await ChromiumBrowserService.create(),
+      browserService: await ChromeBrowserService.create(),
       robotsFetcher: new RobotsFetcher(axiosClient),
     };
   },
   formatResponse: (response: GraphQLResponse, options: { context: Context }): GraphQLResponse => {
     options.context.browserService
       .close()
-      .then(() => console.info('Browser service is closed'))
-      .catch((cause: Error) => console.warn('Failed to close BrowserService', cause));
+      .then(() => logger.info('Browser service is closed'))
+      .catch((e: Error) => logger.warn('Failed to close BrowserService: %s', e));
     return response;
   },
   playground: true,

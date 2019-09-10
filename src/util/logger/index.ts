@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-import { install } from 'source-map-support';
-import app from './app';
-import { getLogger } from './util/logger';
+import log4js from 'log4js';
+import { Level, Logger as ILogger } from './logger';
+import { Log4jsLogger } from './log4jsLogger';
 
-install();
+const ROOT_LOG_NAME = 'GraphDOM';
 
-const DEFAULT_PORT = 8081;
+type Cache = Map<string, ILogger>;
 
-const port = app.get('port') || DEFAULT_PORT;
-const env = app.get('env');
-app.listen(port, () => {
-  getLogger().info('Application is running at http://localhost:%d in %s mode', port, env);
-});
+const mapCache: Cache = new Map<string, ILogger>();
 
-export default app;
+export function getLogger(name: string = ROOT_LOG_NAME, cache: Cache = mapCache): ILogger {
+  const cached = cache.get(name);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const logger = new Log4jsLogger(log4js.getLogger(name));
+  logger.setLevel(Level.DEBUG);
+  cache.set(name, logger);
+  return logger;
+}
