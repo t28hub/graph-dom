@@ -20,18 +20,8 @@ import { Log4jsLogger } from './log4jsLogger';
 
 const ROOT_LOG_NAME = 'GraphDOM';
 
-type Cache = Map<string, ILogger>;
-
-const mapCache: Cache = new Map<string, ILogger>();
-
-export function getLogger(name: string = ROOT_LOG_NAME, cache: Cache = mapCache): ILogger {
-  const cached = cache.get(name);
-  if (cached !== undefined) {
-    return cached;
-  }
-
+export function getLogger(name: string = ROOT_LOG_NAME): ILogger {
   const logger = new Log4jsLogger(log4js.getLogger(name));
   logger.setLevel(Level.DEBUG);
-  cache.set(name, logger);
   return logger;
 }

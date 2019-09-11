@@ -15,9 +15,9 @@
  */
 
 import axios from 'axios';
+import each from 'jest-each';
 import { parse } from 'url';
 import { RobotsFetcher } from '../../src/service/robotsFetcher';
-import each from 'jest-each';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
