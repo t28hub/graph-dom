@@ -37,13 +37,12 @@ export class Element extends Node<SerializableElement> implements IElement {
 
   public static async create(page: Page, element: ElementHandle): Promise<Element> {
     const properties = await page.evaluate((element: DOMElement): SerializableElement => {
-      const { id, className, classList, baseURI, nodeName, nodeType, nodeValue, textContent } = element;
+      const { id, className, classList, nodeName, nodeType, nodeValue, textContent } = element;
       // When type of element is DOCUMENT_TYPE_NODE, properties of SerializableElement could be missing.
       return {
         id: id || '',
         className: className || '',
         classList: Array.from(classList || []),
-        baseURI,
         nodeName,
         nodeType,
         nodeValue,

@@ -39,9 +39,6 @@ type Element implements Node {
   "The HTML of the element including its content"
   outerHTML: String!
 
-  "The absolute base URL"
-  baseURI: String!
-
   "All of the child elements"
   children: [Element]!
 

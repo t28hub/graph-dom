@@ -20,10 +20,6 @@ import { Node as INode, NodeType, SerializableNode, Visitor } from '../node';
 import { DOMElement, DOMNode } from '../web';
 
 export abstract class Node<T extends SerializableNode> implements INode {
-  public get baseURI(): string {
-    return this.properties.baseURI;
-  }
-
   public get nodeName(): string {
     return this.properties.nodeName;
   }

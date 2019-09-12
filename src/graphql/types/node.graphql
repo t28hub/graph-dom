@@ -18,9 +18,6 @@ DOM Node inherited by DOM API objects
 https://developer.mozilla.org/en-US/docs/Web/API/Node
 """
 interface Node {
-  "The absolute base URL"
-  baseURI: String!
-
   "All of the child elements"
   children: [Node]!
 

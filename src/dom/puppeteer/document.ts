@@ -36,8 +36,8 @@ export class Document extends Node<SerializableDocument> implements IDocument {
     }
 
     const properties = await page.evaluate((document: DOMDocument): SerializableDocument => {
-      const { title, baseURI, nodeName, nodeType, nodeValue, textContent } = document;
-      return { title, baseURI, nodeName, nodeType, nodeValue, textContent };
+      const { title, nodeName, nodeType, nodeValue, textContent } = document;
+      return { title, nodeName, nodeType, nodeValue, textContent };
     }, document);
     return new Document(page, document, properties);
   }

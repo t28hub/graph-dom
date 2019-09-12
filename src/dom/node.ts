@@ -18,7 +18,6 @@ import { Document } from './document';
 import { Element } from './element';
 
 export interface Node {
-  readonly baseURI: string;
   readonly nodeName: string;
   readonly nodeType: NodeType;
   readonly nodeValue: string | null;
@@ -43,7 +42,7 @@ export interface Node {
   previousSibling(): Promise<Node | null>;
 }
 
-export type SerializableNode = Pick<Node, 'baseURI' | 'nodeName' | 'nodeType' | 'nodeValue' | 'textContent'>;
+export type SerializableNode = Pick<Node, 'nodeName' | 'nodeType' | 'nodeValue' | 'textContent'>;
 
 export enum NodeType {
   // noinspection JSUnusedGlobalSymbols

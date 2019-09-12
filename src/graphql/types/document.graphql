@@ -27,9 +27,6 @@ type Document implements Node {
   "The <body> element"
   body: Element
 
-  "The absolute base URL"
-  baseURI: String!
-
   "All of the child elements"
   children: [Element]!
 
