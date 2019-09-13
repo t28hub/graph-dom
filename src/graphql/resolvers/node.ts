@@ -15,23 +15,21 @@
  */
 
 import { IResolverObject } from 'graphql-tools';
-import { Document, Element, Node } from '../../dom';
+import { Node } from '../../dom';
+import { isDocument, isElement } from '../../dom/puppeteer';
 
 type Type = 'Document' | 'Element' | null;
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export const resolver: IResolverObject = {
   __resolveType: (node: Node): Type => {
-    return node.accept<Type>({
-      visitDocument(document: Document): Type {
-        return 'Document';
-      },
-      visitElement(element: Element): Type {
-        return 'Element';
-      },
-      defaultAction(node: Node): Type {
-        return null;
-      },
-    });
+    if (isDocument(node)) {
+      return 'Document';
+    }
+    if (isElement(node)) {
+      return 'Element';
+    }
+    // TODO: Return strict node type such as DOCUMENT_TYPE_NODE
+    return 'Element';
   },
 };

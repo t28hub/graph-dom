@@ -17,7 +17,8 @@
 import { Browser, LaunchOptions, NavigationOptions, Page, Response } from 'puppeteer';
 import Chrome from 'chrome-aws-lambda';
 import { format, Url } from 'url';
-import { Document, PuppeteerDocument } from '../dom';
+import { Document } from '../dom';
+import { createDocument } from '../dom/puppeteer';
 import { Optional } from '../util';
 import { BrowserService, Options } from './browserService';
 import { Logger } from '../util/logger/logger';
@@ -64,7 +65,7 @@ export class ChromeBrowserService implements BrowserService {
 
     const { status } = response;
     this.logger.info('Received %d from %s', status, format(url));
-    return PuppeteerDocument.create(page);
+    return await createDocument(page);
   }
 
   public async close(): Promise<void> {

@@ -16,21 +16,22 @@
 
 import { Element } from './element';
 import { Node, SerializableNode } from './node';
+import { Optional } from '../util';
 
 export interface Document extends Node {
   readonly title: string;
 
-  head(): Promise<Element | null>;
+  head(): Promise<Optional<Element>>;
 
-  body(): Promise<Element | null>;
+  body(): Promise<Optional<Element>>;
 
-  getElementById(id: string): Promise<Element | null>;
+  getElementById(id: string): Promise<Optional<Element>>;
 
   getElementsByClassName(name: string): Promise<Array<Element>>;
 
   getElementsByTagName(name: string): Promise<Array<Element>>;
 
-  querySelector(selector: string): Promise<Element | null>;
+  querySelector(selector: string): Promise<Optional<Element>>;
 
   querySelectorAll(selector: string): Promise<Array<Element>>;
 }

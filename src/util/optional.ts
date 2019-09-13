@@ -76,12 +76,12 @@ export class Optional<T> {
     });
   }
 
-  public orElse(other: T): T {
-    return this.visit<T>({
+  public orElse(other: T | null): T | null {
+    return this.visit<T | null>({
       visitValue(value: T): T {
         return value;
       },
-      visitUndefined(): T {
+      visitUndefined(): T | null {
         return other;
       },
     });

@@ -17,6 +17,7 @@
 import { Attribute } from './attribute';
 import { Data } from './data';
 import { Node, SerializableNode } from './node';
+import { Optional } from '../util';
 
 export interface Element extends Node {
   readonly id: string;
@@ -31,13 +32,13 @@ export interface Element extends Node {
 
   outerHTML(): Promise<string>;
 
-  getAttribute(name: string): Promise<string | null>;
+  getAttribute(name: string): Promise<Optional<string>>;
 
   getElementsByClassName(name: string): Promise<Array<Element>>;
 
   getElementsByTagName(name: string): Promise<Array<Element>>;
 
-  querySelector(selector: string): Promise<Element | null>;
+  querySelector(selector: string): Promise<Optional<Element>>;
 
   querySelectorAll(selector: string): Promise<Array<Element>>;
 }

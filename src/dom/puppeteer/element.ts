@@ -19,8 +19,8 @@ import { Attribute } from '../attribute';
 import { DOMElement } from '../web';
 import { Data } from '../data';
 import { Element as IElement, SerializableElement } from '../element';
-import { Visitor } from '../node';
 import { Node } from './node';
+import { Optional } from '../../util';
 
 export class Element extends Node<SerializableElement> implements IElement {
   public get id(): string {
@@ -35,24 +35,7 @@ export class Element extends Node<SerializableElement> implements IElement {
     return this.properties.classList;
   }
 
-  public static async create(page: Page, element: ElementHandle): Promise<Element> {
-    const properties = await page.evaluate((element: DOMElement): SerializableElement => {
-      const { id, className, classList, nodeName, nodeType, nodeValue, textContent } = element;
-      // When type of element is DOCUMENT_TYPE_NODE, properties of SerializableElement could be missing.
-      return {
-        id: id || '',
-        className: className || '',
-        classList: Array.from(classList || []),
-        nodeName,
-        nodeType,
-        nodeValue,
-        textContent,
-      };
-    }, element);
-    return new Element(page, element, properties);
-  }
-
-  private constructor(page: Page, element: ElementHandle, properties: SerializableElement) {
+  public constructor(page: Page, element: ElementHandle, properties: SerializableElement) {
     super(page, element, properties);
   }
 
@@ -102,15 +85,16 @@ export class Element extends Node<SerializableElement> implements IElement {
     return await page.evaluate((element: DOMElement): string => element.outerHTML, element);
   }
 
-  public async getAttribute(name: string): Promise<string | null> {
+  public async getAttribute(name: string): Promise<Optional<string>> {
     const { page, element } = this;
-    return await page.evaluate(
+    const attribute = await page.evaluate(
       (element: DOMElement, name: string): string | null => {
         return element.getAttribute(name);
       },
       element,
       name
     );
+    return Optional.ofNullable(attribute);
   }
 
   public async getElementsByClassName(name: string): Promise<Array<IElement>> {
@@ -121,19 +105,11 @@ export class Element extends Node<SerializableElement> implements IElement {
     return super.getElementsByTagName(name);
   }
 
-  public async querySelector(selector: string): Promise<IElement | null> {
+  public async querySelector(selector: string): Promise<Optional<IElement>> {
     return super.querySelector(selector);
   }
 
   public async querySelectorAll(selector: string): Promise<Array<IElement>> {
     return super.querySelectorAll(selector);
-  }
-
-  public accept<T>(visitor: Visitor<T>): T {
-    return visitor.visitElement(this);
-  }
-
-  protected async createElement(page: Page, element: ElementHandle): Promise<Element> {
-    return Element.create(page, element);
   }
 }

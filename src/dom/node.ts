@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Document } from './document';
 import { Element } from './element';
+import { Optional } from '../util';
 
 export interface Node {
   readonly nodeName: string;
@@ -23,23 +23,21 @@ export interface Node {
   readonly nodeValue: string | null;
   readonly textContent: string | null;
 
-  accept<R>(visitor: Visitor<R>): R;
-
   children(): Promise<Array<Node>>;
 
   childNodes(): Promise<Array<Node>>;
 
-  firstChild(): Promise<Node | null>;
+  firstChild(): Promise<Optional<Node>>;
 
-  lastChild(): Promise<Node | null>;
+  lastChild(): Promise<Optional<Node>>;
 
-  parentNode(): Promise<Node | null>;
+  parentNode(): Promise<Optional<Node>>;
 
-  parentElement(): Promise<Element | null>;
+  parentElement(): Promise<Optional<Element>>;
 
-  nextSibling(): Promise<Node | null>;
+  nextSibling(): Promise<Optional<Node>>;
 
-  previousSibling(): Promise<Node | null>;
+  previousSibling(): Promise<Optional<Node>>;
 }
 
 export type SerializableNode = Pick<Node, 'nodeName' | 'nodeType' | 'nodeValue' | 'textContent'>;
@@ -58,12 +56,4 @@ export enum NodeType {
   DOCUMENT_TYPE_NODE,
   DOCUMENT_FRAGMENT_NODE,
   NOTATION_NODE,
-}
-
-export interface Visitor<T> {
-  visitElement(element: Element): T;
-
-  visitDocument(document: Document): T;
-
-  defaultAction(node: Node): T;
 }

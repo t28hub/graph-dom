@@ -31,22 +31,28 @@ export const resolver: IResolverObject = {
     return element.childNodes();
   },
   firstChild: async (element: Element): Promise<Node | null> => {
-    return element.firstChild();
+    const firstChild = await element.firstChild();
+    return firstChild.orElse(null);
   },
   lastChild: async (element: Element): Promise<Node | null> => {
-    return element.lastChild();
+    const lastChild = await element.lastChild();
+    return lastChild.orElse(null);
   },
   nextSibling: async (element: Element): Promise<Node | null> => {
-    return element.nextSibling();
+    const nextSibling = await element.nextSibling();
+    return nextSibling.orElse(null);
   },
   previousSibling: async (element: Element): Promise<Node | null> => {
-    return element.previousSibling();
+    const previousSibling = await element.previousSibling();
+    return previousSibling.orElse(null);
   },
   parentElement: async (element: Element): Promise<Element | null> => {
-    return element.parentElement();
+    const parentElement = await element.parentElement();
+    return parentElement.orElse(null);
   },
   parentNode: async (element: Element): Promise<Node | null> => {
-    return element.parentNode();
+    const parentNode = await element.parentNode();
+    return parentNode.orElse(null);
   },
   dataset: async (element: Element): Promise<Array<Data>> => {
     return element.dataset();
@@ -63,7 +69,8 @@ export const resolver: IResolverObject = {
   },
   getAttribute: async (element: Element, args: { name: string }): Promise<string | null> => {
     const { name } = args;
-    return element.getAttribute(name);
+    const attribute = await element.getAttribute(name);
+    return attribute.orElse(null);
   },
   getElementsByClassName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
@@ -75,7 +82,8 @@ export const resolver: IResolverObject = {
   },
   querySelector: async (element: Element, args: { selector: string }): Promise<Element | null> => {
     const { selector } = args;
-    return await element.querySelector(selector);
+    const selected = await element.querySelector(selector);
+    return selected.orElse(null);
   },
   querySelectorAll: async (element: Element, args: { selector: string }): Promise<Array<Element>> => {
     const { selector } = args;

@@ -19,10 +19,12 @@ import { Document, Element, Node, NodeType } from '../../dom';
 
 export const resolver: IResolverObject = {
   head: async (document: Document): Promise<Element | null> => {
-    return document.head();
+    const head = await document.head();
+    return head.orElse(null);
   },
   body: async (document: Document): Promise<Element | null> => {
-    return document.body();
+    const body = await document.body();
+    return body.orElse(null);
   },
   children: async (document: Document): Promise<Array<Node>> => {
     return document.children();
@@ -31,22 +33,28 @@ export const resolver: IResolverObject = {
     return document.childNodes();
   },
   firstChild: async (document: Document): Promise<Node | null> => {
-    return document.firstChild();
+    const firstChild = await document.firstChild();
+    return firstChild.orElse(null);
   },
   lastChild: async (document: Document): Promise<Node | null> => {
-    return document.lastChild();
+    const lastChild = await document.lastChild();
+    return lastChild.orElse(null);
   },
   nextSibling: async (document: Document): Promise<Node | null> => {
-    return document.nextSibling();
+    const nextSibling = await document.nextSibling();
+    return nextSibling.orElse(null);
   },
   previousSibling: async (document: Document): Promise<Node | null> => {
-    return document.previousSibling();
+    const previousSibling = await document.previousSibling();
+    return previousSibling.orElse(null);
   },
   parentElement: async (document: Document): Promise<Element | null> => {
-    return document.parentElement();
+    const parentElement = await document.parentElement();
+    return parentElement.orElse(null);
   },
   parentNode: async (document: Document): Promise<Node | null> => {
-    return document.parentNode();
+    const parentNode = await document.parentNode();
+    return parentNode.orElse(null);
   },
   nodeType: (document: Document): string => {
     const { nodeType } = document;
@@ -54,7 +62,8 @@ export const resolver: IResolverObject = {
   },
   getElementById: async (document: Document, args: { id: string }): Promise<Element | null> => {
     const { id } = args;
-    return document.getElementById(id);
+    const element = await document.getElementById(id);
+    return element.orElse(null);
   },
   getElementsByClassName: async (document: Document, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
@@ -66,7 +75,8 @@ export const resolver: IResolverObject = {
   },
   querySelector: async (document: Document, args: { selector: string }): Promise<Element | null> => {
     const { selector } = args;
-    return document.querySelector(selector);
+    const selected = await document.querySelector(selector);
+    return selected.orElse(null);
   },
   querySelectorAll: async (document: Document, args: { selector: string }): Promise<Array<Element>> => {
     const { selector } = args;

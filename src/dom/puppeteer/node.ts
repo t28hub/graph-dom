@@ -15,8 +15,10 @@
  */
 
 import { ElementHandle, JSHandle, Page } from 'puppeteer';
+import { create, isElement } from './';
 import { Element as IElement } from '../element';
-import { Node as INode, NodeType, SerializableNode, Visitor } from '../node';
+import { Node as INode, NodeType, SerializableNode } from '../node';
+import { Optional } from '../../util';
 import { DOMElement, DOMNode } from '../web';
 
 export abstract class Node<T extends SerializableNode> implements INode {
@@ -46,71 +48,75 @@ export abstract class Node<T extends SerializableNode> implements INode {
     this.properties = properties;
   }
 
-  public async children(): Promise<Array<IElement>> {
+  public async children(): Promise<Array<INode>> {
     const { page, element } = this;
     const collection = await page.evaluateHandle((element: DOMElement): HTMLCollection => {
       return element.children;
     }, element);
-    return this.toElements(collection);
+    return this.toNodeArray(collection);
   }
 
-  public async childNodes(): Promise<Array<IElement>> {
+  public async childNodes(): Promise<Array<INode>> {
     const { page, element } = this;
     const collection = await page.evaluateHandle((element: DOMElement): NodeListOf<ChildNode> => {
       return element.childNodes;
     }, element);
-    return this.toElements(collection);
+    return this.toNodeArray(collection);
   }
 
-  public async firstChild(): Promise<IElement | null> {
+  public async firstChild(): Promise<Optional<INode>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.firstChild;
     }, element);
-    return handle !== null ? this.toElement(handle) : null;
+    return this.toNode(handle);
   }
 
-  public async lastChild(): Promise<IElement | null> {
+  public async lastChild(): Promise<Optional<INode>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.lastChild;
     }, element);
-    return handle !== null ? this.toElement(handle) : null;
+    return this.toNode(handle);
   }
 
-  public async nextSibling(): Promise<IElement | null> {
+  public async nextSibling(): Promise<Optional<INode>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.nextSibling;
     }, element);
-    return handle !== null ? this.toElement(handle) : null;
+    return this.toNode(handle);
   }
 
-  public async previousSibling(): Promise<IElement | null> {
+  public async previousSibling(): Promise<Optional<INode>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.previousSibling;
     }, element);
-    return handle !== null ? this.toElement(handle) : null;
+    return this.toNode(handle);
   }
 
-  public async parentElement(): Promise<IElement | null> {
+  public async parentElement(): Promise<Optional<IElement>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.parentElement;
     }, element);
-    return handle !== null ? this.toElement(handle) : null;
+
+    const optionalNode = await this.toNode(handle);
+    if (!optionalNode.isPresent()) {
+      return Optional.empty();
+    }
+    const node = optionalNode.get();
+    return Optional.ofNullable(isElement(node) ? node : null);
   }
 
-  public async parentNode(): Promise<IElement | null> {
+  public async parentNode(): Promise<Optional<INode>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle((element: DOMElement): DOMNode | null => {
       return element.parentNode;
     }, element);
-    return handle !== null ? this.toElement(handle) : null;
+    return this.toNode(handle);
   }
-
-  public abstract accept<R>(visitor: Visitor<R>): R;
 
   protected async getElementsByClassName(name: string): Promise<Array<IElement>> {
     const { page, element } = this;
@@ -121,7 +127,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
       element,
       name
     );
-    return this.toElements(collection);
+    return this.toElementArray(collection);
   }
 
   protected async getElementsByTagName(name: string): Promise<Array<IElement>> {
@@ -133,13 +139,13 @@ export abstract class Node<T extends SerializableNode> implements INode {
       element,
       name
     );
-    return this.toElements(collection);
+    return this.toElementArray(collection);
   }
 
-  protected async querySelector(selector: string): Promise<IElement | null> {
-    const { page, element } = this;
+  protected async querySelector(selector: string): Promise<Optional<IElement>> {
+    const { element } = this;
     const found = await element.$(selector);
-    return found === null ? null : await this.createElement(page, found);
+    return this.toElement(found);
   }
 
   protected async querySelectorAll(selector: string): Promise<Array<IElement>> {
@@ -147,33 +153,61 @@ export abstract class Node<T extends SerializableNode> implements INode {
     const found: ElementHandle<DOMElement>[] = await element.$$(selector);
     const promises: Promise<IElement>[] = found.map(
       async (element: ElementHandle): Promise<IElement> => {
-        return await this.createElement(page, element);
+        const node = await Node.create(page, element);
+        if (isElement(node)) {
+          return node;
+        }
+        throw new Error();
       }
     );
     return Promise.all(promises);
   }
 
-  protected async toElement(handle: JSHandle): Promise<IElement | null> {
+  protected async toNode(handle: JSHandle | null): Promise<Optional<INode>> {
+    if (handle === null) {
+      return Optional.empty();
+    }
+
     const element = handle.asElement();
-    return element === null ? null : await this.createElement(this.page, element);
+    if (element === null) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(await Node.create(this.page, element));
   }
 
-  protected async toElements(collection: JSHandle): Promise<Array<IElement>> {
+  protected async toNodeArray(collection: JSHandle): Promise<Array<INode>> {
     const properties = await collection.getProperties();
-    const promises = Array.from(properties.values())
-      .map((handle: JSHandle): ElementHandle | null => handle.asElement())
-      .filter((element: ElementHandle | null): boolean => element !== null)
-      .map(
-        async (element: ElementHandle | null): Promise<IElement> => {
-          if (element === null) {
-            throw new Error();
-          }
-          return await this.createElement(this.page, element);
-        }
-      );
+    const promises = Array.from(properties.values()).map(
+      async (handle: JSHandle): Promise<INode> => {
+        const node = await this.toNode(handle);
+        return node.orElseThrow(() => new Error('Node does not exist'));
+      }
+    );
     return Promise.all(promises);
   }
 
-  // Avoid circular dependency between Node, Document and Element
-  protected abstract async createElement(page: Page, element: ElementHandle): Promise<IElement>;
+  protected async toElement(handle: JSHandle | null): Promise<Optional<IElement>> {
+    const optionalNode = await this.toNode(handle);
+    if (!optionalNode.isPresent()) {
+      return Optional.empty();
+    }
+
+    const node = optionalNode.get();
+    return Optional.ofNullable(isElement(node) ? node : null);
+  }
+
+  protected async toElementArray(collection: JSHandle): Promise<Array<IElement>> {
+    const properties = await collection.getProperties();
+    const promises = Array.from(properties.values()).map(
+      async (handle: JSHandle): Promise<IElement> => {
+        const node = await this.toElement(handle);
+        return node.orElseThrow(() => new Error('Element does not exist'));
+      }
+    );
+    return Promise.all(promises);
+  }
+
+  protected static async create(page: Page, element: ElementHandle): Promise<INode> {
+    return await create(page, element);
+  }
 }
