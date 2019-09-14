@@ -18,6 +18,7 @@ import axios, { AxiosInstance } from 'axios';
 import { Config, GraphQLResponse } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
+import helmet from 'helmet';
 import { Context, resolvers, typeDefs } from './graphql';
 import { ChromeBrowserService } from './service/chromeBrowserService';
 import { RobotsFetcher } from './service/robotsFetcher';
@@ -25,8 +26,18 @@ import { Logger } from './util/logger/logger';
 import { getLogger } from './util/logger';
 
 const app = express();
+app.use(
+  helmet({
+    frameguard: {
+      action: 'deny',
+    },
+    hidePoweredBy: true,
+    hsts: true,
+    noSniff: true,
+    xssFilter: true,
+  })
+);
 
-const logger: Logger = getLogger();
 const config: Config = {
   typeDefs,
   resolvers,
@@ -38,6 +49,7 @@ const config: Config = {
     };
   },
   formatResponse: (response: GraphQLResponse, options: { context: Context }): GraphQLResponse => {
+    const logger: Logger = getLogger();
     options.context.browserService
       .close()
       .then(() => logger.info('Browser service is closed'))
