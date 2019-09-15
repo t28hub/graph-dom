@@ -19,12 +19,14 @@ import { Config, GraphQLResponse } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import helmet from 'helmet';
-import { Context } from './graphql/context';
+import { Context, DataSources } from './graphql/context';
 import { schema } from './graphql/schama';
 import { ChromeBrowserService } from './service/chromeBrowserService';
-import { RobotsFetcher } from './service/robotsFetcher';
+import { RobotsTxtFetcher } from './service/robotsTxtFetcher';
 import { Logger } from './util/logger/logger';
 import { getLogger } from './util/logger';
+import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
+import { puppeteer } from 'chrome-aws-lambda';
 
 const app = express();
 app.use(
@@ -41,19 +43,35 @@ app.use(
 
 const config: Config = {
   schema,
-  context: async (): Promise<Context> => {
-    const axiosClient: AxiosInstance = axios.create();
-    return {
-      browserService: await ChromeBrowserService.create(),
-      robotsFetcher: new RobotsFetcher(axiosClient),
+  dataSources: (): DataSources => {
+    const browserOptions = {
+      browserPath:
+        process.env.NODE_ENV !== 'production'
+          ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+          : puppeteer.executablePath(),
+      headless: process.env.NODE_ENV !== 'production',
     };
+    const browserService = new ChromeBrowserService(browserOptions);
+    const axiosClient: AxiosInstance = axios.create();
+    const robotsFetcher = new RobotsTxtFetcher(axiosClient);
+    return {
+      browser: new BrowserDataSource(browserService, robotsFetcher),
+    };
+  },
+  context: (): Partial<Context> => {
+    return {};
   },
   formatResponse: (response: GraphQLResponse, options: { context: Context }): GraphQLResponse => {
     const logger: Logger = getLogger();
-    options.context.browserService
+    const { browser } = options.context.dataSources;
+    browser
       .close()
-      .then(() => logger.info('Browser service is closed'))
-      .catch((e: Error) => logger.warn('Failed to close BrowserService: %s', e));
+      .then(() => {
+        logger.info('Browser is closed');
+      })
+      .catch((e: Error) => {
+        logger.info('Failed to close browser: %s', e);
+      });
     return response;
   },
   playground: true,

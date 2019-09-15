@@ -24,11 +24,7 @@ export const resolver: IResolverObject = {
   page: async (parent: any, args: { url: string }, context: Context): Promise<Document> => {
     const { url } = args;
     const parsed = parse(url);
-    const { robotsFetcher, browserService } = context;
-    const robotsTxt = await robotsFetcher.fetch(parsed);
-    if (!robotsTxt.isAllowed(parsed)) {
-      throw new Error('Specified URL is not allowed to fetch');
-    }
-    return await browserService.fetch(parsed);
+    const { browser } = context.dataSources;
+    return await browser.fetch(parsed);
   },
 };

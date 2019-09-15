@@ -17,13 +17,21 @@
 import { Url } from 'url';
 import { Document } from '../dom';
 
-export type Options = Partial<{
-  timeout: number;
-  userAgent: string;
-}>;
+export interface Options {
+  readonly browserPath: string;
+  readonly headless: boolean;
+}
+
+export type WaitUntil = 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';
+
+export interface OpenOptions {
+  readonly timeout: number;
+  readonly userAgent: string;
+  readonly waitUntil: WaitUntil;
+}
 
 export interface BrowserService {
-  fetch(url: Url, options?: Options): Promise<Document>;
+  open(url: Url, options?: Partial<OpenOptions>): Promise<Document>;
 
-  close(): Promise<void>;
+  dispose(): Promise<void>;
 }

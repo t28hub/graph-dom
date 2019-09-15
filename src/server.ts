@@ -21,11 +21,8 @@ import { getLogger } from './util/logger';
 install();
 
 const DEFAULT_PORT = 8081;
-
 const port = app.get('port') || DEFAULT_PORT;
 const env = app.get('env');
 app.listen(port, () => {
   getLogger().info('Application is running at http://localhost:%d in %s mode', port, env);
 });
-
-export default app;
