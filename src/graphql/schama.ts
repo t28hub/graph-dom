@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-import { DocumentNode } from 'graphql';
-import { IResolvers } from 'graphql-tools';
+import { GraphQLSchema } from 'graphql';
+import { IResolvers, ITypeDefinitions, makeExecutableSchema } from 'graphql-tools';
 import { resolver as queryResolver } from './resolvers/query';
 import { resolver as nodeResolver } from './resolvers/node';
 import { resolver as documentResolver } from './resolvers/document';
 import { resolver as elementResolver } from './resolvers/element';
-import schema from './types/schema.graphql';
+import attribute from './typeDefs/attribute';
+import data from './typeDefs/data';
+import document from './typeDefs/document';
+import element from './typeDefs/element';
+import node from './typeDefs/node';
+import query from './typeDefs/query';
 
-export { Context } from './context';
-export const typeDefs: DocumentNode = schema;
+const typeDefs: ITypeDefinitions = [attribute, data, document, element, node, query];
 
-export const resolvers: IResolvers = {
+const resolvers: IResolvers = {
   Query: queryResolver,
   Node: nodeResolver,
   Document: documentResolver,
   Element: elementResolver,
 };
+
+export const schema: GraphQLSchema = makeExecutableSchema({ typeDefs, resolvers });

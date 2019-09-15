@@ -1,17 +1,19 @@
 {
   "name": "graph-dom",
   "version": 2,
-  "env": {},
+  "env": {
+    "NODE_ENV": "production"
+  },
   "builds": [
     {
-      "src": "dist/server.js",
+      "src": "dist/src/server.js",
       "use": "@now/node"
     }
   ],
   "routes": [
     {
       "src": "/.*",
-      "dest": "dist/server.js"
+      "dest": "dist/src/server.js"
     }
   ]
 }

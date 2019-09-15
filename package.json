@@ -16,13 +16,16 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "npx now dev --debug",
+    "prestart": "yarn build",
     "lint": "yarn lint:eslint && yarn lint:prettier",
     "lint:eslint": "npx eslint 'src/**/*.ts'",
     "lint:prettier": "npx prettier --check '*.{js,json,ts}'",
     "test": "npx jest",
     "clean": "npx rimraf dist reports yarn-error.log",
-    "build": "npx webpack --mode production --progress",
-    "watch": "npx webpack --mode development --progress --watch"
+    "build": "npx tsc",
+    "watch": "npx tsc --watch",
+    "deploy": "npx now",
+    "predeploy": "yarn clean && yarn build"
   },
   "husky": {
     "hooks": {
@@ -49,8 +52,6 @@
     "@types/node": "^12.7.2",
     "@types/puppeteer-core": "^1.9.0",
     "@types/source-map-support": "^0.5.0",
-    "@types/webpack": "^4.32.2",
-    "@types/webpack-node-externals": "^1.6.3",
     "@typescript-eslint/eslint-plugin": "^2.1.0",
     "@typescript-eslint/parser": "^2.1.0",
     "eslint": "^6.3.0",
@@ -67,10 +68,7 @@
     "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.4",
     "ts-node": "^8.3.0",
-    "typescript": "^3.5.3",
-    "webpack": "^4.39.2",
-    "webpack-cli": "^3.3.6",
-    "webpack-node-externals": "^1.7.2"
+    "typescript": "^3.5.3"
   },
   "optionalDependencies": {
     "iltorb": "^2.4.3"

@@ -19,7 +19,8 @@ import { Config, GraphQLResponse } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import helmet from 'helmet';
-import { Context, resolvers, typeDefs } from './graphql';
+import { Context } from './graphql/context';
+import { schema } from './graphql/schama';
 import { ChromeBrowserService } from './service/chromeBrowserService';
 import { RobotsFetcher } from './service/robotsFetcher';
 import { Logger } from './util/logger/logger';
@@ -39,8 +40,7 @@ app.use(
 );
 
 const config: Config = {
-  typeDefs,
-  resolvers,
+  schema,
   context: async (): Promise<Context> => {
     const axiosClient: AxiosInstance = axios.create();
     return {
