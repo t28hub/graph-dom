@@ -19,13 +19,12 @@ import { Config, GraphQLResponse } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import helmet from 'helmet';
-import { Context, DataSources } from './graphql/context';
+import { Context } from './graphql/context';
 import { schema } from './graphql/schama';
 import { ChromeBrowserService } from './service/chromeBrowserService';
-import { RobotsTxtFetcher } from './service/robotsTxtFetcher';
+import { RobotsFetcher } from './service/robotsFetcher';
 import { Logger } from './util/logger/logger';
 import { getLogger } from './util/logger';
-import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
 import { getConfig, Mode } from './config';
 
 const app = express();
@@ -45,29 +44,19 @@ const config = getConfig();
 
 const serverConfig: Config = {
   schema,
-  dataSources: (): DataSources => {
-    const { path, headless } = config.browser;
-    const browserService = new ChromeBrowserService({ path, headless });
+  context: async (): Promise<Context> => {
     const axiosClient: AxiosInstance = axios.create();
-    const robotsFetcher = new RobotsTxtFetcher(axiosClient);
     return {
-      browser: new BrowserDataSource(browserService, robotsFetcher),
+      browserService: await ChromeBrowserService.create(),
+      robotsFetcher: new RobotsFetcher(axiosClient),
     };
-  },
-  context: (): Partial<Context> => {
-    return {};
   },
   formatResponse: (response: GraphQLResponse, options: { context: Context }): GraphQLResponse => {
     const logger: Logger = getLogger();
-    const { browser } = options.context.dataSources;
-    browser
+    options.context.browserService
       .close()
-      .then(() => {
-        logger.info('Browser is closed');
-      })
-      .catch((e: Error) => {
-        logger.info('Failed to close browser: %s', e);
-      });
+      .then(() => logger.info('Browser service is closed'))
+      .catch((e: Error) => logger.warn('Failed to close BrowserService: %s', e));
     return response;
   },
   playground: config.mode === Mode.DEVELOPMENT,

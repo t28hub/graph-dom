@@ -17,14 +17,14 @@
 import axios from 'axios';
 import each from 'jest-each';
 import { parse } from 'url';
-import { RobotsTxtFetcher } from '../../src/service/robotsTxtFetcher';
+import { RobotsFetcher } from '../../src/service/robotsFetcher';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('RobotsFetcher', () => {
   describe('fetch', () => {
-    const fetcher = new RobotsTxtFetcher(axios);
+    const fetcher = new RobotsFetcher(axios);
 
     each([
       'https://example.com',

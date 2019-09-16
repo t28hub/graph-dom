@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { BrowserDataSource } from './dataSources/browserDataSource';
-
-export type DataSources = {
-  readonly browser: BrowserDataSource;
-};
+import { BrowserService } from '../service/browserService';
+import { RobotsFetcher } from '../service/robotsFetcher';
 
 export interface Context {
-  readonly dataSources: DataSources;
+  readonly browserService: BrowserService;
+  readonly robotsFetcher: RobotsFetcher;
 }

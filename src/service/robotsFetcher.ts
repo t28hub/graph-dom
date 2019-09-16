@@ -22,14 +22,14 @@ import { getLogger } from '../util/logger';
 
 const STATUS_CODE_OK = 200;
 
-export class RobotsTxtFetcher {
+export class RobotsFetcher {
   public constructor(
     private readonly axios: AxiosInstance,
-    private readonly logger: Logger = getLogger(RobotsTxtFetcher.name)
+    private readonly logger: Logger = getLogger(RobotsFetcher.name)
   ) {}
 
   public async fetch(url: Url): Promise<RobotsTxt> {
-    const robotsUrl: string = RobotsTxtFetcher.buildRobotsUrl(url);
+    const robotsUrl: string = RobotsFetcher.buildRobotsUrl(url);
     this.logger.info('Fetching robots.txt file from %s', robotsUrl);
 
     const response: AxiosResponse<string> = await this.fetchText(robotsUrl);
