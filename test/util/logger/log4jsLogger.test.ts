@@ -15,8 +15,8 @@
  */
 
 import log4js from 'log4js';
-import { Level } from '../../../src/util/logger/logger';
 import { Log4jsLogger } from '../../../src/util/logger/log4jsLogger';
+import { Level } from '../../../src/util/logger/level';
 
 describe('Log4jsLogger', () => {
   describe('debug', () => {

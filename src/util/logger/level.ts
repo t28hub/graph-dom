@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-export interface Logger {
-  debug(message: string, ...args: any[]): void;
-
-  info(message: string, ...args: any[]): void;
-
-  warn(message: string, ...args: any[]): void;
-
-  error(message: string, ...args: any[]): void;
-
-  trace(message: string, ...args: any[]): void;
+export enum Level {
+  DEBUG,
+  INFO,
+  WARN,
+  ERROR,
+  TRACE,
 }

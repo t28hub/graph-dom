@@ -2,7 +2,8 @@
   "name": "graph-dom",
   "version": 2,
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "GRAPH_DOM_BROWSER_HEADLESS": "true"
   },
   "builds": [
     {

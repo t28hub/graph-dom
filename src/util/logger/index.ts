@@ -15,8 +15,9 @@
  */
 
 import log4js from 'log4js';
-import { Level, Logger as ILogger } from './logger';
+import { Logger as ILogger } from './logger';
 import { Log4jsLogger } from './log4jsLogger';
+import { Level } from './level';
 
 const ROOT_LOG_NAME = 'GraphDOM';
 

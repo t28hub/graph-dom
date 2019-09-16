@@ -15,7 +15,8 @@
  */
 
 import log4js, { Levels, Logger } from 'log4js';
-import { Level, Logger as ILogger } from './logger';
+import { Logger as ILogger } from './logger';
+import { Level } from './level';
 
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 export class Log4jsLogger implements ILogger {

@@ -23,7 +23,12 @@
     "no-console": "error",
     "@typescript-eslint/explicit-member-accessibility": "error",
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/no-inferrable-types": "error",
+    "@typescript-eslint/no-inferrable-types": [
+      "error",
+      {
+        "ignoreParameters": true
+      }
+    ],
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/no-magic-numbers": [
       "error",

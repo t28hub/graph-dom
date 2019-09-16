@@ -1,6 +1,14 @@
 # GraphDOM [![CircleCI Build Status](https://circleci.com/gh/t28hub/graph-dom/tree/master.svg?style=shield&circle-token=af937781f52f3988d85743c0c65dac4602660765)](https://circleci.com/gh/t28hub/graph-dom/tree/master)
 Web scraping and DOM traversing API with GraphQL.
 
+## Environment Variables
+| Name | Description | Value |
+|:---|:---|:---|
+| `NODE_ENV` | Application mode. | development or production |
+| `GRAPH_DOM_BROWSER_PATH` | Path to browser executable. | \- |
+| `GRAPH_DOM_BROWSER_HEADLESS` | Whether to run browser in headless mode or not. | true or false |
+
+
 ## License
 ```
 Copyright 2019 Tatsuya Maki

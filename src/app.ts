@@ -26,7 +26,7 @@ import { RobotsTxtFetcher } from './service/robotsTxtFetcher';
 import { Logger } from './util/logger/logger';
 import { getLogger } from './util/logger';
 import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
-import { puppeteer } from 'chrome-aws-lambda';
+import { getConfig, Mode } from './config';
 
 const app = express();
 app.use(
@@ -41,17 +41,13 @@ app.use(
   })
 );
 
-const config: Config = {
+const config = getConfig();
+
+const serverConfig: Config = {
   schema,
   dataSources: (): DataSources => {
-    const browserOptions = {
-      browserPath:
-        process.env.NODE_ENV !== 'production'
-          ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-          : puppeteer.executablePath(),
-      headless: process.env.NODE_ENV !== 'production',
-    };
-    const browserService = new ChromeBrowserService(browserOptions);
+    const { path, headless } = config.browser;
+    const browserService = new ChromeBrowserService({ path, headless });
     const axiosClient: AxiosInstance = axios.create();
     const robotsFetcher = new RobotsTxtFetcher(axiosClient);
     return {
@@ -74,10 +70,11 @@ const config: Config = {
       });
     return response;
   },
-  playground: true,
-  tracing: true,
+  playground: config.mode === Mode.DEVELOPMENT,
+  tracing: config.mode === Mode.DEVELOPMENT,
+  debug: config.mode === Mode.DEVELOPMENT,
 };
-const server = new ApolloServer(config);
+const server = new ApolloServer(serverConfig);
 server.applyMiddleware({ app });
 
 export default app;

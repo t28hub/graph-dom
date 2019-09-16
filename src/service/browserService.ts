@@ -18,7 +18,7 @@ import { Url } from 'url';
 import { Document } from '../dom';
 
 export interface Options {
-  readonly browserPath: string;
+  readonly path: string;
   readonly headless: boolean;
 }
 

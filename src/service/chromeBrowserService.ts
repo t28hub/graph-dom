@@ -61,11 +61,11 @@ export class ChromeBrowserService implements BrowserService {
       return this.browser;
     }
 
-    const { browserPath, headless } = this.options;
+    const { path: executablePath, headless } = this.options;
     const options: LaunchOptions = {
       args: Chrome.args,
       defaultViewport: Chrome.defaultViewport,
-      executablePath: browserPath,
+      executablePath,
       headless,
     };
     const browser = await Chrome.puppeteer.launch(options);
