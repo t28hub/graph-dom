@@ -3,6 +3,7 @@
   "version": 2,
   "env": {
     "NODE_ENV": "production",
+    "GRAPH_DOM_SERVER_PORT": "3000",
     "GRAPH_DOM_BROWSER_HEADLESS": "true"
   },
   "builds": [

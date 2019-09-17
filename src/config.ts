@@ -24,6 +24,9 @@ export enum Mode {
 
 export interface Config {
   readonly mode: Mode;
+  readonly server: {
+    readonly port: number;
+  };
   readonly browser: {
     readonly path: string;
     readonly headless: boolean;
@@ -61,6 +64,22 @@ function parseBoolean(value: string | undefined, defaultValue: boolean): boolean
   }
 }
 
+function parseNumber(value: string | undefined, defaultValue: number): number {
+  if (!value) {
+    return defaultValue;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (typeof parsed !== 'number') {
+      return defaultValue;
+    }
+    return parsed;
+  } catch (e) {
+    throw new TypeError(`Invalid number value: ${value}`);
+  }
+}
+
 function parseMode(value: string | undefined, defaultValue: Mode = Mode.DEVELOPMENT): Mode {
   switch (value) {
     case 'development':
@@ -71,6 +90,8 @@ function parseMode(value: string | undefined, defaultValue: Mode = Mode.DEVELOPM
       return defaultValue;
   }
 }
+
+const DEFAULT_SERVER_PORT = 8080;
 
 export function getConfig(reload: boolean = false): Config {
   const mode: Mode = parseMode(process.env.NODE_ENV);
@@ -87,6 +108,9 @@ export function getConfig(reload: boolean = false): Config {
 
   return {
     mode,
+    server: {
+      port: parseNumber(process.env.GRAPH_DOM_SERVER_PORT, DEFAULT_SERVER_PORT),
+    },
     browser: {
       path: process.env.GRAPH_DOM_BROWSER_PATH || puppeteer.executablePath(),
       headless: parseBoolean(process.env.GRAPH_DOM_BROWSER_HEADLESS, false),

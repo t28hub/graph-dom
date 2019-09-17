@@ -25,18 +25,12 @@ import { Logger } from '../util/logger/logger';
 import { getLogger } from '../util/logger';
 
 export class ChromeBrowserService implements BrowserService {
-  /* eslint-disable-next-line */
-  public static async create(options: { [name: string]: any } = {}): Promise<ChromeBrowserService> {
-    // TODO: Remove temporary implementation
-    const browserPath =
-      process.env.NODE_ENV === 'development'
-        ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-        : await Chrome.executablePath;
+  public static async create(options: { path: string; headless: boolean }): Promise<ChromeBrowserService> {
     const defaultOptions: LaunchOptions = {
       args: Chrome.args,
       defaultViewport: Chrome.defaultViewport,
-      executablePath: browserPath,
-      headless: Chrome.headless,
+      executablePath: options.path,
+      headless: options.headless,
     };
     const launchOptions: LaunchOptions = { ...defaultOptions, ...options };
     const browser: Browser = await Chrome.puppeteer.launch(launchOptions);

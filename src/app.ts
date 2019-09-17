@@ -45,9 +45,10 @@ const config = getConfig();
 const serverConfig: Config = {
   schema,
   context: async (): Promise<Context> => {
+    const { path, headless } = config.browser;
     const axiosClient: AxiosInstance = axios.create();
     return {
-      browserService: await ChromeBrowserService.create(),
+      browserService: await ChromeBrowserService.create({ path, headless }),
       robotsFetcher: new RobotsFetcher(axiosClient),
     };
   },

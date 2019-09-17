@@ -17,15 +17,15 @@
 import { install } from 'source-map-support';
 import app from './app';
 import { getLogger } from './util/logger';
+import { getConfig } from './config';
 
 install();
 
-const DEFAULT_PORT = 8081;
+const logger = getLogger();
+const config = getConfig();
 
-const port = app.get('port') || DEFAULT_PORT;
-const env = app.get('env');
+const mode = config.mode;
+const port = config.server.port;
 app.listen(port, () => {
-  getLogger().info('Application is running at http://localhost:%d in %s mode', port, env);
+  logger.info('Application is running at http://localhost:%d in %s mode', port, mode);
 });
-
-export default app;

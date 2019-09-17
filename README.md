@@ -5,6 +5,7 @@ Web scraping and DOM traversing API with GraphQL.
 | Name | Description | Value |
 |:---|:---|:---|
 | `NODE_ENV` | Application mode. | development or production |
+| `GRAPH_DOM_SERVER_PORT` | Port listened by application. | 8081 |
 | `GRAPH_DOM_BROWSER_PATH` | Path to browser executable. | \- |
 | `GRAPH_DOM_BROWSER_HEADLESS` | Whether to run browser in headless mode or not. | true or false |
 
