@@ -31,6 +31,8 @@ describe('RobotsTxt', () => {
 
       // Assert
       expect(actual).toBeDefined();
+      expect(actual.url).toBe(url);
+      expect(actual.content).toBe(content);
     });
   });
 

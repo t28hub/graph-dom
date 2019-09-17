@@ -36,12 +36,12 @@ describe('RobotsFetcher', () => {
       'https://example.com/test/index.html?query=example#title',
     ]).test('should fetch robots.txt from %s', async (url: string) => {
       // Arrange
-      mockedAxios.get.mockImplementation(async () => {
-        const data = `
+      const content = `
           User-Agent: *
           Allow: /
         `;
-        return { status: 200, statusText: 'OK', data };
+      mockedAxios.get.mockImplementation(async () => {
+        return { status: 200, statusText: 'OK', data: content };
       });
 
       // Act
@@ -51,6 +51,22 @@ describe('RobotsFetcher', () => {
       // Assert
       expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });
       expect(actual).toBeDefined();
+    });
+
+    test('should return RobotsTxt when received status is not 200', async () => {
+      // Arrange
+      mockedAxios.get.mockImplementation(async () => {
+        return { status: 404, statusText: 'Not Found', data: 'URL is not found' };
+      });
+
+      // Act
+      const parsed = parse('https://example.com');
+      const actual = await fetcher.fetch(parsed);
+
+      // Assert
+      expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });
+      expect(actual).toBeDefined();
+      expect(actual.content).toBe('');
     });
 
     test('should throw an Error string when a request failed', async () => {
@@ -63,21 +79,6 @@ describe('RobotsFetcher', () => {
       await expect(fetcher.fetch(parse('https://example.com')))
         .rejects
         .toThrow('Failed to fetch text from https://example.com/robots.txt');
-
-      // Assert
-      expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });
-    });
-
-    test('should throw an Error when received status is not 200', async () => {
-      // Arrange
-      mockedAxios.get.mockImplementation(async () => {
-        return { status: 404, statusText: 'Not Found' };
-      });
-
-      // Act
-      await expect(fetcher.fetch(parse('https://example.com')))
-        .rejects
-        .toThrow('Received unexpected status \'404 Not Found\' from https://example.com/robots.txt');
 
       // Assert
       expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });

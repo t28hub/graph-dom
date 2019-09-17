@@ -18,12 +18,12 @@ import parse, { Robots } from 'robots-parser';
 import { format, Url } from 'url';
 
 export class RobotsTxt {
-  private constructor(private readonly source: Robots) {}
+  private constructor(public readonly url: Url, public readonly content: string, private readonly source: Robots) {}
 
   public static parse(url: Url, content: string): RobotsTxt {
     const urlString = format(url);
     const parsed: Robots = parse(urlString, content);
-    return new RobotsTxt(parsed);
+    return new RobotsTxt(url, content, parsed);
   }
 
   public isAllowed(url: Url, userAgent?: string): boolean {

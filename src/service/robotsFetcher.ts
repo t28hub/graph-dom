@@ -35,10 +35,8 @@ export class RobotsFetcher {
     const { status, statusText } = response;
     logger.info('Received response %d %s from %s', status, statusText, robotsUrl);
 
-    if (status !== STATUS_CODE_OK) {
-      throw new Error(`Received unexpected status '${status} ${statusText}' from ${robotsUrl}`);
-    }
-    return RobotsTxt.parse(url, response.data);
+    const content = status === STATUS_CODE_OK ? response.data : '';
+    return RobotsTxt.parse(url, content);
   }
 
   private async fetchText(urlString: string): Promise<AxiosResponse<string>> {
