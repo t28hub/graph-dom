@@ -60,7 +60,11 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - lint
+      - lint:
+          filters:
+            branches:
+              ignore:
+                - master
       - test
       - build:
           requires:
