@@ -15,7 +15,7 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "start": "npx now dev --debug",
+    "start": "npx now dev",
     "prestart": "yarn build",
     "lint": "yarn lint:eslint && yarn lint:prettier",
     "lint:eslint": "npx eslint 'src/**/*.ts'",

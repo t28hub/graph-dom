@@ -15,22 +15,13 @@
  */
 
 import log4js from 'log4js';
-import { Log4jsLogger } from '../../../src/util/logger/log4jsLogger';
-import { Level } from '../../../src/util/logger/level';
+import { Log4jsLogger } from '../../../src/util/logging/log4jsLogger';
 
 describe('Log4jsLogger', () => {
   describe('debug', () => {
     const mockedLogger = jest.fn().bind(log4js.getLogger());
     mockedLogger.debug = jest.fn();
     const logger = new Log4jsLogger(mockedLogger);
-
-    test('should set debug level', () => {
-      // Act
-      logger.setLevel(Level.DEBUG);
-
-      // Assert
-      expect(mockedLogger.level).toBe('DEBUG');
-    });
 
     test('should call debug method with message', () => {
       // Act
@@ -56,14 +47,6 @@ describe('Log4jsLogger', () => {
     mockedLogger.info = jest.fn();
     const logger = new Log4jsLogger(mockedLogger);
 
-    test('should set info level', () => {
-      // Act
-      logger.setLevel(Level.INFO);
-
-      // Assert
-      expect(mockedLogger.level).toBe('INFO');
-    });
-
     test('should call info method with message', () => {
       // Act
       const message = 'This is an info message';
@@ -87,14 +70,6 @@ describe('Log4jsLogger', () => {
     const mockedLogger = jest.fn().bind(log4js.getLogger());
     mockedLogger.warn = jest.fn();
     const logger = new Log4jsLogger(mockedLogger);
-
-    test('should set warn level', () => {
-      // Act
-      logger.setLevel(Level.WARN);
-
-      // Assert
-      expect(mockedLogger.level).toBe('WARN');
-    });
 
     test('should call warn method with message', () => {
       // Act
@@ -120,14 +95,6 @@ describe('Log4jsLogger', () => {
     mockedLogger.error = jest.fn();
     const logger = new Log4jsLogger(mockedLogger);
 
-    test('should set error level', () => {
-      // Act
-      logger.setLevel(Level.ERROR);
-
-      // Assert
-      expect(mockedLogger.level).toBe('ERROR');
-    });
-
     test('should call error method with message', () => {
       // Act
       const message = 'This is an error message';
@@ -150,14 +117,6 @@ describe('Log4jsLogger', () => {
     const mockedLogger = jest.fn().bind(log4js.getLogger());
     mockedLogger.trace = jest.fn();
     const logger = new Log4jsLogger(mockedLogger);
-
-    test('should set trace level', () => {
-      // Act
-      logger.setLevel(Level.TRACE);
-
-      // Assert
-      expect(mockedLogger.level).toBe('TRACE');
-    });
 
     test('should call trace method with message', () => {
       // Act

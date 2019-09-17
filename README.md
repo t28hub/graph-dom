@@ -4,10 +4,12 @@ Web scraping and DOM traversing API with GraphQL.
 ## Environment Variables
 | Name | Description | Value |
 |:---|:---|:---|
-| `NODE_ENV` | Application mode. | development or production |
-| `GRAPH_DOM_SERVER_PORT` | Port listened by application. | 8081 |
+| `NODE_ENV` | Application mode. | `development` or `production` |
+| `GRAPH_DOM_SERVER_PORT` | Port listened by application. | `8081` |
+| `GRAPH_DOM_LOGGING_LEVEL` | Log level to be output. | One of `debug`, `info`, `warn`, `error` and `trace` |
+| `GRAPH_DOM_LOGGING_PATTERN` | Pattern of log message to be output. | `[%r] [%p] %c - %m%n` |
 | `GRAPH_DOM_BROWSER_PATH` | Path to browser executable. | \- |
-| `GRAPH_DOM_BROWSER_HEADLESS` | Whether to run browser in headless mode or not. | true or false |
+| `GRAPH_DOM_BROWSER_HEADLESS` | Whether to run browser in headless mode or not. | `true` or `false` |
 
 
 ## License

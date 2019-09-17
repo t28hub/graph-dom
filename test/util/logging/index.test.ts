@@ -15,7 +15,7 @@
  */
 
 import log4js from 'log4js';
-import { getLogger } from '../../../src/util/logger';
+import { getLogger } from '../../../src/util/logging';
 
 jest.mock('log4js');
 log4js.getLogger = jest.fn().mockImplementation((category?: string) => {

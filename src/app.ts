@@ -19,13 +19,12 @@ import { Config, GraphQLResponse } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import helmet from 'helmet';
+import { getConfig, Mode } from './config';
 import { Context } from './graphql/context';
 import { schema } from './graphql/schama';
 import { ChromeBrowserService } from './service/chromeBrowserService';
 import { RobotsFetcher } from './service/robotsFetcher';
-import { Logger } from './util/logger/logger';
-import { getLogger } from './util/logger';
-import { getConfig, Mode } from './config';
+import { getLogger } from './util/logging';
 
 const app = express();
 app.use(
@@ -53,7 +52,7 @@ const serverConfig: Config = {
     };
   },
   formatResponse: (response: GraphQLResponse, options: { context: Context }): GraphQLResponse => {
-    const logger: Logger = getLogger();
+    const logger = getLogger();
     options.context.browserService
       .close()
       .then(() => logger.info('Browser service is closed'))

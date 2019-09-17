@@ -17,24 +17,23 @@
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { format, Url, UrlObject } from 'url';
 import { RobotsTxt } from './robotsTxt';
-import { Logger } from '../util/logger/logger';
-import { getLogger } from '../util/logger';
+import { getLogger, Logger } from '../util/logging';
 
 const STATUS_CODE_OK = 200;
 
 export class RobotsFetcher {
-  public constructor(
-    private readonly axios: AxiosInstance,
-    private readonly logger: Logger = getLogger(RobotsFetcher.name)
-  ) {}
+  private static readonly logger: Logger = getLogger(RobotsFetcher.name);
+
+  public constructor(private readonly axios: AxiosInstance) {}
 
   public async fetch(url: Url): Promise<RobotsTxt> {
+    const { logger } = RobotsFetcher;
     const robotsUrl: string = RobotsFetcher.buildRobotsUrl(url);
-    this.logger.info('Fetching robots.txt file from %s', robotsUrl);
+    logger.info('Fetching robots.txt file from %s', robotsUrl);
 
     const response: AxiosResponse<string> = await this.fetchText(robotsUrl);
     const { status, statusText } = response;
-    this.logger.info('Received response %d %s from %s', status, statusText, robotsUrl);
+    logger.info('Received response %d %s from %s', status, statusText, robotsUrl);
 
     if (status !== STATUS_CODE_OK) {
       throw new Error(`Received unexpected status '${status} ${statusText}' from ${robotsUrl}`);
@@ -43,13 +42,14 @@ export class RobotsFetcher {
   }
 
   private async fetchText(urlString: string): Promise<AxiosResponse<string>> {
+    const { logger } = RobotsFetcher;
     try {
       const config: AxiosRequestConfig = {
         responseType: 'text',
       };
       return await this.axios.get<string>(urlString, config);
     } catch (e) {
-      this.logger.warn('Failed to fetch text from %s: %s', urlString, e);
+      logger.warn('Failed to fetch text from %s: %s', urlString, e);
       throw new Error(`Failed to fetch text from ${urlString}`);
     }
   }

@@ -16,6 +16,7 @@
 
 import { puppeteer } from 'chrome-aws-lambda';
 import { config } from 'dotenv';
+import { Level } from './util/logging/level';
 
 export enum Mode {
   PRODUCTION = 'production',
@@ -26,6 +27,10 @@ export interface Config {
   readonly mode: Mode;
   readonly server: {
     readonly port: number;
+  };
+  readonly logging: {
+    readonly level: Level;
+    readonly pattern: string;
   };
   readonly browser: {
     readonly path: string;
@@ -91,7 +96,25 @@ function parseMode(value: string | undefined, defaultValue: Mode = Mode.DEVELOPM
   }
 }
 
+function parseLevel(value: string | undefined, defaultValue: Level): Level {
+  switch (value) {
+    case 'debug':
+      return Level.DEBUG;
+    case 'info':
+      return Level.INFO;
+    case 'warn':
+      return Level.WARN;
+    case 'error':
+      return Level.ERROR;
+    case 'trace':
+      return Level.TRACE;
+    default:
+      return defaultValue;
+  }
+}
+
 const DEFAULT_SERVER_PORT = 8080;
+const DEFAULT_LOGGING_PATTERN = '[%r] [%p] %c - %m%n';
 
 export function getConfig(reload: boolean = false): Config {
   const mode: Mode = parseMode(process.env.NODE_ENV);
@@ -102,7 +125,7 @@ export function getConfig(reload: boolean = false): Config {
    * And it uses `.env` for local development.
    * https://zeit.co/docs/v2/environment-variables-and-secrets/
    */
-  if (process.env.NOW_REGION === undefined) {
+  if (process.env.NOW_REGION === undefined && process.env.CI === undefined) {
     load(`.env.${mode.toString()}`, reload);
   }
 
@@ -110,6 +133,10 @@ export function getConfig(reload: boolean = false): Config {
     mode,
     server: {
       port: parseNumber(process.env.GRAPH_DOM_SERVER_PORT, DEFAULT_SERVER_PORT),
+    },
+    logging: {
+      level: parseLevel(process.env.GRAPH_DOM_LOGGING_LEVEL, Level.INFO),
+      pattern: process.env.GRAPH_DOM_LOGGING_PATTERN || DEFAULT_LOGGING_PATTERN,
     },
     browser: {
       path: process.env.GRAPH_DOM_BROWSER_PATH || puppeteer.executablePath(),

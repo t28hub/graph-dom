@@ -16,7 +16,7 @@
 
 import { install } from 'source-map-support';
 import app from './app';
-import { getLogger } from './util/logger';
+import { getLogger } from './util/logging';
 import { getConfig } from './config';
 
 install();
