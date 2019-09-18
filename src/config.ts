@@ -51,7 +51,7 @@ function load(path: string, force: boolean): void {
   });
 
   if (error) {
-    throw new Error(`Failed to load '${path}': ${error}`);
+    throw new Error(`Failed to load '${path}': ${error.message}`);
   }
   loaded.add(path);
 }
@@ -61,12 +61,17 @@ function parseBoolean(value: string | undefined, defaultValue: boolean): boolean
     return defaultValue;
   }
 
+  let parsed;
   try {
-    const parsed = JSON.parse(value);
-    return parsed === true;
+    parsed = JSON.parse(value);
   } catch (e) {
-    throw new TypeError(`Invalid boolean value: ${value}`);
+    throw new TypeError(`Invalid boolean: ${value}`);
   }
+
+  if (typeof parsed !== 'boolean') {
+    throw new TypeError(`Invalid boolean: ${value}`);
+  }
+  return parsed;
 }
 
 function parseNumber(value: string | undefined, defaultValue: number): number {
@@ -74,15 +79,17 @@ function parseNumber(value: string | undefined, defaultValue: number): number {
     return defaultValue;
   }
 
+  let parsed;
   try {
-    const parsed = JSON.parse(value);
-    if (typeof parsed !== 'number') {
-      return defaultValue;
-    }
-    return parsed;
+    parsed = JSON.parse(value);
   } catch (e) {
-    throw new TypeError(`Invalid number value: ${value}`);
+    throw new TypeError(`Invalid number: ${value}`);
   }
+
+  if (typeof parsed !== 'number') {
+    throw new TypeError(`Invalid number: ${value}`);
+  }
+  return parsed;
 }
 
 function parseMode(value: string | undefined, defaultValue: Mode = Mode.DEVELOPMENT): Mode {
@@ -91,8 +98,10 @@ function parseMode(value: string | undefined, defaultValue: Mode = Mode.DEVELOPM
       return Mode.DEVELOPMENT;
     case 'production':
       return Mode.PRODUCTION;
-    default:
+    case undefined:
       return defaultValue;
+    default:
+      throw new TypeError(`Unknown mode: ${value}`);
   }
 }
 
@@ -108,8 +117,10 @@ function parseLevel(value: string | undefined, defaultValue: Level): Level {
       return Level.ERROR;
     case 'trace':
       return Level.TRACE;
-    default:
+    case undefined:
       return defaultValue;
+    default:
+      throw new TypeError(`Unknown level: ${value}`);
   }
 }
 
@@ -140,7 +151,7 @@ export function getConfig(reload: boolean = false): Config {
     },
     browser: {
       path: process.env.GRAPH_DOM_BROWSER_PATH || puppeteer.executablePath(),
-      headless: parseBoolean(process.env.GRAPH_DOM_BROWSER_HEADLESS, false),
+      headless: parseBoolean(process.env.GRAPH_DOM_BROWSER_HEADLESS, true),
     },
   };
 }
