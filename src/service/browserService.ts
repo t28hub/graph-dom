@@ -17,13 +17,21 @@
 import { Url } from 'url';
 import { Document } from '../dom';
 
-export type Options = Partial<{
-  timeout: number;
-  userAgent: string;
-}>;
+// https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagegotourl-options
+export type WaitUntil =
+  | 'load' // Wait until 'load' event is fired.
+  | 'domcontentloaded' // Wait until 'DOMContentLoaded' event is fired.
+  | 'networkidle0' // Wait until network connections are no more than 0.
+  | 'networkidle2'; // Wait until network connections are no more than 2.
+
+export interface Options {
+  readonly timeout: number;
+  readonly userAgent: string;
+  readonly waitUntil: WaitUntil;
+}
 
 export interface BrowserService {
-  fetch(url: Url, options?: Options): Promise<Document>;
+  open(url: Url, options?: Partial<Options>): Promise<Document>;
 
   close(): Promise<void>;
 }

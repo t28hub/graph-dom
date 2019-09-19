@@ -23,8 +23,10 @@ import { getConfig, Mode } from './config';
 import { Context } from './graphql/context';
 import { schema } from './graphql/schama';
 import { ChromeBrowserService } from './service/chromeBrowserService';
-import { RobotsFetcher } from './service/robotsFetcher';
+import { RobotsTxtFetcher } from './service/robotsTxtFetcher';
 import { getLogger } from './util/logging';
+import { DataSources } from 'apollo-server-core/src/graphqlOptions';
+import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
 
 const app = express();
 app.use(
@@ -40,22 +42,27 @@ app.use(
 );
 
 const config = getConfig();
+const logger = getLogger();
 
 const serverConfig: Config = {
   schema,
-  context: async (): Promise<Context> => {
+  context: (): Omit<Context, 'dataSources'> => {
+    return {};
+  },
+  dataSources: (): DataSources<Context> => {
     const { path, headless } = config.browser;
+    const browserService = new ChromeBrowserService({ path, headless });
     const axiosClient: AxiosInstance = axios.create();
+    const robotsTxtFetcher = new RobotsTxtFetcher(axiosClient);
     return {
-      browserService: await ChromeBrowserService.create({ path, headless }),
-      robotsFetcher: new RobotsFetcher(axiosClient),
+      browser: new BrowserDataSource(browserService, robotsTxtFetcher),
     };
   },
   formatResponse: (response: GraphQLResponse, options: { context: Context }): GraphQLResponse => {
-    const logger = getLogger();
-    options.context.browserService
-      .close()
-      .then(() => logger.info('Browser service is closed'))
+    const { browser } = options.context.dataSources;
+    browser
+      .dispose()
+      .then(() => logger.info('Browser data source is closed'))
       .catch((e: Error) => logger.warn('Failed to close BrowserService: %s', e));
     return response;
   },
