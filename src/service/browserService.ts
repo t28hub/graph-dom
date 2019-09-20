@@ -33,5 +33,5 @@ export interface Options {
 export interface BrowserService {
   open(url: Url, options?: Partial<Options>): Promise<Document>;
 
-  close(): Promise<void>;
+  dispose(): Promise<void>;
 }

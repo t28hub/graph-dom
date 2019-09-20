@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+import { AxiosInstance } from 'axios';
 import { BrowserDataSource } from './dataSources/browserDataSource';
+import { BrowserService } from '../service/browserService';
 
 export interface Context {
+  readonly axios: AxiosInstance;
+  readonly browser: BrowserService;
   readonly dataSources: {
     readonly browser: BrowserDataSource;
   };

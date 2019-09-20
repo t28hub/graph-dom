@@ -35,7 +35,8 @@ const STATUS_CODE_MULTIPLE_CHOICE = 300;
 export class ChromeBrowserService implements BrowserService {
   private static readonly logger: Logger = getLogger(ChromeBrowserService.name);
 
-  private browser?: Browser;
+  // Avoid to instantiate multiple browsers.
+  private browserPromise?: Promise<Browser>;
 
   public constructor(private readonly browserOptions: BrowserOptions) {}
 
@@ -45,14 +46,15 @@ export class ChromeBrowserService implements BrowserService {
     const page: Page = await browser.newPage();
     page.setDefaultTimeout(DEFAULT_TIMEOUT);
     page.setDefaultNavigationTimeout(DEFAULT_NAVIGATION_TIMEOUT);
+
     try {
       const urlString = format(url);
       const response: Response = await ChromeBrowserService.goto(page, urlString, options);
-      const [status, statusText] = [response.status(), response.statusText()];
+      const status = response.status();
       if (status >= STATUS_CODE_OK || status < STATUS_CODE_MULTIPLE_CHOICE) {
-        logger.info('Received successful status %d %s from %s', status, statusText, urlString);
+        logger.info("Received successful status '%d' from %s", status, urlString);
       } else {
-        logger.warn('Received non-successful status %d %s from %s', status, response.statusText(), urlString);
+        logger.warn("Received non-successful status '%d' from %s", status, urlString);
       }
       return await createDocument(page);
     } catch (e) {
@@ -61,30 +63,30 @@ export class ChromeBrowserService implements BrowserService {
     }
   }
 
-  public async close(): Promise<void> {
+  public async dispose(): Promise<void> {
     const { logger } = ChromeBrowserService;
-    if (this.browser === undefined) {
-      logger.info('Browser is not defined');
+    if (this.browserPromise === undefined) {
       return;
     }
 
-    const pages: Page[] = await this.browser.pages();
+    const browser = await this.browserPromise;
+    const pages: Page[] = await browser.pages();
     await Promise.all(pages.map((page: Page) => ChromeBrowserService.closePage(page)));
 
     try {
-      await this.browser.close();
-      logger.info('Browser ia closed');
+      await browser.close();
+      logger.info('Browser is closed');
     } catch (e) {
       logger.warn('Failed to close a browser: %s', e.message);
     } finally {
-      this.browser.disconnect();
-      this.browser = undefined;
+      browser.disconnect();
+      this.browserPromise = undefined;
     }
   }
 
-  private async ensureBrowser(): Promise<Browser> {
-    if (this.browser) {
-      return this.browser;
+  private ensureBrowser(): Promise<Browser> {
+    if (this.browserPromise) {
+      return this.browserPromise;
     }
 
     const { path: executablePath, headless } = this.browserOptions;
@@ -94,9 +96,9 @@ export class ChromeBrowserService implements BrowserService {
       executablePath,
       headless,
     };
-    const browser: Browser = await Chrome.puppeteer.launch(options);
-    this.browser = browser;
-    return browser;
+    const browserPromise = Chrome.puppeteer.launch(options);
+    this.browserPromise = browserPromise;
+    return browserPromise;
   }
 
   private static async goto(page: Page, urlString: string, options: Partial<Options>): Promise<Response> {
@@ -117,11 +119,12 @@ export class ChromeBrowserService implements BrowserService {
   }
 
   private static async closePage(page: Page): Promise<void> {
+    const { logger } = ChromeBrowserService;
     const url: string = page.url();
     try {
       await page.close();
     } catch (e) {
-      ChromeBrowserService.logger.warn('Failed to close a page(%s): %s', url, e.message);
+      logger.warn('Failed to close a page(%s): %s', url, e.message);
     }
   }
 }

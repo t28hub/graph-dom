@@ -31,19 +31,21 @@ export interface Options {
 export class BrowserDataSource extends DataSource<Context> {
   private static readonly logger: Logger = getLogger(BrowserDataSource.name);
 
-  private context!: Context;
+  private browserService!: BrowserService;
+  private robotsTxtFetcher!: RobotsTxtFetcher;
 
-  public constructor(
-    private readonly browserService: BrowserService,
-    private readonly robotsTxtFetcher: RobotsTxtFetcher
-  ) {
+  public constructor() {
     super();
   }
 
   public initialize(config: DataSourceConfig<Context>): void {
     const { logger } = BrowserDataSource;
     logger.debug('Initializing BrowserDataSource');
-    this.context = config.context;
+
+    const { axios, browser } = config.context;
+    this.browserService = browser;
+    this.robotsTxtFetcher = new RobotsTxtFetcher(axios);
+
     logger.debug('Initialized BrowserDataSource');
   }
 
@@ -53,9 +55,5 @@ export class BrowserDataSource extends DataSource<Context> {
       throw new Error(`URL is not allowed to fetch by robots.txt: ${format(url)}`);
     }
     return await this.browserService.open(url, options);
-  }
-
-  public async dispose(): Promise<void> {
-    await this.browserService.close();
   }
 }

@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import axios, { AxiosInstance } from 'axios';
-import { Config, GraphQLResponse } from 'apollo-server-core';
+import { Config } from 'apollo-server-core';
+import { DataSources } from 'apollo-server-core/src/graphqlOptions';
 import { ApolloServer } from 'apollo-server-express';
+import axios from 'axios';
 import express from 'express';
 import helmet from 'helmet';
 import { getConfig, Mode } from './config';
 import { Context } from './graphql/context';
+import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
+import { BrowserLifecyclePlugin } from './graphql/plugins/browserLifecyclePlugin';
 import { schema } from './graphql/schama';
 import { ChromeBrowserService } from './service/chromeBrowserService';
-import { RobotsTxtFetcher } from './service/robotsTxtFetcher';
-import { getLogger } from './util/logging';
-import { DataSources } from 'apollo-server-core/src/graphqlOptions';
-import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
 
 const app = express();
 app.use(
@@ -42,30 +41,23 @@ app.use(
 );
 
 const config = getConfig();
-const logger = getLogger();
 
 const serverConfig: Config = {
   schema,
   context: (): Omit<Context, 'dataSources'> => {
-    return {};
-  },
-  dataSources: (): DataSources<Context> => {
     const { path, headless } = config.browser;
-    const browserService = new ChromeBrowserService({ path, headless });
-    const axiosClient: AxiosInstance = axios.create();
-    const robotsTxtFetcher = new RobotsTxtFetcher(axiosClient);
     return {
-      browser: new BrowserDataSource(browserService, robotsTxtFetcher),
+      axios: axios.create(),
+      // Instantiate browser by each request to isolate state of browser.
+      browser: new ChromeBrowserService({ path, headless }),
     };
   },
-  formatResponse: (response: GraphQLResponse, options: { context: Context }): GraphQLResponse => {
-    const { browser } = options.context.dataSources;
-    browser
-      .dispose()
-      .then(() => logger.info('Browser data source is closed'))
-      .catch((e: Error) => logger.warn('Failed to close BrowserService: %s', e));
-    return response;
+  dataSources: (): DataSources<Context> => {
+    return {
+      browser: new BrowserDataSource(),
+    };
   },
+  plugins: [new BrowserLifecyclePlugin()],
   playground: config.mode === Mode.DEVELOPMENT,
   tracing: config.mode === Mode.DEVELOPMENT,
   debug: config.mode === Mode.DEVELOPMENT,

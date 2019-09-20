@@ -29,7 +29,12 @@
         "ignoreParameters": true
       }
     ],
-    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "args": "none"
+      }
+    ],
     "@typescript-eslint/no-magic-numbers": [
       "error",
       {
