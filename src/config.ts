@@ -28,6 +28,13 @@ export interface Config {
   readonly server: {
     readonly port: number;
   };
+  readonly cache: {
+    readonly redis?: {
+      readonly host: string;
+      readonly port: number;
+      readonly password?: string;
+    };
+  };
   readonly logging: {
     readonly level: Level;
     readonly pattern: string;
@@ -126,6 +133,24 @@ function parseLevel(value: string | undefined, defaultValue: Level): Level {
 
 const DEFAULT_SERVER_PORT = 8080;
 const DEFAULT_LOGGING_PATTERN = '[%r] [%p] %c - %m%n';
+const DEFAULT_CACHE_REDIS_PORT = 6379;
+
+export function getCacheConfig(): Pick<Config, 'cache'> {
+  if (process.env.GRAPH_DOM_CACHE_REDIS_HOST) {
+    return {
+      cache: {
+        redis: {
+          host: `${process.env.GRAPH_DOM_CACHE_REDIS_HOST}`,
+          port: parseNumber(process.env.GRAPH_DOM_CACHE_REDIS_PORT, DEFAULT_CACHE_REDIS_PORT),
+          password: process.env.GRAPH_DOM_CACHE_REDIS_PASSWORD,
+        },
+      },
+    };
+  }
+  return {
+    cache: {},
+  };
+}
 
 export function getConfig(reload: boolean = false): Config {
   const mode: Mode = parseMode(process.env.NODE_ENV);
@@ -140,11 +165,13 @@ export function getConfig(reload: boolean = false): Config {
     load(`.env.${mode.toString()}`, reload);
   }
 
+  const { cache } = getCacheConfig();
   return {
     mode,
     server: {
       port: parseNumber(process.env.GRAPH_DOM_SERVER_PORT, DEFAULT_SERVER_PORT),
     },
+    cache,
     logging: {
       level: parseLevel(process.env.GRAPH_DOM_LOGGING_LEVEL, Level.INFO),
       pattern: process.env.GRAPH_DOM_LOGGING_PATTERN || DEFAULT_LOGGING_PATTERN,

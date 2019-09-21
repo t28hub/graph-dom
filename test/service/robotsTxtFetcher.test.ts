@@ -22,7 +22,7 @@ import { RobotsTxtFetcher } from '../../src/service/robotsTxtFetcher';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-describe('RobotsFetcher', () => {
+describe('RobotsTxtFetcher', () => {
   describe('fetch', () => {
     const fetcher = new RobotsTxtFetcher(axios);
 
@@ -34,7 +34,7 @@ describe('RobotsFetcher', () => {
       'https://example.com/test/index.html',
       'https://example.com/test/index.html?query=example',
       'https://example.com/test/index.html?query=example#title',
-    ]).test('should open robots.txt from %s', async (url: string) => {
+    ]).test('should open robots.txt from %s', async (urlString: string) => {
       // Arrange
       const content = `
           User-Agent: *
@@ -45,8 +45,8 @@ describe('RobotsFetcher', () => {
       });
 
       // Act
-      const parsed = parse(url);
-      const actual = await fetcher.fetch(parsed);
+      const url = parse(urlString);
+      const actual = await fetcher.fetch(url);
 
       // Assert
       expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });
@@ -82,6 +82,30 @@ describe('RobotsFetcher', () => {
 
       // Assert
       expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });
+    });
+  });
+
+  describe('buildRobotsTxtUrl', () => {
+    each([
+      'http://example.com',
+      'https://example.com',
+      'https://example.com/',
+      'https://example.com:443/',
+      'https://example.com/test/',
+      'https://example.com/test/index.html',
+      'https://example.com/test/index.html?query=example',
+      'https://example.com/test/index.html?query=example#title',
+    ]).test('should return robots.txt URL from %s', (urlString: string) => {
+      // Act
+      const url = parse(urlString);
+      const actual = RobotsTxtFetcher.buildRobotsTxtUrl(url);
+
+      // Assert
+      expect(actual).toEqual({
+        protocol: url.protocol,
+        host: url.host,
+        pathname: '/robots.txt',
+      });
     });
   });
 });

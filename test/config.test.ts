@@ -28,6 +28,8 @@ const defaultConfig: Config = {
   server: {
     port: DEFAULT_SERVER_PORT
   },
+  cache: {
+  },
   logging: {
     level: Level.INFO,
     pattern: DEFAULT_LOGGING_PATTERN
@@ -100,6 +102,56 @@ describe('Config', () => {
           ...defaultConfig,
           server: {
             port: 8081
+          }
+        }
+      ],
+      [
+        {
+          CI: 'true',
+          GRAPH_DOM_CACHE_REDIS_HOST: 'localhost'
+        },
+        {
+          ...defaultConfig,
+          cache: {
+            redis: {
+              host: 'localhost',
+              port: 6379,
+              password: undefined
+            }
+          }
+        }
+      ],
+      [
+        {
+          CI: 'true',
+          GRAPH_DOM_CACHE_REDIS_HOST: 'localhost',
+          GRAPH_DOM_CACHE_REDIS_PORT: 6380
+        },
+        {
+          ...defaultConfig,
+          cache: {
+            redis: {
+              host: 'localhost',
+              port: 6380,
+              password: undefined
+            }
+          }
+        }
+      ],
+      [
+        {
+          CI: 'true',
+          GRAPH_DOM_CACHE_REDIS_HOST: 'localhost',
+          GRAPH_DOM_CACHE_REDIS_PASSWORD: 'REDIS_PASSWORD'
+        },
+        {
+          ...defaultConfig,
+          cache: {
+            redis: {
+              host: 'localhost',
+              port: 6379,
+              password: 'REDIS_PASSWORD'
+            }
           }
         }
       ],

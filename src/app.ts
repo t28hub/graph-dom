@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import { Config } from 'apollo-server-core';
+import { Config as ServerConfig, KeyValueCache } from 'apollo-server-core';
 import { DataSources } from 'apollo-server-core/src/graphqlOptions';
 import { ApolloServer } from 'apollo-server-express';
 import axios from 'axios';
 import express from 'express';
 import helmet from 'helmet';
-import { getConfig, Mode } from './config';
+import { getConfig, Config, Mode } from './config';
 import { Context } from './graphql/context';
 import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
 import { BrowserLifecyclePlugin } from './graphql/plugins/browserLifecyclePlugin';
 import { schema } from './graphql/schama';
 import { ChromeBrowserService } from './service/chromeBrowserService';
+import { RedisCache } from 'apollo-server-cache-redis';
+import { InMemoryLRUCache } from 'apollo-server-caching';
 
 const app = express();
 app.use(
@@ -42,8 +44,17 @@ app.use(
 
 const config = getConfig();
 
-const serverConfig: Config = {
+function getCache({ cache: config }: Config): KeyValueCache<string> {
+  if (config.redis) {
+    const { host, port, password } = config.redis;
+    return new RedisCache({ host, port, password });
+  }
+  return new InMemoryLRUCache();
+}
+
+const serverConfig: ServerConfig = {
   schema,
+  cache: getCache(config),
   context: (): Omit<Context, 'dataSources'> => {
     const { path, headless } = config.browser;
     return {

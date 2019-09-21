@@ -15,7 +15,7 @@
  */
 
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { format, Url, UrlObject } from 'url';
+import { format, Url } from 'url';
 import { RobotsTxt } from './robotsTxt';
 import { getLogger, Logger } from '../util/logging';
 
@@ -28,7 +28,7 @@ export class RobotsTxtFetcher {
 
   public async fetch(url: Url): Promise<RobotsTxt> {
     const { logger } = RobotsTxtFetcher;
-    const robotsUrl: string = RobotsTxtFetcher.buildRobotsUrl(url);
+    const robotsUrl: string = format(RobotsTxtFetcher.buildRobotsTxtUrl(url));
     logger.info('Fetching robots.txt file from %s', robotsUrl);
 
     const response: AxiosResponse<string> = await this.fetchText(robotsUrl);
@@ -52,13 +52,12 @@ export class RobotsTxtFetcher {
     }
   }
 
-  private static buildRobotsUrl(url: Url): string {
+  public static buildRobotsTxtUrl(url: Url): Url {
     const { protocol, host } = url;
-    const parts: UrlObject = {
+    return {
       protocol,
       host,
       pathname: '/robots.txt',
     };
-    return format(parts);
   }
 }
