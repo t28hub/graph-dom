@@ -55,8 +55,14 @@ describe('RobotsTxtCache', () => {
       // Assert
       expect(mockedCache.get).toBeCalledWith('https://example.com/');
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().url).toMatchObject({ protocol: 'https:', host: 'example.com', pathname: '/' } as Url);
-      expect(actual.get().content).toBe('This is cached robots.txt.');
+      expect(actual.get()).toMatchObject({
+        url: {
+          protocol: 'https:',
+          host: 'example.com',
+          pathname: '/'
+        } as Url,
+        content: 'This is cached robots.txt.'
+      });
     });
 
     test('should return empty when cached value does not exist', async () => {
@@ -81,17 +87,17 @@ describe('RobotsTxtCache', () => {
       await cache.set(url, robotsTxt);
 
       // Assert
-      expect(mockedCache.set).toBeCalledWith('https://example.com/', robotsTxt.content, { ttl: undefined });
+      expect(mockedCache.set).toBeCalledWith('https://example.com/', robotsTxt.content, { ttl: 3600 });
     });
 
     test('should call set method with URL, Robots.txt and ttl', async () => {
       // Act
       const url = parse('https://example.com/');
       const robotsTxt = RobotsTxt.parse(url, 'This is a robots.txt.');
-      await cache.set(url, robotsTxt, 3000);
+      await cache.set(url, robotsTxt, 7200);
 
       // Assert
-      expect(mockedCache.set).toBeCalledWith('https://example.com/', robotsTxt.content, { ttl: 3000 });
+      expect(mockedCache.set).toBeCalledWith('https://example.com/', robotsTxt.content, { ttl: 7200 });
     });
   });
 
@@ -99,7 +105,6 @@ describe('RobotsTxtCache', () => {
     test('should call set method with URL', async () => {
       // Act
       const url = parse('https://example.com/');
-      const robotsTxt = RobotsTxt.parse(url, 'This is a robots.txt.');
       await cache.delete(url);
 
       // Assert

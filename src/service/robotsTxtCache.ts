@@ -20,6 +20,8 @@ import { RobotsTxt } from './robotsTxt';
 import { Optional } from '../util';
 import { KeyValueCache } from 'apollo-server-caching';
 
+const DEFAULT_CACHE_TTL = 3600;
+
 export class RobotsTxtCache implements Cache<Url, RobotsTxt> {
   public constructor(private readonly cache: KeyValueCache<string>) {}
 
@@ -34,7 +36,7 @@ export class RobotsTxtCache implements Cache<Url, RobotsTxt> {
     return Optional.of(parsed);
   }
 
-  public async set(key: Url, value: RobotsTxt, ttl?: number): Promise<void> {
+  public async set(key: Url, value: RobotsTxt, ttl: number = DEFAULT_CACHE_TTL): Promise<void> {
     const urlString = format(key);
     await this.cache.set(urlString, value.content, { ttl });
   }
