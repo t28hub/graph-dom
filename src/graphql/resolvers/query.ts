@@ -18,11 +18,14 @@ import { IResolverObject } from 'graphql-tools';
 import { parse } from 'url';
 import { Context } from '../context';
 import { Document } from '../../dom';
+import { validateUrl } from '../../validator';
 
 export const resolver: IResolverObject = {
   /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
   page: async (parent: any, args: { url: string }, context: Context): Promise<Document> => {
     const { url } = args;
+    validateUrl(url);
+
     const parsed = parse(url);
     const { browser } = context.dataSources;
     return await browser.fetch(parsed, { waitUntil: 'load' });

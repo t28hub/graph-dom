@@ -16,6 +16,7 @@
 
 import { IResolverObject } from 'graphql-tools';
 import { Document, Element, Node, NodeType } from '../../dom';
+import { validateClassName, validateId, validateSelector, validateTagName } from '../../validator';
 
 export const resolver: IResolverObject = {
   head: async (document: Document): Promise<Element | null> => {
@@ -62,24 +63,29 @@ export const resolver: IResolverObject = {
   },
   getElementById: async (document: Document, args: { id: string }): Promise<Element | null> => {
     const { id } = args;
+    validateId(id);
     const element = await document.getElementById(id);
     return element.orElse(null);
   },
   getElementsByClassName: async (document: Document, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
+    validateClassName(name);
     return document.getElementsByClassName(name);
   },
   getElementsByTagName: async (document: Document, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
+    validateTagName(name);
     return document.getElementsByTagName(name);
   },
   querySelector: async (document: Document, args: { selector: string }): Promise<Element | null> => {
     const { selector } = args;
+    validateSelector(selector);
     const selected = await document.querySelector(selector);
     return selected.orElse(null);
   },
   querySelectorAll: async (document: Document, args: { selector: string }): Promise<Array<Element>> => {
     const { selector } = args;
+    validateSelector(selector);
     return document.querySelectorAll(selector);
   },
 };

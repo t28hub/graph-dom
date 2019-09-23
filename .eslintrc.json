@@ -38,6 +38,7 @@
     "@typescript-eslint/no-magic-numbers": [
       "error",
       {
+        "ignore": [0],
         "ignoreEnums": true
       }
     ],

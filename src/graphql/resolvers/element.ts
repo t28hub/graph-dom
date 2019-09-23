@@ -18,6 +18,7 @@ import { IResolverObject } from 'graphql-tools';
 import { Element, Node, NodeType } from '../../dom';
 import { Attribute } from '../../dom/attribute';
 import { Data } from '../../dom/data';
+import { validateAttributeName, validateClassName, validateSelector, validateTagName } from '../../validator';
 
 // noinspection JSUnusedGlobalSymbols
 export const resolver: IResolverObject = {
@@ -69,24 +70,29 @@ export const resolver: IResolverObject = {
   },
   getAttribute: async (element: Element, args: { name: string }): Promise<string | null> => {
     const { name } = args;
+    validateAttributeName(name);
     const attribute = await element.getAttribute(name);
     return attribute.orElse(null);
   },
   getElementsByClassName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
+    validateClassName(name);
     return element.getElementsByClassName(name);
   },
   getElementsByTagName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
+    validateTagName(name);
     return element.getElementsByTagName(name);
   },
   querySelector: async (element: Element, args: { selector: string }): Promise<Element | null> => {
     const { selector } = args;
+    validateSelector(selector);
     const selected = await element.querySelector(selector);
     return selected.orElse(null);
   },
   querySelectorAll: async (element: Element, args: { selector: string }): Promise<Array<Element>> => {
     const { selector } = args;
+    validateSelector(selector);
     return await element.querySelectorAll(selector);
   },
 };

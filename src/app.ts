@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { InMemoryLRUCache } from 'apollo-server-caching';
 import { Config as ServerConfig, KeyValueCache } from 'apollo-server-core';
 import { DataSources } from 'apollo-server-core/src/graphqlOptions';
 import { ApolloServer } from 'apollo-server-express';
@@ -27,7 +28,6 @@ import { BrowserLifecyclePlugin } from './graphql/plugins/browserLifecyclePlugin
 import { schema } from './graphql/schama';
 import { ChromeBrowserService } from './service/chromeBrowserService';
 import { RedisCache } from 'apollo-server-cache-redis';
-import { InMemoryLRUCache } from 'apollo-server-caching';
 
 const app = express();
 app.use(
