@@ -26,6 +26,8 @@ import { BrowserService } from '../../../src/service/browserService';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+jest.mock('../../../src/util/logging');
+
 const MockKeyValueCache: jest.Mock<KeyValueCache> = jest.fn(() => ({
   get: jest.fn(),
   set: jest.fn(),

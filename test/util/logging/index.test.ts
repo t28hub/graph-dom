@@ -16,13 +16,28 @@
 
 import log4js from 'log4js';
 import { getLogger } from '../../../src/util/logging';
+import { Level } from '../../../src/util/logging/level';
 
-jest.mock('log4js');
-log4js.getLogger = jest.fn().mockImplementation((category?: string) => {
-  return { level: '' };
+jest.mock('log4js', () => {
+  return {
+    configure: jest.fn(),
+    getLogger: jest.fn().mockReturnValue({ level: '' })
+  };
+});
+
+jest.mock('../../../src/config', () => {
+  return {
+    getConfig: jest.fn().mockReturnValue({
+      logging: {
+        level: 1,
+        pattern: ''
+      }
+    })
+  };
 });
 
 describe('getLogger', () => {
+
   test('should instantiate logger with default category', () => {
     // Act
     const actual = getLogger();

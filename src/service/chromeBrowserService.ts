@@ -51,7 +51,7 @@ export class ChromeBrowserService implements BrowserService {
       const urlString = format(url);
       const response: Response = await ChromeBrowserService.goto(page, urlString, options);
       const status = response.status();
-      if (status >= STATUS_CODE_OK || status < STATUS_CODE_MULTIPLE_CHOICE) {
+      if (status >= STATUS_CODE_OK && status < STATUS_CODE_MULTIPLE_CHOICE) {
         logger.info("Received successful status '%d' from %s", status, urlString);
       } else {
         logger.warn("Received non-successful status '%d' from %s", status, urlString);

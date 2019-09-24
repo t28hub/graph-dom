@@ -22,6 +22,8 @@ import { RobotsTxtFetcher } from '../../src/service/robotsTxtFetcher';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+jest.mock('../../src/util/logging');
+
 describe('RobotsTxtFetcher', () => {
   describe('fetch', () => {
     const fetcher = new RobotsTxtFetcher(axios);

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+jest.unmock('chrome-aws-lambda');
+jest.unmock('puppeteer');
+
 import { puppeteer } from 'chrome-aws-lambda';
 import each from 'jest-each';
 import { Config, getConfig, Mode } from '../src/config';

@@ -19,6 +19,8 @@ import { KeyValueCache } from 'apollo-server-caching';
 import { RobotsTxtCache } from '../../src/service/robotsTxtCache';
 import { RobotsTxt } from '../../src/service/robotsTxt';
 
+jest.mock('../../src/util/logging');
+
 describe('RobotsTxtCache', () => {
   const mockedCache: KeyValueCache = {
     get: jest.fn(),
