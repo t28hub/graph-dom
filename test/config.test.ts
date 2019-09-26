@@ -19,29 +19,8 @@ jest.unmock('puppeteer');
 
 import { puppeteer } from 'chrome-aws-lambda';
 import each from 'jest-each';
-import { Config, getConfig, Mode } from '../src/config';
+import { Config, DEFAULT_LOGGING_PATTERN, DEFAULT_SERVER_PORT, getConfig, Mode } from '../src/config';
 import { Level } from '../src/util/logging/level';
-
-const DEFAULT_SERVER_PORT = 8080;
-const DEFAULT_LOGGING_PATTERN = '[%r] [%p] %c - %m%n';
-const DEFAULT_BROWSER_PATH = puppeteer.executablePath();
-
-const defaultConfig: Config = {
-  mode: Mode.DEVELOPMENT,
-  server: {
-    port: DEFAULT_SERVER_PORT
-  },
-  cache: {
-  },
-  logging: {
-    level: Level.INFO,
-    pattern: DEFAULT_LOGGING_PATTERN
-  },
-  browser: {
-    path: DEFAULT_BROWSER_PATH,
-    headless: true
-  }
-};
 
 describe('Config', () => {
   const env = process.env;
@@ -74,7 +53,7 @@ describe('Config', () => {
         {
           CI: 'true'
         },
-        { ...defaultConfig }
+        {}
       ],
       [
         {
@@ -82,7 +61,6 @@ describe('Config', () => {
           NODE_ENV: 'development'
         },
         {
-          ...defaultConfig,
           mode: Mode.DEVELOPMENT
         }
       ],
@@ -92,7 +70,6 @@ describe('Config', () => {
           NODE_ENV: 'production'
         },
         {
-          ...defaultConfig,
           mode: Mode.PRODUCTION
         }
       ],
@@ -102,7 +79,6 @@ describe('Config', () => {
           GRAPH_DOM_SERVER_PORT: '8081'
         },
         {
-          ...defaultConfig,
           server: {
             port: 8081
           }
@@ -114,7 +90,6 @@ describe('Config', () => {
           GRAPH_DOM_CACHE_REDIS_HOST: 'localhost'
         },
         {
-          ...defaultConfig,
           cache: {
             redis: {
               host: 'localhost',
@@ -131,7 +106,6 @@ describe('Config', () => {
           GRAPH_DOM_CACHE_REDIS_PORT: 6380
         },
         {
-          ...defaultConfig,
           cache: {
             redis: {
               host: 'localhost',
@@ -148,7 +122,6 @@ describe('Config', () => {
           GRAPH_DOM_CACHE_REDIS_PASSWORD: 'REDIS_PASSWORD'
         },
         {
-          ...defaultConfig,
           cache: {
             redis: {
               host: 'localhost',
@@ -164,7 +137,6 @@ describe('Config', () => {
           GRAPH_DOM_LOGGING_LEVEL: 'debug'
         },
         {
-          ...defaultConfig,
           logging: {
             level: Level.DEBUG,
             pattern: DEFAULT_LOGGING_PATTERN
@@ -177,7 +149,6 @@ describe('Config', () => {
           GRAPH_DOM_LOGGING_LEVEL: 'info'
         },
         {
-          ...defaultConfig,
           logging: {
             level: Level.INFO,
             pattern: DEFAULT_LOGGING_PATTERN
@@ -190,7 +161,6 @@ describe('Config', () => {
           GRAPH_DOM_LOGGING_LEVEL: 'warn'
         },
         {
-          ...defaultConfig,
           logging: {
             level: Level.WARN,
             pattern: DEFAULT_LOGGING_PATTERN
@@ -204,7 +174,6 @@ describe('Config', () => {
           GRAPH_DOM_LOGGING_LEVEL: 'error'
         },
         {
-          ...defaultConfig,
           logging: {
             level: Level.ERROR,
             pattern: DEFAULT_LOGGING_PATTERN
@@ -217,7 +186,6 @@ describe('Config', () => {
           GRAPH_DOM_LOGGING_LEVEL: 'trace'
         },
         {
-          ...defaultConfig,
           logging: {
             level: Level.TRACE,
             pattern: DEFAULT_LOGGING_PATTERN
@@ -230,7 +198,6 @@ describe('Config', () => {
           GRAPH_DOM_LOGGING_PATTERN: '[%r] [TEST] - %m%n'
         },
         {
-          ...defaultConfig,
           logging: {
             level: Level.INFO,
             pattern: '[%r] [TEST] - %m%n'
@@ -243,7 +210,6 @@ describe('Config', () => {
           GRAPH_DOM_BROWSER_PATH: '/path/to/chrome'
         },
         {
-          ...defaultConfig,
           browser: {
             path: '/path/to/chrome',
             headless: true
@@ -256,9 +222,8 @@ describe('Config', () => {
           GRAPH_DOM_BROWSER_HEADLESS: 'true'
         },
         {
-          ...defaultConfig,
           browser: {
-            path: DEFAULT_BROWSER_PATH,
+            path: puppeteer.executablePath(),
             headless: true
           }
         }
@@ -269,9 +234,8 @@ describe('Config', () => {
           GRAPH_DOM_BROWSER_HEADLESS: 'false'
         },
         {
-          ...defaultConfig,
           browser: {
-            path: DEFAULT_BROWSER_PATH,
+            path: puppeteer.executablePath(),
             headless: false
           }
         }
@@ -279,12 +243,27 @@ describe('Config', () => {
     ]).test(`should return config from ${JSON.stringify('%s')}`, (environment: { [name: string]: string }, expected: Config) => {
       // Arrange
       process.env = { ...environment };
+      const defaultConfig: Config = {
+        mode: Mode.DEVELOPMENT,
+        server: {
+          port: DEFAULT_SERVER_PORT
+        },
+        cache: {},
+        logging: {
+          level: Level.INFO,
+          pattern: DEFAULT_LOGGING_PATTERN
+        },
+        browser: {
+          path: puppeteer.executablePath(),
+          headless: true
+        }
+      };
 
       // Act
       const actual = getConfig();
 
       // Assert
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual({ ...defaultConfig, ...expected });
     });
 
     each([

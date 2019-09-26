@@ -19,19 +19,14 @@ import puppeteer, { browser, page } from '../../src/__mocks__/puppeteer';
 import { ChromeBrowserService } from '../../src/service/chromeBrowserService';
 
 jest.mock('../../src/util/logging');
-jest.mock('../../src/dom/puppeteer', () => {
-  return {
-    create: jest.fn(),
-    createDocument: jest.fn(),
-    createElement: jest.fn(),
-  };
-});
+jest.mock('../../src/dom/puppeteer');
 
 describe('ChromeBrowserService', () => {
   let browserService!: ChromeBrowserService;
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+
     browser.newPage = jest.fn().mockReturnValue(Promise.resolve(page));
     puppeteer.launch.mockReturnValue(browser);
     browserService = new ChromeBrowserService({

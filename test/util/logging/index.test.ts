@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-import log4js from 'log4js';
+import log4js from '../../../src/__mocks__/log4js';
 import { getLogger } from '../../../src/util/logging';
-import { Level } from '../../../src/util/logging/level';
-
-jest.mock('log4js', () => {
-  return {
-    configure: jest.fn(),
-    getLogger: jest.fn().mockReturnValue({ level: '' })
-  };
-});
 
 jest.mock('../../../src/config', () => {
   return {
@@ -37,6 +29,9 @@ jest.mock('../../../src/config', () => {
 });
 
 describe('getLogger', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
 
   test('should instantiate logger with default category', () => {
     // Act
@@ -44,6 +39,7 @@ describe('getLogger', () => {
 
     // Assert
     expect(actual).toBeDefined();
+    expect(log4js.getLogger).toBeCalledTimes(1);
     expect(log4js.getLogger).toBeCalledWith('GraphDOM');
   });
 
@@ -53,6 +49,7 @@ describe('getLogger', () => {
 
     // Assert
     expect(actual).toBeDefined();
+    expect(log4js.getLogger).toBeCalledTimes(1);
     expect(log4js.getLogger).toBeCalledWith('Test');
   });
 });

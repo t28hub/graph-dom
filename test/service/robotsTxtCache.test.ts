@@ -30,9 +30,7 @@ describe('RobotsTxtCache', () => {
   const cache = new RobotsTxtCache(mockedCache);
 
   beforeEach(() => {
-    (mockedCache.get as jest.Mock).mockReset();
-    (mockedCache.set as jest.Mock).mockReset();
-    (mockedCache.delete as jest.Mock).mockReset();
+    jest.resetAllMocks();
   });
 
 

@@ -17,18 +17,24 @@
 import log4js from 'log4js';
 import { Log4jsLogger } from '../../../src/util/logging/log4jsLogger';
 
-describe('Log4jsLogger', () => {
-  describe('debug', () => {
-    const mockedLogger = jest.fn().bind(log4js.getLogger());
-    mockedLogger.debug = jest.fn();
-    const logger = new Log4jsLogger(mockedLogger);
+jest.mock('log4js');
 
+describe('Log4jsLogger', () => {
+  const mockedLogger = log4js.getLogger();
+  const logger = new Log4jsLogger(mockedLogger);
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('debug', () => {
     test('should call debug method with message', () => {
       // Act
       const message = 'This is a debug message';
       logger.debug(message);
 
       // Assert
+      expect(mockedLogger.debug).toBeCalledTimes(1);
       expect(mockedLogger.debug).toBeCalledWith(message);
     });
 
@@ -38,21 +44,19 @@ describe('Log4jsLogger', () => {
       logger.debug(message, 'debug');
 
       // Assert
+      expect(mockedLogger.debug).toBeCalledTimes(1);
       expect(mockedLogger.debug).toBeCalledWith(message, 'debug');
     });
   });
 
   describe('info', () => {
-    const mockedLogger = jest.fn().bind(log4js.getLogger());
-    mockedLogger.info = jest.fn();
-    const logger = new Log4jsLogger(mockedLogger);
-
     test('should call info method with message', () => {
       // Act
       const message = 'This is an info message';
       logger.info(message);
 
       // Assert
+      expect(mockedLogger.info).toBeCalledTimes(1);
       expect(mockedLogger.info).toBeCalledWith(message);
     });
 
@@ -62,21 +66,19 @@ describe('Log4jsLogger', () => {
       logger.info(message, 'info');
 
       // Assert
+      expect(mockedLogger.info).toBeCalledTimes(1);
       expect(mockedLogger.info).toBeCalledWith(message, 'info');
     });
   });
 
   describe('warn', () => {
-    const mockedLogger = jest.fn().bind(log4js.getLogger());
-    mockedLogger.warn = jest.fn();
-    const logger = new Log4jsLogger(mockedLogger);
-
     test('should call warn method with message', () => {
       // Act
       const message = 'This is a warn message';
       logger.warn(message);
 
       // Assert
+      expect(mockedLogger.warn).toBeCalledTimes(1);
       expect(mockedLogger.warn).toBeCalledWith(message);
     });
 
@@ -86,21 +88,19 @@ describe('Log4jsLogger', () => {
       logger.warn(message, 'warn');
 
       // Assert
+      expect(mockedLogger.warn).toBeCalledTimes(1);
       expect(mockedLogger.warn).toBeCalledWith(message, 'warn');
     });
   });
 
   describe('error', () => {
-    const mockedLogger = jest.fn().bind(log4js.getLogger());
-    mockedLogger.error = jest.fn();
-    const logger = new Log4jsLogger(mockedLogger);
-
     test('should call error method with message', () => {
       // Act
       const message = 'This is an error message';
       logger.error(message);
 
       // Assert
+      expect(mockedLogger.error).toBeCalledTimes(1);
       expect(mockedLogger.error).toBeCalledWith(message);
     });
 
@@ -110,20 +110,18 @@ describe('Log4jsLogger', () => {
       logger.error(message, 'error');
 
       // Assert
+      expect(mockedLogger.error).toBeCalledTimes(1);
       expect(mockedLogger.error).toBeCalledWith(message, 'error');
     });
   });
   describe('trace', () => {
-    const mockedLogger = jest.fn().bind(log4js.getLogger());
-    mockedLogger.trace = jest.fn();
-    const logger = new Log4jsLogger(mockedLogger);
-
     test('should call trace method with message', () => {
       // Act
       const message = 'This is a trace message';
       logger.trace(message);
 
       // Assert
+      expect(mockedLogger.trace).toBeCalledTimes(1);
       expect(mockedLogger.trace).toBeCalledWith(message);
     });
 
@@ -133,6 +131,7 @@ describe('Log4jsLogger', () => {
       logger.trace(message, 'trace');
 
       // Assert
+      expect(mockedLogger.trace).toBeCalledTimes(1);
       expect(mockedLogger.trace).toBeCalledWith(message, 'trace');
     });
   });

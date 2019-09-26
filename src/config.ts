@@ -131,9 +131,9 @@ function parseLevel(value: string | undefined, defaultValue: Level): Level {
   }
 }
 
-const DEFAULT_SERVER_PORT = 8080;
-const DEFAULT_LOGGING_PATTERN = '[%r] [%p] %c - %m%n';
-const DEFAULT_CACHE_REDIS_PORT = 6379;
+export const DEFAULT_SERVER_PORT = 8080;
+export const DEFAULT_LOGGING_PATTERN = '[%r] [%p] %c - %m%n';
+export const DEFAULT_CACHE_REDIS_PORT = 6379;
 
 export function getCacheConfig(): Pick<Config, 'cache'> {
   if (process.env.GRAPH_DOM_CACHE_REDIS_HOST) {
