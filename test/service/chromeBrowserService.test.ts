@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import each from 'jest-each';
 import { parse } from 'url';
 import puppeteer, { browser, page } from '../../src/__mocks__/puppeteer';
 import { ChromeBrowserService } from '../../src/service/chromeBrowserService';
 import { InvalidUrlError } from '../../src/service/errors/invalidUrlError';
 import { RequestTimeoutError } from '../../src/service/errors/requestTimeoutError';
-import each from 'jest-each';
 import { NoResponseError } from '../../src/service/errors/noResponseError';
 import { SslCertificateError } from '../../src/service/errors/sslCertificateError';
 import { NotAvailableError } from '../../src/service/errors/notAvailableError';
