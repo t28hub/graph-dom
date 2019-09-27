@@ -17,6 +17,13 @@
 import { parse } from 'url';
 import puppeteer, { browser, page } from '../../src/__mocks__/puppeteer';
 import { ChromeBrowserService } from '../../src/service/chromeBrowserService';
+import { InvalidUrlError } from '../../src/service/errors/invalidUrlError';
+import { RequestTimeoutError } from '../../src/service/errors/requestTimeoutError';
+import each from 'jest-each';
+import { NoResponseError } from '../../src/service/errors/noResponseError';
+import { SslCertificateError } from '../../src/service/errors/sslCertificateError';
+import { NotAvailableError } from '../../src/service/errors/notAvailableError';
+import { NetworkError } from '../../src/service/errors/networkError';
 
 jest.mock('../../src/util/logging');
 jest.mock('../../src/dom/puppeteer');
@@ -24,10 +31,12 @@ jest.mock('../../src/dom/puppeteer');
 describe('ChromeBrowserService', () => {
   let browserService!: ChromeBrowserService;
   beforeEach(() => {
-    // Reset mocks
     jest.clearAllMocks();
 
-    browser.newPage = jest.fn().mockReturnValue(Promise.resolve(page));
+    page.goto.mockReturnValue(Promise.resolve({
+      status: jest.fn().mockReturnValue(200)
+    }));
+    browser.newPage.mockReturnValue(Promise.resolve(page));
     puppeteer.launch.mockReturnValue(browser);
     browserService = new ChromeBrowserService({
       path: '/path/to/chrome',
@@ -38,7 +47,7 @@ describe('ChromeBrowserService', () => {
   describe('open', () => {
     test('should launch browser', async () => {
       // Arrange
-      page.goto = jest.fn().mockReturnValue(Promise.resolve({
+      page.goto.mockReturnValueOnce(Promise.resolve({
         status: jest.fn().mockReturnValue(200)
       }));
 
@@ -59,7 +68,7 @@ describe('ChromeBrowserService', () => {
 
     test('should launch browser only once when open is called over 2 times', async () => {
       // Arrange
-      page.goto = jest.fn().mockReturnValue(Promise.resolve({
+      page.goto.mockReturnValueOnce(Promise.resolve({
         status: jest.fn().mockReturnValue(200)
       }));
 
@@ -87,7 +96,7 @@ describe('ChromeBrowserService', () => {
     test('should set default timeout when property is set', async () => {
       // Act
       const url = parse('https://example.com/');
-      const actual = await browserService.open(url, { timeout: 5000 });
+      await browserService.open(url, { timeout: 5000 });
 
       // Assert
       expect(browser.newPage).toBeCalledWith();
@@ -97,7 +106,7 @@ describe('ChromeBrowserService', () => {
     test('should set userAgent when property is set', async () => {
       // Act
       const url = parse('https://example.com/');
-      const actual = await browserService.open(url, { userAgent: 'CustomUserAgent/1.0.0' });
+      await browserService.open(url, { userAgent: 'CustomUserAgent/1.0.0' });
 
       // Assert
       expect(browser.newPage).toBeCalledWith();
@@ -107,7 +116,7 @@ describe('ChromeBrowserService', () => {
     test('should set waitUntil when property is set', async () => {
       // Act
       const url = parse('https://example.com/');
-      const actual = await browserService.open(url, { waitUntil: 'networkidle2' });
+      await browserService.open(url, { waitUntil: 'networkidle2' });
 
       // Assert
       expect(browser.newPage).toBeCalledWith();
@@ -116,19 +125,19 @@ describe('ChromeBrowserService', () => {
 
     test('should throw an Error when received response is null', async () => {
       // Arrange
-      page.goto = jest.fn().mockReturnValue(Promise.resolve(null));
+      page.goto.mockReturnValueOnce(Promise.resolve(null));
 
       // Act
       const url = parse('https://example.com/');
       const actual = browserService.open(url);
 
       // Assert
-      await expect(actual).rejects.toThrow();
+      await expect(actual).rejects.toThrow(NoResponseError);
     });
 
     test('should not throw an Error when received status is not successful', async () => {
       // Arrange
-      page.goto = jest.fn().mockReturnValue(Promise.resolve({
+      page.goto.mockReturnValueOnce(Promise.resolve({
         status: jest.fn().mockReturnValue(404)
       }));
 
@@ -138,6 +147,59 @@ describe('ChromeBrowserService', () => {
 
       // Assert
       await expect(actual).toBeUndefined();
+    });
+
+    each([
+      [
+        new puppeteer.errors.TimeoutError('Request timeout'),
+        'https://example.com',
+        RequestTimeoutError
+      ],
+      [
+        new Error('net::ERR_INVALID_URL at invalidurl'),
+        'chrome://invalid',
+        InvalidUrlError
+      ],
+      [
+        new Error('net::ERR_CERT_DATE_INVALID at https://expired.badssl.com'),
+        'https://expired.badssl.com',
+        SslCertificateError
+      ],
+      [
+        new Error('net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH at https://null.badssl.com'),
+        'https://null.badssl.com',
+        SslCertificateError
+      ],
+      [
+        new Error('net::DNS_PROBE_FINISHED_NXDOMAIN at https://git.facebook.com'),
+        'https://git.facebook.com',
+        NotAvailableError
+      ],
+      [
+        new Error('net::ERR_NAME_NOT_RESOLVED at https://one.example.com'),
+        'https://one.example.com',
+        NotAvailableError
+      ],
+      [
+        new Error('net::ERR_CONNECTION_REFUSED at https://localhost:8080'),
+        'https://localhost:8080',
+        NotAvailableError
+      ],
+      [
+        new Error('net::DNS_TIMED_OUT'),
+        'https://example.com',
+        NetworkError
+      ]
+    ]).test('should throw an Error when error %p', async (error: Error, urlString: string, expected: jest.Constructable) => {
+      // Arrange
+      page.goto.mockReturnValueOnce(Promise.reject(error));
+
+      // Act
+      const url = parse(urlString);
+      const actual = browserService.open(url);
+
+      // Assert
+      await expect(actual).rejects.toThrow(expected);
     });
   });
 
@@ -175,10 +237,10 @@ describe('ChromeBrowserService', () => {
       // Arrange
       const url = parse('https://example.com/');
       await browserService.open(url);
-      page.close = jest.fn(() => {
+      page.close.mockImplementationOnce(() => {
         throw new Error('Failed to close page');
       });
-      browser.pages = jest.fn().mockReturnValue(Promise.resolve([page]));
+      browser.pages.mockReturnValue(Promise.resolve([page]));
 
       // Act
       await browserService.dispose();

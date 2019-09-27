@@ -80,7 +80,7 @@ describe('RobotsTxtFetcher', () => {
       // Act
       await expect(fetcher.fetch(parse('https://example.com')))
         .rejects
-        .toThrow('Failed to fetch text from https://example.com/robots.txt');
+        .toThrow('Failed to fetch robots.txt from https://example.com/robots.txt');
 
       // Assert
       expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });

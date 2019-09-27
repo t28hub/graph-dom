@@ -21,6 +21,13 @@ import { Document } from '../dom';
 import { createDocument } from '../dom/puppeteer';
 import { BrowserService, Options } from './browserService';
 import { getLogger, Logger } from '../util/logging';
+import { ApolloError } from 'apollo-server-errors';
+import { RequestTimeoutError } from './errors/requestTimeoutError';
+import { SslCertificateError } from './errors/sslCertificateError';
+import { NoResponseError } from './errors/noResponseError';
+import { NotAvailableError } from './errors/notAvailableError';
+import { NetworkError } from './errors/networkError';
+import { InvalidUrlError } from './errors/invalidUrlError';
 
 export interface BrowserOptions {
   readonly path: string;
@@ -43,12 +50,12 @@ export class ChromeBrowserService implements BrowserService {
   public async open(url: Url, options: Partial<Options> = {}): Promise<Document> {
     const { logger } = ChromeBrowserService;
     const browser = await this.ensureBrowser();
-    const page: Page = await browser.newPage();
+    const page = await browser.newPage();
     page.setDefaultTimeout(DEFAULT_TIMEOUT);
     page.setDefaultNavigationTimeout(DEFAULT_NAVIGATION_TIMEOUT);
 
+    const urlString = format(url);
     try {
-      const urlString = format(url);
       const response: Response = await ChromeBrowserService.goto(page, urlString, options);
       const status = response.status();
       if (status >= STATUS_CODE_OK && status < STATUS_CODE_MULTIPLE_CHOICE) {
@@ -59,7 +66,9 @@ export class ChromeBrowserService implements BrowserService {
       return await createDocument(page);
     } catch (e) {
       await ChromeBrowserService.closePage(page);
-      throw e;
+
+      logger.warn('Failed to navigate to %s: %s', urlString, e.message);
+      throw ChromeBrowserService.translateError(e, urlString);
     }
   }
 
@@ -110,10 +119,11 @@ export class ChromeBrowserService implements BrowserService {
       await page.setUserAgent(userAgent);
     }
 
+    // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagegotourl-options
     const navigationOptions: NavigationOptions = { waitUntil: waitUntil || 'load' };
     const response: Response | null = await page.goto(urlString, navigationOptions);
     if (response === null) {
-      throw new Error(`Received no response from ${urlString}`);
+      throw new NoResponseError(`Received no response from ${urlString}`);
     }
     return response;
   }
@@ -126,5 +136,37 @@ export class ChromeBrowserService implements BrowserService {
     } catch (e) {
       logger.warn('Failed to close a page(%s): %s', url, e.message);
     }
+  }
+
+  private static translateError(error: Error, urlString: string): ApolloError {
+    if (error instanceof ApolloError) {
+      return error;
+    }
+
+    if (error instanceof Chrome.puppeteer.errors.TimeoutError) {
+      return new RequestTimeoutError(`Request timed out ${urlString}`);
+    }
+
+    // Puppeteer throws an error when network error occurred.
+    // Cannot detect error using 'instanceof' operator because thrown error is instance of Error.
+    // The error message contains an error code defined in chromium.
+    // https://cs.chromium.org/chromium/src/net/base/net_error_list.h
+    const { message } = error;
+    if (/ERR_INVALID_URL/.test(message)) {
+      return new InvalidUrlError(`URL is invalid ${urlString}`);
+    }
+    // https://support.google.com/chrome/answer/6098869?hl=en
+    if (/ERR_CERT_/.test(message) || /ERR_SSL_/.test(message)) {
+      return new SslCertificateError(`Received SSL certificate error from ${urlString}`);
+    }
+    // https://support.google.com/chromebook/answer/1085581?hl=en
+    if (
+      /DNS_PROBE_FINISHED_NXDOMAIN/.test(message) ||
+      /ERR_NAME_NOT_RESOLVED/.test(message) ||
+      /ERR_CONNECTION_REFUSED/.test(message)
+    ) {
+      return new NotAvailableError(`Requested webpage is not available ${urlString}`);
+    }
+    return new NetworkError(`Received network error from ${urlString}`);
   }
 }

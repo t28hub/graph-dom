@@ -18,6 +18,7 @@ import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { format, Url } from 'url';
 import { RobotsTxt } from './robotsTxt';
 import { getLogger, Logger } from '../util/logging';
+import { NetworkError } from './errors/networkError';
 
 const STATUS_CODE_OK = 200;
 
@@ -31,25 +32,24 @@ export class RobotsTxtFetcher {
     const robotsUrl: string = format(RobotsTxtFetcher.buildRobotsTxtUrl(url));
     logger.info('Fetching robots.txt file from %s', robotsUrl);
 
-    const response: AxiosResponse<string> = await this.fetchText(robotsUrl);
-    const { status, statusText } = response;
-    logger.info('Received response %d %s from %s', status, statusText, robotsUrl);
+    try {
+      const response: AxiosResponse<string> = await this.fetchText(robotsUrl);
+      const { status, statusText } = response;
+      logger.info('Received response %d %s from %s', status, statusText, robotsUrl);
 
-    const content = status === STATUS_CODE_OK ? response.data : '';
-    return RobotsTxt.parse(url, content);
+      const content = status === STATUS_CODE_OK ? response.data : '';
+      return RobotsTxt.parse(url, content);
+    } catch (e) {
+      logger.warn('Failed to fetch robots.txt from %s: %s', robotsUrl, e.message);
+      throw new NetworkError(`Failed to fetch robots.txt from ${robotsUrl}`);
+    }
   }
 
   private async fetchText(urlString: string): Promise<AxiosResponse<string>> {
-    const { logger } = RobotsTxtFetcher;
-    try {
-      const config: AxiosRequestConfig = {
-        responseType: 'text',
-      };
-      return await this.axios.get<string>(urlString, config);
-    } catch (e) {
-      logger.warn('Failed to fetch text from %s: %s', urlString, e);
-      throw new Error(`Failed to fetch text from ${urlString}`);
-    }
+    const config: AxiosRequestConfig = {
+      responseType: 'text',
+    };
+    return await this.axios.get<string>(urlString, config);
   }
 
   public static buildRobotsTxtUrl(url: Url): Url {

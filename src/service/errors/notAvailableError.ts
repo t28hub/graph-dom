@@ -14,27 +14,12 @@
  * limitations under the License.
  */
 
-import { errors } from 'puppeteer';
+import { ApolloError } from 'apollo-server-errors';
 
-export const page = {
-  close: jest.fn(),
-  evaluateHandle: jest.fn().mockReturnValue(Promise.resolve(null)),
-  goto: jest.fn().mockReturnValue(Promise.resolve(null)),
-  setDefaultTimeout: jest.fn(),
-  setDefaultNavigationTimeout: jest.fn(),
-  setUserAgent: jest.fn(),
-  url: jest.fn(),
-};
+export class NotAvailableError extends ApolloError {
+  public constructor(message: string) {
+    super(message, 'NOT_AVAILABLE');
 
-export const browser = {
-  newPage: jest.fn(),
-  close: jest.fn(),
-  disconnect: jest.fn(),
-  pages: jest.fn().mockReturnValue([]),
-};
-
-export default {
-  executablePath: jest.fn().mockReturnValue('/path/to/chrome'),
-  launch: jest.fn(),
-  errors,
-};
+    Object.defineProperty(this, 'name', { value: 'NotAvailableError' });
+  }
+}
