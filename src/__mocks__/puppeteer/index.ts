@@ -20,8 +20,10 @@ export const page = {
   close: jest.fn(),
   evaluateHandle: jest.fn().mockReturnValue(Promise.resolve(null)),
   goto: jest.fn().mockReturnValue(Promise.resolve(null)),
+  on: jest.fn(),
   setDefaultTimeout: jest.fn(),
   setDefaultNavigationTimeout: jest.fn(),
+  setRequestInterception: jest.fn(),
   setUserAgent: jest.fn(),
   url: jest.fn(),
 };

@@ -15,7 +15,7 @@
  */
 
 import Chrome from 'chrome-aws-lambda';
-import { Browser, LaunchOptions, NavigationOptions, Page, Response } from 'puppeteer';
+import { Browser, LaunchOptions, NavigationOptions, Page, Request, ResourceType, Response } from 'puppeteer';
 import { format, Url } from 'url';
 import { Document } from '../dom';
 import { createDocument } from '../dom/puppeteer';
@@ -38,6 +38,7 @@ const DEFAULT_TIMEOUT = 50000;
 const DEFAULT_NAVIGATION_TIMEOUT = 50000;
 const STATUS_CODE_OK = 200;
 const STATUS_CODE_MULTIPLE_CHOICE = 300;
+const IGNORED_RESOURCE_TYPES: ResourceType[] = ['font', 'image', 'media', 'stylesheet'];
 
 export class ChromeBrowserService implements BrowserService {
   private static readonly logger: Logger = getLogger(ChromeBrowserService.name);
@@ -53,6 +54,17 @@ export class ChromeBrowserService implements BrowserService {
     const page = await browser.newPage();
     page.setDefaultTimeout(DEFAULT_TIMEOUT);
     page.setDefaultNavigationTimeout(DEFAULT_NAVIGATION_TIMEOUT);
+
+    if (this.browserOptions.headless) {
+      await page.setRequestInterception(true);
+      page.on('request', (request: Request) => {
+        if (IGNORED_RESOURCE_TYPES.includes(request.resourceType())) {
+          request.abort('aborted');
+        } else {
+          request.continue();
+        }
+      });
+    }
 
     const urlString = format(url);
     try {
@@ -99,6 +111,7 @@ export class ChromeBrowserService implements BrowserService {
     }
 
     const { path: executablePath, headless } = this.browserOptions;
+    ChromeBrowserService.logger.warn('Launch options %s', Chrome.args);
     const options: LaunchOptions = {
       args: Chrome.args,
       defaultViewport: Chrome.defaultViewport,

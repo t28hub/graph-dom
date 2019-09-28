@@ -93,6 +93,106 @@ describe('ChromeBrowserService', () => {
       expect(page.goto).toBeCalledWith('https://example.org/', { waitUntil: 'load' });
     });
 
+    test('should set request interceptor when headless is true', async () => {
+      // Act
+      const browserService = new ChromeBrowserService({
+        path: '/path/to/chrome',
+        headless: true
+      });
+
+      // Act
+      const url = parse('https://example.com/');
+      await browserService.open(url);
+
+      // Assert
+      expect(page.setRequestInterception).toBeCalledWith(true);
+      expect(page.on).toBeCalledWith('request', expect.any(Function));
+    });
+
+    each([
+      ['font'],
+      ['image'],
+      ['media'],
+      ['stylesheet']
+    ]).test('should abort request when resource type is blocking: %s', async (resourceType: string) => {
+      // Act
+      const browserService = new ChromeBrowserService({
+        path: '/path/to/chrome',
+        headless: true
+      });
+      const request = {
+        abort: jest.fn(),
+        continue: jest.fn(),
+        resourceType: jest.fn().mockReturnValue(resourceType)
+      };
+      page.on.mockImplementation((eventName: string, handler: (request: any) => void) => {
+        if (eventName === 'request') {
+          handler(request);
+        }
+      });
+
+      // Act
+      const url = parse('https://example.com/');
+      await browserService.open(url);
+
+      // Assert
+      expect(request.abort).toBeCalledWith('aborted');
+      expect(request.continue).not.toBeCalled();
+    });
+
+    each([
+      ['document'],
+      ['script'],
+      ['texttrack'],
+      ['xhr'],
+      ['fetch'],
+      ['eventsource'],
+      ['websocket'],
+      ['manifest'],
+      ['other'],
+      ['unknown']
+    ]).test('should continue request when resource type is not blocking: %s', async (resourceType: string) => {
+      // Act
+      const browserService = new ChromeBrowserService({
+        path: '/path/to/chrome',
+        headless: true
+      });
+      const request = {
+        abort: jest.fn(),
+        continue: jest.fn(),
+        resourceType: jest.fn().mockReturnValue(resourceType)
+      };
+      page.on.mockImplementation((eventName: string, handler: (request: any) => void) => {
+        if (eventName === 'request') {
+          handler(request);
+        }
+      });
+
+      // Act
+      const url = parse('https://example.com/');
+      await browserService.open(url);
+
+      // Assert
+      expect(request.abort).not.toBeCalled();
+      expect(request.continue).toBeCalled();
+    });
+
+    test('should not set request interceptor when headless is true', async () => {
+      // Act
+      const browserService = new ChromeBrowserService({
+        path: '/path/to/chrome',
+        headless: false
+      });
+
+      // Act
+      const url = parse('https://example.com/');
+      await browserService.open(url);
+
+      // Assert
+      expect(page.setRequestInterception).not.toBeCalled();
+      expect(page.on).not.toBeCalled();
+    });
+
     test('should set default timeout when property is set', async () => {
       // Act
       const url = parse('https://example.com/');
