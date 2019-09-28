@@ -15,21 +15,17 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { IResolvers, ITypeDefinitions, makeExecutableSchema } from 'graphql-tools';
+import { importSchema } from 'graphql-import';
+import { makeExecutableSchema } from 'graphql-tools';
+import { resolve } from 'path';
 import { resolver as queryResolver } from './resolvers/query';
 import { resolver as nodeResolver } from './resolvers/node';
 import { resolver as documentResolver } from './resolvers/document';
 import { resolver as elementResolver } from './resolvers/element';
-import attribute from './typeDefs/attribute';
-import data from './typeDefs/data';
-import document from './typeDefs/document';
-import element from './typeDefs/element';
-import node from './typeDefs/node';
-import query from './typeDefs/query';
 
-const typeDefs: ITypeDefinitions = [attribute, data, document, element, node, query];
-
-const resolvers: IResolvers = {
+const path = resolve(__dirname, './typeDefs/query.graphql');
+const typeDefs = importSchema(path);
+const resolvers = {
   Query: queryResolver,
   Node: nodeResolver,
   Document: documentResolver,

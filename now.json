@@ -8,14 +8,19 @@
   },
   "builds": [
     {
-      "src": "dist/src/server.js",
-      "use": "@now/node"
+      "src": "src/server.ts",
+      "use": "@now/node",
+      "config": {
+        "includeFiles": [
+          "src/**/*.graphql"
+        ]
+      }
     }
   ],
   "routes": [
     {
       "src": "/.*",
-      "dest": "dist/src/server.js"
+      "dest": "src/server.ts"
     }
   ]
 }
