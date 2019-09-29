@@ -22,7 +22,7 @@ import { RobotsTxt } from '../../src/service/robotsTxt';
 jest.mock('../../src/util/logging');
 
 describe('RobotsTxtCache', () => {
-  const mockedCache: KeyValueCache = {
+  const mockedCache: jest.Mocked<KeyValueCache> = {
     get: jest.fn(),
     set: jest.fn(),
     delete: jest.fn()
@@ -32,7 +32,6 @@ describe('RobotsTxtCache', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-
 
   describe('get', () => {
     test('should call get method with URL', async () => {
@@ -46,7 +45,7 @@ describe('RobotsTxtCache', () => {
 
     test('should return value when cached value exists', async () => {
       // Arrange
-      (mockedCache.get as jest.Mock).mockReturnValue('This is cached robots.txt.');
+      mockedCache.get.mockReturnValue(Promise.resolve('This is cached robots.txt.'));
 
       // Act
       const url = parse('https://example.com/');
@@ -67,7 +66,7 @@ describe('RobotsTxtCache', () => {
 
     test('should return empty when cached value does not exist', async () => {
       // Arrange
-      (mockedCache.get as jest.Mock).mockReturnValue(undefined);
+      mockedCache.get.mockReturnValue(Promise.resolve(undefined));
 
       // Act
       const url = parse('https://example.com/');

@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-jest.unmock('chrome-aws-lambda');
-jest.unmock('puppeteer');
-
-import { puppeteer } from 'chrome-aws-lambda';
 import each from 'jest-each';
+import puppeteer from '../src/__mocks__/puppeteer';
 import { Config, DEFAULT_LOGGING_PATTERN, DEFAULT_SERVER_PORT, getConfig, Mode } from '../src/config';
 import { Level } from '../src/util/logging/level';
+
+jest.mock('chrome-aws-lambda', () => {
+  return { puppeteer };
+});
 
 describe('Config', () => {
   const env = process.env;
   describe('getConfig', () => {
     beforeEach(() => {
+      jest.resetAllMocks();
       jest.resetModules();
       process.env = { ...env };
       delete process.env.NODE_ENV;
@@ -243,6 +245,7 @@ describe('Config', () => {
     ]).test(`should return config from ${JSON.stringify('%s')}`, (environment: { [name: string]: string }, expected: Config) => {
       // Arrange
       process.env = { ...environment };
+      puppeteer.executablePath.mockReturnValue('/path/to/chrome');
       const defaultConfig: Config = {
         mode: Mode.DEVELOPMENT,
         server: {

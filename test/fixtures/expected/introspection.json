@@ -1,0 +1,92 @@
+{
+  "data": {
+    "__schema": {
+      "queryType": {
+        "name": "Query"
+      },
+      "mutationType": null,
+      "subscriptionType": null,
+      "types": [
+        {
+          "kind": "OBJECT",
+          "name": "Query"
+        },
+        {
+          "kind": "SCALAR",
+          "name": "String"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "Document"
+        },
+        {
+          "kind": "INTERFACE",
+          "name": "Node"
+        },
+        {
+          "kind": "ENUM",
+          "name": "NodeType"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "Element"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "Attribute"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "Data"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "__Schema"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "__Type"
+        },
+        {
+          "kind": "ENUM",
+          "name": "__TypeKind"
+        },
+        {
+          "kind": "SCALAR",
+          "name": "Boolean"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "__Field"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "__InputValue"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "__EnumValue"
+        },
+        {
+          "kind": "OBJECT",
+          "name": "__Directive"
+        },
+        {
+          "kind": "ENUM",
+          "name": "__DirectiveLocation"
+        }
+      ],
+      "directives": [
+        {
+          "name": "skip"
+        },
+        {
+          "name": "include"
+        },
+        {
+          "name": "deprecated"
+        }
+      ]
+    }
+  }
+}

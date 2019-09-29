@@ -17,6 +17,7 @@
 module.exports = {
   rootDir: '.',
   roots: ['<rootDir>/src/', '<rootDir>/test/'],
+  automock: false,
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },

@@ -48,6 +48,7 @@ export class RobotsTxtFetcher {
   private async fetchText(urlString: string): Promise<AxiosResponse<string>> {
     const config: AxiosRequestConfig = {
       responseType: 'text',
+      validateStatus: (status: number): boolean => true,
     };
     return await this.axios.get<string>(urlString, config);
   }

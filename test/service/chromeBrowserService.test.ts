@@ -25,8 +25,11 @@ import { SslCertificateError } from '../../src/service/errors/sslCertificateErro
 import { NotAvailableError } from '../../src/service/errors/notAvailableError';
 import { NetworkError } from '../../src/service/errors/networkError';
 
-jest.mock('../../src/util/logging');
+jest.mock('chrome-aws-lambda', () => {
+  return { args: [], puppeteer };
+});
 jest.mock('../../src/dom/puppeteer');
+jest.mock('../../src/util/logging');
 
 describe('ChromeBrowserService', () => {
   let browserService!: ChromeBrowserService;

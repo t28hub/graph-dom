@@ -1,0 +1,5 @@
+query PageTitle {
+  page(url: "https://www.example.com") {
+    title
+  }
+}

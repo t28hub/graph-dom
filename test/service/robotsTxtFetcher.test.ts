@@ -20,18 +20,21 @@ import { parse } from 'url';
 import { RobotsTxtFetcher } from '../../src/service/robotsTxtFetcher';
 
 jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-
 jest.mock('../../src/util/logging');
 
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
 describe('RobotsTxtFetcher', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('fetch', () => {
     const fetcher = new RobotsTxtFetcher(axios);
 
     each([
       'https://example.com',
       'https://example.com/',
-      'https://example.com:443/',
       'https://example.com/test/',
       'https://example.com/test/index.html',
       'https://example.com/test/index.html?query=example',
@@ -51,7 +54,10 @@ describe('RobotsTxtFetcher', () => {
       const actual = await fetcher.fetch(url);
 
       // Assert
-      expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });
+      expect(mockedAxios.get).toBeCalledWith(
+        'https://example.com/robots.txt',
+        { responseType: 'text', validateStatus: expect.any(Function) }
+      );
       expect(actual).toBeDefined();
     });
 
@@ -66,7 +72,10 @@ describe('RobotsTxtFetcher', () => {
       const actual = await fetcher.fetch(parsed);
 
       // Assert
-      expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });
+      expect(mockedAxios.get).toBeCalledWith(
+        'https://example.com/robots.txt',
+        { responseType: 'text', validateStatus: expect.any(Function) }
+      );
       expect(actual).toBeDefined();
       expect(actual.content).toBe('');
     });
@@ -83,7 +92,10 @@ describe('RobotsTxtFetcher', () => {
         .toThrow('Failed to fetch robots.txt from https://example.com/robots.txt');
 
       // Assert
-      expect(mockedAxios.get).toBeCalledWith('https://example.com/robots.txt', { responseType: 'text' });
+      expect(mockedAxios.get).toBeCalledWith(
+        'https://example.com/robots.txt',
+        { responseType: 'text', validateStatus: expect.any(Function) }
+      );
     });
   });
 

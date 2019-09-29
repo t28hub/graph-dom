@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-import puppeteer from '../puppeteer';
-
-export default {
-  args: [],
-  puppeteer,
+module.exports = {
+  rootDir: '.',
+  roots: ['<rootDir>/src/', '<rootDir>/test/'],
+  automock: false,
+  transform: {
+    '^.+\\.ts$': 'ts-jest',
+  },
+  globals: {
+    'ts-jest': {
+      tsConfig: 'tsconfig.json',
+    },
+  },
+  collectCoverage: false,
+  moduleFileExtensions: ['js', 'ts'],
+  testEnvironment: 'node',
+  testMatch: ['**/test/**/*.test.e2e.ts'],
+  reporters: ['default', ['jest-junit', { outputDirectory: 'reports/test/e2e', outputName: 'jest.xml' }]],
+  verbose: true,
 };

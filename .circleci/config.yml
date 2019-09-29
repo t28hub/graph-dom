@@ -11,7 +11,7 @@ aliases:
       - node_modules
     key: v2-dependencies-{{ .Branch }}-{{ checksum "yarn.lock" }}
 
-version: 2
+version: 2.1
 jobs:
   lint:
     docker:
@@ -45,6 +45,24 @@ jobs:
           path: ./reports/coverage/lcov-report
           destination: lcov
 
+  e2e:
+    docker:
+      - image: circleci/node:12-browsers
+    working_directory: ~/graph-dom
+    environment:
+      NODE_ENV: development
+    steps:
+      - checkout
+      - restore_cache: *restore-cache
+      - run: *install-dependencies
+      - save_cache: *save-cache
+      - run: yarn test:e2e --ci
+      - store_test_results:
+          path: ./reports/test
+      - store_artifacts:
+          path: ./reports/test
+          destination: jest
+
   build:
     docker:
       - image: circleci/node:12
@@ -70,4 +88,7 @@ workflows:
           requires:
             - lint
             - test
+      - e2e:
+          requires:
+            - build
 

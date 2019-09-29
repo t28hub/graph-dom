@@ -17,14 +17,12 @@
 import { DataSourceConfig } from 'apollo-datasource';
 import axios from 'axios';
 import { parse } from 'url';
-import { Document, NodeType } from '../../../src/dom';
+import { NodeType } from '../../../src/dom';
 import { Context } from '../../../src/graphql/context';
 import { BrowserDataSource } from '../../../src/graphql/dataSources/browserDataSource';
 import { BrowserService } from '../../../src/service/browserService';
 
 jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-
 jest.mock('../../../src/util/logging');
 
 const document = {
