@@ -1,0 +1,5 @@
+query {
+  page(url: "ftp://user:p@ssw0rd@example.com/path") {
+    title
+  }
+}

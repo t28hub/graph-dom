@@ -1,4 +1,4 @@
-query PageTitle {
+query {
   page(url: "https://www.example.com") {
     title
   }

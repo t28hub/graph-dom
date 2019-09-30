@@ -25,6 +25,8 @@ export function validate(condition: boolean, message: string): void {
 }
 
 export function validateUrl(input: string, allowedProtocols: string[] = ['http:', 'https:']): void {
+  validate(input.length !== 0, `URL must not be empty`);
+
   let parsed!: Url;
   try {
     parsed = parse(input);

@@ -1,0 +1,11 @@
+query {
+  JavaScript: page(url: "https://en.wikipedia.org/wiki/JavaScript") {
+    title
+  }
+  TypeScript: page(url: "https://en.wikipedia.org/wiki/TypeScript") {
+    title
+  }
+  ECMAScript: page(url: "https://en.wikipedia.org/wiki/ECMAScript") {
+    title
+  }
+}

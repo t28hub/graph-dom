@@ -53,6 +53,14 @@ describe('Validator', () => {
       }).not.toThrowError();
     });
 
+    test('should throw an UserInputError when URL is empty', () => {
+      // Assert
+      expect(() => {
+        // Act
+        validateUrl('');
+      }).toThrowError(new UserInputError('URL must not be empty'));
+    });
+
     test('should throw an UserInputError when URL is invalid', () => {
       // Assert
       expect(() => {

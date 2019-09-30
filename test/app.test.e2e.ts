@@ -15,6 +15,7 @@
  */
 
 import { promises } from 'fs';
+import each from 'jest-each';
 import { resolve } from 'path';
 import supertest, { Test } from 'supertest';
 import app from '../src/app';
@@ -45,7 +46,7 @@ const postQuery = (payload: Payload): Test => {
     .send(payload);
 };
 
-describe('API', () => {
+describe('App', () => {
   beforeAll(() => {
     jest.setTimeout(30000);
   });
@@ -77,22 +78,43 @@ describe('API', () => {
       expect(body).toMatchObject(expected);
     });
 
-    test('should respond 200 with title', async () => {
+    each`
+      graphqlFile                             | expectedFile
+      ${'pageTitleQuery.graphql'}             | ${'pageTitle.json'}
+      ${'multiplePagesQuery.graphql'}         | ${'multiplePages.json'}
+    `.test('should respond 200 with data: $graphqlFile', async ({ graphqlFile, expectedFile }: { [name: string]: string }) => {
       // Arrange
-      const query = await readGraphqlFile('pageTitleQuery.graphql');
-      const expected = await readExpectedJson('pageTitle.json');
+      const query = await readGraphqlFile(graphqlFile);
+      const expected = await readExpectedJson(expectedFile);
 
       // Act
-      const response = await postQuery({
-        operationName: 'PageTitle',
-        query
-      });
+      const response = await postQuery({ query });
 
       // Assert
       const { status, body } = response;
       expect(status).toBe(200);
       expect(body).toMatchObject(expected);
       expect(body).not.toHaveProperty('errors');
+    });
+
+    each`
+      graphqlFile                             | expectedFile
+      ${'emptyUrlQuery.graphql'}              | ${'emptyUrl.json'} 
+      ${'invalidUrlQuery.graphql'}            | ${'invalidUrl.json'} 
+      ${'disallowedProtocolUrlQuery.graphql'} | ${'disallowedProtocolUrl.json'} 
+      ${'missingProtocolUrlQuery.graphql'}    | ${'missingProtocolUrl.json'} 
+    `.test('should respond 200 with BAD_USER_INPUT error: $graphqlFile', async ({ graphqlFile, expectedFile }: { [name: string]: string }) => {
+      // Arrange
+      const query = await readGraphqlFile(graphqlFile);
+      const expected = await readExpectedJson(expectedFile);
+
+      // Act
+      const response = await postQuery({ query });
+
+      // Assert
+      const { status, body } = response;
+      expect(status).toBe(200);
+      expect(body).toMatchObject(expected);
     });
 
     test('should respond GraphQL schema', async () => {
