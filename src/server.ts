@@ -23,10 +23,10 @@ import { LoggerProvider } from './infrastructure/loggerProvider';
 install();
 
 const mode = `${process.env.NODE_ENV}`;
+const port = parseInt(process.env.GRAPH_DOM_SERVER_PORT || '8080');
 const { injector } = AppModule;
 
-const logger = injector.get(LoggerProvider).provideLogger();
-const port = parseInt(process.env.GRAPH_DOM_SERVER_PORT || '8080');
 app.listen(port, () => {
+  const logger = injector.get(LoggerProvider).provideLogger();
   logger.info('Application is running at http://localhost:%d in %s mode', port, mode);
 });

@@ -15,7 +15,7 @@
  */
 
 import { GraphQLModule } from '@graphql-modules/core';
-import { RedisProvider } from './redisProvider';
+import { RedisCacheProvider } from './redisCacheProvider';
 import { Provider } from '@graphql-modules/di';
 
 export const DEFAULT_REDIS_HOST = '127.0.0.1';
@@ -27,7 +27,7 @@ export interface Config {
   readonly password?: string;
 }
 
-export const RedisModule = new GraphQLModule<Config>({
+export const CacheModule = new GraphQLModule<Config>({
   providers: ({ config }: GraphQLModule): Provider[] => [
     {
       provide: 'RedisHost',
@@ -41,6 +41,6 @@ export const RedisModule = new GraphQLModule<Config>({
       provide: 'RedisPassword',
       useValue: config.password,
     },
-    RedisProvider,
+    RedisCacheProvider,
   ],
 });

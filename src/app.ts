@@ -23,7 +23,7 @@ import 'reflect-metadata';
 import { AppModule } from './appModule';
 import { Context } from './context';
 import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
-import { RedisProvider } from './infrastructure/redisProvider';
+import { RedisCacheProvider } from './infrastructure/redisCacheProvider';
 
 const app = express();
 app.use(
@@ -39,7 +39,7 @@ app.use(
 );
 
 const { schema, injector, context } = AppModule;
-const cache = injector.get(RedisProvider).provideCache();
+const cache = injector.get(RedisCacheProvider).provideCache();
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const serverConfig: ServerConfig = {
@@ -51,11 +51,13 @@ const serverConfig: ServerConfig = {
     const browser = injector.get(BrowserDataSource);
     return { browser };
   },
+  engine: undefined,
   debug: isDevelopment,
   playground: isDevelopment,
   tracing: isDevelopment,
 };
-const server = new ApolloServer(serverConfig);
+
+export const server = new ApolloServer(serverConfig);
 server.applyMiddleware({ app });
 
 export default app;

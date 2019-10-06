@@ -29,7 +29,7 @@ export interface Config {
   overwrite: false,
 })
 export class BrowserProvider implements OnInit {
-  private rootBrowserPromise!: Promise<Browser>;
+  private sharedBrowserPromise!: Promise<Browser>;
 
   public constructor(
     @Inject('BrowserPath') public readonly path: string,
@@ -37,18 +37,24 @@ export class BrowserProvider implements OnInit {
   ) {}
 
   public onInit(module: GraphQLModule): void {
-    this.rootBrowserPromise = Chrome.puppeteer.launch({
+    this.sharedBrowserPromise = Chrome.puppeteer.launch({
       executablePath: this.path,
       headless: this.headless,
+      args: ['--no-sandbox', '--disable-gpu', '--enable-logging', this.headless ? '--headless' : ''],
     });
   }
 
   public async provideBrowser(options: Partial<BrowserOptions> = {}): Promise<Browser> {
-    const browser = await this.rootBrowserPromise;
+    const browser = await this.sharedBrowserPromise;
     const connectOptions: ConnectOptions = {
       browserWSEndpoint: browser.wsEndpoint(),
       ...options,
     };
     return await Chrome.puppeteer.connect(connectOptions);
+  }
+
+  public async dispose(): Promise<void> {
+    const browser = await this.sharedBrowserPromise;
+    await browser.close();
   }
 }

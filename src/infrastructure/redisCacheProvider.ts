@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { GraphQLModule, OnInit } from '@graphql-modules/core';
 import { Inject, Injectable, ProviderScope } from '@graphql-modules/di';
 import { KeyValueCache } from 'apollo-server-caching';
 import { RedisCache } from 'apollo-server-cache-redis';
@@ -22,15 +23,25 @@ import { RedisCache } from 'apollo-server-cache-redis';
   scope: ProviderScope.Application,
   overwrite: false,
 })
-export class RedisProvider {
+export class RedisCacheProvider implements OnInit {
+  private cache!: RedisCache;
+
   public constructor(
     @Inject('RedisHost') private readonly host: string,
     @Inject('RedisPort') private readonly port: number,
     @Inject('RedisPassword') private readonly password?: string
   ) {}
 
-  public provideCache(): KeyValueCache {
+  public onInit(module: GraphQLModule): void {
     const { host, port, password } = this;
-    return new RedisCache({ host, port, password });
+    this.cache = new RedisCache({ host, port, password });
+  }
+
+  public provideCache(): KeyValueCache {
+    return this.cache;
+  }
+
+  public async dispose(): Promise<void> {
+    await this.cache.close();
   }
 }

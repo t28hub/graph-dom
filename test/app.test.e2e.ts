@@ -14,83 +14,110 @@
  * limitations under the License.
  */
 
+import 'reflect-metadata';
 import { promises } from 'fs';
 import each from 'jest-each';
 import { resolve } from 'path';
 import supertest, { Test } from 'supertest';
 import app from '../src/app';
 import { AppModule } from '../src/appModule';
-import { Browser } from 'puppeteer';
 import { BrowserProvider } from '../src/infrastructure/browserProvider';
-import { Logger } from '../src/util/logging/logger';
-import { LoggerProvider } from '../src/infrastructure/loggerProvider';
+import { RedisCacheProvider } from '../src/infrastructure/redisCacheProvider';
 
 jest.unmock('puppeteer');
-jest.setTimeout(30000);
+jest.setTimeout(10000);
 
-const readGraphqlFile = async (name: string): Promise<string> => {
+async function readGraphqlFile(name: string): Promise<string> {
   const path = resolve(__dirname, './fixtures/graphql/', name);
   return await promises.readFile(path, { encoding: 'utf8', flag: 'r' });
-};
+}
 
-const readExpectedJson = async (name: string): Promise<object> => {
+async function readExpectedJson(name: string): Promise<object> {
   const path = resolve(__dirname, './fixtures/expected/', name);
   const text = await promises.readFile(path, { encoding: 'utf8', flag: 'r' });
   return JSON.parse(text);
-};
-
-interface Payload {
-  readonly operationName?: string;
-  readonly query: string;
-  readonly variables?: { [name: string]: any };
 }
 
-const postQuery = (payload: Payload): Test => {
+function post(json?: any): Test {
   return supertest(app)
     .post('/graphql')
+    .set('Accept', 'application/json')
     .set('Content-Type', 'application/json; charset=utf-8')
-    .send(payload);
-};
+    .set('User-Agent', 'GraphDOM/1.0.0')
+    .send(json);
+}
 
 describe('App', () => {
-  const { injector } = AppModule;
-
-  let browser!: Browser;
-  let logger!: Logger;
-  beforeAll(async () => {
-    browser = await injector.get(BrowserProvider).provideBrowser();
-    logger = injector.get(LoggerProvider).provideLogger('App E2E');
-  });
-
   afterAll(async () => {
-    await browser.close();
+    const { injector } = AppModule;
+    await injector.get(RedisCacheProvider).dispose();
+    await injector.get(BrowserProvider).dispose();
   });
 
   describe('POST /graphql', () => {
     test('should respond 200 with required headers', async () => {
       // Arrange
       const query = await readGraphqlFile('typenameQuery.graphql');
-      const expected = await readExpectedJson('typename.json');
 
       // Act
-      const response = await postQuery({ query });
+      const response = await post({ query });
 
       // Assert
-      const { status, header, body } = response;
+      const { status, header } = response;
       expect(status).toBe(200);
       expect(header).toMatchObject({
-        'content-type':'application/json; charset=utf-8',
+        'content-type': 'application/json; charset=utf-8',
         'strict-transport-security': expect.anything(),
         'x-download-options': 'noopen',
         'x-content-type-options': 'nosniff',
         'x-frame-options': 'DENY',
-        'x-xss-protection': '1; mode=block',
+        'x-xss-protection': '1; mode=block'
       });
       expect(header).not.toMatchObject({
         'x-powered-by': expect.anything(),
         'server': expect.anything()
       });
+    });
+
+    test('should respond 200 with __typename', async () => {
+      // Arrange
+      const query = await readGraphqlFile('typenameQuery.graphql');
+      const expected = await readExpectedJson('typename.json');
+
+      // Act
+      const response = await post({ query });
+
+      // Assert
+      const { status, body } = response;
+      expect(status).toBe(200);
+      expect(body.data).toBeDefined();
+      expect(body.errors).toBeUndefined();
       expect(body).toMatchObject(expected);
+    });
+
+    test('should respond 200 with GraphQL schema', async () => {
+      // Arrange
+      const query = await readGraphqlFile('introspectionQuery.graphql');
+      const expected = await readExpectedJson('introspection.json');
+
+      const response = await post({ query });
+
+      // Assert
+      const { status, body } = response;
+      expect(status).toBe(200);
+      expect(body.data).toBeDefined();
+      expect(body.errors).toBeUndefined();
+      expect(body).toMatchObject(expected);
+    });
+
+    test('should respond 500 when body is missing', async () => {
+      // Act
+      const response = await post();
+
+      // Assert
+      const { status, body } = response;
+      expect(status).toBe(500);
+      expect(body).toEqual({});
     });
 
     each`
@@ -103,14 +130,14 @@ describe('App', () => {
       const expected = await readExpectedJson(expectedFile);
 
       // Act
-      const response = await postQuery({ query });
+      const response = await post({ query });
 
       // Assert
       const { status, body } = response;
-      logger.info('Received %d %p', status, body);
       expect(status).toBe(200);
+      expect(body.data).toBeDefined();
+      expect(body.errors).toBeUndefined();
       expect(body).toMatchObject(expected);
-      expect(body).not.toHaveProperty('errors');
     });
 
     each`
@@ -125,53 +152,14 @@ describe('App', () => {
       const expected = await readExpectedJson(expectedFile);
 
       // Act
-      const response = await postQuery({ query });
-
-      // Assert
-      const { status, body } = response;
-      logger.info('Received %d %p', status, body);
-      expect(status).toBe(200);
-      expect(body).toMatchObject(expected);
-    });
-
-    test('should respond GraphQL schema', async () => {
-      // Arrange
-      const query = await readGraphqlFile('introspectionQuery.graphql');
-      const expected = await readExpectedJson('introspection.json');
-
-      const response = await postQuery({
-        operationName: 'IntrospectionQuery',
-        query
-      });
+      const response = await post({ query });
 
       // Assert
       const { status, body } = response;
       expect(status).toBe(200);
+      expect(body.data).toBeNull();
+      expect(body.errors).toBeDefined();
       expect(body).toMatchObject(expected);
-    });
-
-    test('should respond 400 when method is not POST', async () => {
-      // Act
-      const response = await supertest(app)
-        .get('/graphql')
-        .set('Content-Type', 'application/json; charset=utf-8');
-
-      // Assert
-      const { status, body } = response;
-      expect(status).toBe(400);
-      expect(body).toEqual({});
-    });
-
-    test('should respond 500 when body is missing', async () => {
-      // Act
-      const response = await supertest(app)
-        .post('/graphql')
-        .set('Content-Type', 'application/json; charset=utf-8');
-
-      // Assert
-      const { status, body } = response;
-      expect(status).toBe(500);
-      expect(body).toEqual({});
     });
   });
 });

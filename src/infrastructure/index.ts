@@ -19,7 +19,7 @@ import { puppeteer } from 'chrome-aws-lambda';
 import { AxiosProvider } from './axiosProvider';
 import { BrowserModule } from './browserModule';
 import { DEFAULT_LOGGING_PATTERN, LoggingModule } from './loggingModule';
-import { DEFAULT_REDIS_HOST, DEFAULT_REDIS_PORT, RedisModule } from './redisModule';
+import { DEFAULT_REDIS_HOST, DEFAULT_REDIS_PORT, CacheModule } from './cacheModule';
 import { Level } from '../util/logging/logger';
 
 function parseInt(value: string | undefined, defaultValue: number): number {
@@ -62,7 +62,7 @@ export const InfrastructureModule = new GraphQLModule({
       level: parseLevel(process.env.GRAPH_DOM_LOGGING_LEVEL, Level.INFO),
       pattern: process.env.GRAPH_DOM_LOGGING_PATTERN || DEFAULT_LOGGING_PATTERN,
     }),
-    RedisModule.forRoot({
+    CacheModule.forRoot({
       host: process.env.GRAPH_DOM_REDIS_HOST || DEFAULT_REDIS_HOST,
       port: parseInt(process.env.GRAPH_DOM_REDIS_PORT, DEFAULT_REDIS_PORT),
       password: process.env.GRAPH_DOM_REDIS_PASSWORD,

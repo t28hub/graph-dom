@@ -91,4 +91,7 @@ workflows:
           requires:
             - lint
             - test
+      - e2e:
+          requires:
+            - build
 

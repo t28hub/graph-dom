@@ -101,8 +101,12 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
     const browser = await this.browserPromise;
     this.logger.debug('Browser is connected: %s', browser.isConnected());
 
-    const pages: Page[] = await browser.pages();
-    await Promise.all(pages.map((page: Page) => this.closePage(page)));
+    try {
+      const pages: Page[] = await browser.pages();
+      await Promise.all(pages.map((page: Page) => this.closePage(page)));
+    } catch (e) {
+      this.logger.warn('Failed to close pages: %s', e.message);
+    }
 
     try {
       browser.disconnect();
