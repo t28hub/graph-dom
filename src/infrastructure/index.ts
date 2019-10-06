@@ -56,7 +56,7 @@ export const InfrastructureModule = new GraphQLModule({
   imports: [
     BrowserModule.forRoot({
       path: process.env.GRAPH_DOM_BROWSER_PATH || puppeteer.executablePath(),
-      headless: process.env.GRAPH_DOM_BROWSER_HEADLESS === 'true',
+      headless: process.env.GRAPH_DOM_BROWSER_HEADLESS !== 'false',
     }),
     LoggingModule.forRoot({
       level: parseLevel(process.env.GRAPH_DOM_LOGGING_LEVEL, Level.INFO),

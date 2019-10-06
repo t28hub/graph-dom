@@ -9,7 +9,7 @@ Web scraping and DOM traversing API with GraphQL.
 | `GRAPH_DOM_LOGGING_LEVEL` | Log level to be output. | One of `debug`, `info`, `warn`, `error` and `trace` |
 | `GRAPH_DOM_LOGGING_PATTERN` | Pattern of log message to be output. | `[%r] [%p] %c - %m%n` |
 | `GRAPH_DOM_BROWSER_PATH` | Path to browser executable. | \- |
-| `GRAPH_DOM_BROWSER_HEADLESS` | Whether to run browser in headless mode or not. | `true` or `false` |
+| `GRAPH_DOM_BROWSER_HEADLESS` | Whether to run browser in headless mode or not. Defaults to `true`. | `true` or `false` |
 
 
 ## License

@@ -51,6 +51,7 @@ jobs:
     working_directory: ~/graph-dom
     environment:
       NODE_ENV: development
+      GRAPH_DOM_BROWSER_HEADLESS: true
     steps:
       - checkout
       - restore_cache: *restore-cache
