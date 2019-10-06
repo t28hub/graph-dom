@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-import './env'; // Load environment variables at first
-import { install } from 'source-map-support';
-import app from './app';
-import { AppModule } from './appModule';
-import { LoggerProvider } from './infrastructure/loggerProvider';
+import { Injector } from '@graphql-modules/di';
 
-install();
-
-const mode = `${process.env.NODE_ENV}`;
-const { injector } = AppModule;
-
-const logger = injector.get(LoggerProvider).provideLogger();
-const port = parseInt(process.env.GRAPH_DOM_SERVER_PORT || '8080');
-app.listen(port, () => {
-  logger.info('Application is running at http://localhost:%d in %s mode', port, mode);
-});
+export interface Context {
+  readonly injector: Injector;
+}

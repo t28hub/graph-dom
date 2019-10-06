@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-import { InMemoryLRUCache } from 'apollo-server-caching';
-import { Config as ServerConfig, KeyValueCache } from 'apollo-server-core';
+import { Config as ServerConfig } from 'apollo-server-core';
 import { DataSources } from 'apollo-server-core/src/graphqlOptions';
 import { ApolloServer } from 'apollo-server-express';
-import axios from 'axios';
 import express from 'express';
 import helmet from 'helmet';
-import { getConfig, Config, Mode } from './config';
-import { Context } from './graphql/context';
+import 'reflect-metadata';
+import { AppModule } from './appModule';
+import { Context } from './context';
 import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
-import { BrowserLifecyclePlugin } from './graphql/plugins/browserLifecyclePlugin';
-import { schema } from './graphql/schama';
-import { ChromeBrowserService } from './service/chromeBrowserService';
-import { RedisCache } from 'apollo-server-cache-redis';
+import { RedisProvider } from './infrastructure/redisProvider';
 
 const app = express();
 app.use(
@@ -42,36 +38,22 @@ app.use(
   })
 );
 
-const config = getConfig();
+const { schema, injector, context } = AppModule;
+const cache = injector.get(RedisProvider).provideCache();
 
-function getCache({ cache: config }: Config): KeyValueCache<string> {
-  if (config.redis) {
-    const { host, port, password } = config.redis;
-    return new RedisCache({ host, port, password });
-  }
-  return new InMemoryLRUCache();
-}
-
+const isDevelopment = process.env.NODE_ENV === 'development';
 const serverConfig: ServerConfig = {
   schema,
-  cache: getCache(config),
-  context: (): Omit<Context, 'dataSources'> => {
-    const { path, headless } = config.browser;
-    return {
-      axios: axios.create(),
-      // Instantiate browser by each request to isolate state of browser.
-      browser: new ChromeBrowserService({ path, headless }),
-    };
-  },
+  cache,
+  modules: [AppModule],
+  context,
   dataSources: (): DataSources<Context> => {
-    return {
-      browser: new BrowserDataSource(),
-    };
+    const browser = injector.get(BrowserDataSource);
+    return { browser };
   },
-  plugins: [new BrowserLifecyclePlugin()],
-  playground: config.mode === Mode.DEVELOPMENT,
-  tracing: config.mode === Mode.DEVELOPMENT,
-  debug: config.mode === Mode.DEVELOPMENT,
+  debug: isDevelopment,
+  playground: isDevelopment,
+  tracing: isDevelopment,
 };
 const server = new ApolloServer(serverConfig);
 server.applyMiddleware({ app });

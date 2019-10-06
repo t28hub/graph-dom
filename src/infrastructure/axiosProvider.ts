@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-export const logger = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  trace: jest.fn(),
-};
+import { Injectable, ProviderScope } from '@graphql-modules/di';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
-export const getLogger = jest.fn().mockReturnValue(logger);
+@Injectable({
+  scope: ProviderScope.Application,
+  overwrite: false,
+})
+export class AxiosProvider {
+  private readonly instance: AxiosInstance;
+
+  public constructor() {
+    const config: AxiosRequestConfig = {
+      timeout: 5000,
+    };
+    this.instance = axios.create(config);
+  }
+
+  public provideInstance(): AxiosInstance {
+    return this.instance;
+  }
+}

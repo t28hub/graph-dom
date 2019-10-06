@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { KeyValueCache } from 'apollo-server-caching';
 import { format, Url } from 'url';
 import { Cache } from './cache';
 import { RobotsTxt } from './robotsTxt';
 import { Optional } from '../util';
-import { KeyValueCache } from 'apollo-server-caching';
 
 const DEFAULT_CACHE_TTL = 3600;
 

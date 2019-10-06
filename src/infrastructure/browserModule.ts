@@ -14,14 +14,25 @@
  * limitations under the License.
  */
 
-import { AxiosInstance } from 'axios';
-import { BrowserDataSource } from './dataSources/browserDataSource';
-import { BrowserService } from '../service/browserService';
+import { GraphQLModule } from '@graphql-modules/core';
+import { BrowserProvider } from './browserProvider';
+import { Provider } from '@graphql-modules/di';
 
-export interface Context {
-  readonly axios: AxiosInstance;
-  readonly browser: BrowserService;
-  readonly dataSources: {
-    readonly browser: BrowserDataSource;
-  };
+export interface Config {
+  readonly path: string;
+  readonly headless: boolean;
 }
+
+export const BrowserModule = new GraphQLModule<Config>({
+  providers: ({ config }: GraphQLModule): Provider[] => [
+    {
+      provide: 'BrowserPath',
+      useValue: config.path,
+    },
+    {
+      provide: 'BrowserHeadless',
+      useValue: config.headless,
+    },
+    BrowserProvider,
+  ],
+});

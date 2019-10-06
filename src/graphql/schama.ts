@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { GraphQLSchema } from 'graphql';
 import { importSchema } from 'graphql-import';
-import { makeExecutableSchema } from 'graphql-tools';
 import { resolve } from 'path';
 import { resolver as queryResolver } from './resolvers/query';
 import { resolver as nodeResolver } from './resolvers/node';
@@ -24,12 +22,12 @@ import { resolver as documentResolver } from './resolvers/document';
 import { resolver as elementResolver } from './resolvers/element';
 
 const path = resolve(__dirname, './typeDefs/query.graphql');
-const typeDefs = importSchema(path);
-const resolvers = {
+export const typeDefs = importSchema(path);
+export const resolvers = {
   Query: queryResolver,
   Node: nodeResolver,
   Document: documentResolver,
   Element: elementResolver,
 };
 
-export const schema: GraphQLSchema = makeExecutableSchema({ typeDefs, resolvers });
+// export const schema: GraphQLSchema = makeExecutableSchema({ typeDefs, resolvers });

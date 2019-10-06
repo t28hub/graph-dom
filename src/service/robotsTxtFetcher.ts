@@ -14,33 +14,43 @@
  * limitations under the License.
  */
 
+import { Injectable, ProviderScope } from '@graphql-modules/di';
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { format, Url } from 'url';
 import { RobotsTxt } from './robotsTxt';
-import { getLogger, Logger } from '../util/logging';
+import { LoggerProvider } from '../infrastructure/loggerProvider';
+import { AxiosProvider } from '../infrastructure/axiosProvider';
 import { NetworkError } from './errors/networkError';
+import { Logger } from '../util/logging/logger';
 
 const STATUS_CODE_OK = 200;
 
+@Injectable({
+  scope: ProviderScope.Application,
+  overwrite: false,
+})
 export class RobotsTxtFetcher {
-  private static readonly logger: Logger = getLogger(RobotsTxtFetcher.name);
+  private readonly axios: AxiosInstance;
+  private readonly logger: Logger;
 
-  public constructor(private readonly axios: AxiosInstance) {}
+  public constructor(axiosProvider: AxiosProvider, loggerProvider: LoggerProvider) {
+    this.axios = axiosProvider.provideInstance();
+    this.logger = loggerProvider.provideLogger(RobotsTxtFetcher.name);
+  }
 
   public async fetch(url: Url): Promise<RobotsTxt> {
-    const { logger } = RobotsTxtFetcher;
     const robotsUrl: string = format(RobotsTxtFetcher.buildRobotsTxtUrl(url));
-    logger.info('Fetching robots.txt file from %s', robotsUrl);
+    this.logger.info('Fetching robots.txt file from %s', robotsUrl);
 
     try {
       const response: AxiosResponse<string> = await this.fetchText(robotsUrl);
       const { status, statusText } = response;
-      logger.info('Received response %d %s from %s', status, statusText, robotsUrl);
+      this.logger.info('Received response %d %s from %s', status, statusText, robotsUrl);
 
       const content = status === STATUS_CODE_OK ? response.data : '';
       return RobotsTxt.parse(url, content);
     } catch (e) {
-      logger.warn('Failed to fetch robots.txt from %s: %s', robotsUrl, e.message);
+      this.logger.warn('Failed to fetch robots.txt from %s: %s', robotsUrl, e.message);
       throw new NetworkError(`Failed to fetch robots.txt from ${robotsUrl}`);
     }
   }
@@ -48,7 +58,7 @@ export class RobotsTxtFetcher {
   private async fetchText(urlString: string): Promise<AxiosResponse<string>> {
     const config: AxiosRequestConfig = {
       responseType: 'text',
-      validateStatus: (status: number): boolean => true,
+      validateStatus: (): boolean => true,
     };
     return await this.axios.get<string>(urlString, config);
   }

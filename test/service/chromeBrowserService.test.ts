@@ -15,8 +15,10 @@
  */
 
 import each from 'jest-each';
+import 'reflect-metadata';
 import { parse } from 'url';
 import puppeteer, { browser, page } from '../../src/__mocks__/puppeteer';
+import { BrowserProvider } from '../../src/infrastructure/browserProvider';
 import { ChromeBrowserService } from '../../src/service/chromeBrowserService';
 import { InvalidUrlError } from '../../src/service/errors/invalidUrlError';
 import { RequestTimeoutError } from '../../src/service/errors/requestTimeoutError';
@@ -24,15 +26,30 @@ import { NoResponseError } from '../../src/service/errors/noResponseError';
 import { SslCertificateError } from '../../src/service/errors/sslCertificateError';
 import { NotAvailableError } from '../../src/service/errors/notAvailableError';
 import { NetworkError } from '../../src/service/errors/networkError';
+import { LoggerProvider } from '../../src/infrastructure/loggerProvider';
+import { Level } from '../../src/util/logging/logger';
 
 jest.mock('chrome-aws-lambda', () => {
-  return { args: [], puppeteer };
+  return { puppeteer };
 });
 jest.mock('../../src/dom/puppeteer');
-jest.mock('../../src/util/logging');
+jest.mock('../../src/infrastructure/browserProvider', () => {
+  return {
+    BrowserProvider: jest.fn((path: string, headless: boolean) => {
+      return {
+        path,
+        headless,
+        provideBrowser: jest.fn(),
+      };
+    })
+  };
+});
+jest.mock('../../src/infrastructure/loggerProvider');
 
 describe('ChromeBrowserService', () => {
-  let browserService!: ChromeBrowserService;
+  const browserProvider = new BrowserProvider('/path/to/chrome', true);
+  const loggerProvider = new LoggerProvider(Level.DEBUG,  '[%r] [%p] %c - %m');
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -40,31 +57,32 @@ describe('ChromeBrowserService', () => {
       status: jest.fn().mockReturnValue(200)
     }));
     browser.newPage.mockReturnValue(Promise.resolve(page));
-    puppeteer.launch.mockReturnValue(browser);
-    browserService = new ChromeBrowserService({
-      path: '/path/to/chrome',
-      headless: true
+
+    browserProvider.provideBrowser = jest.fn().mockReturnValue(browser);
+
+    loggerProvider.provideLogger = jest.fn().mockReturnValue({
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      trace: jest.fn()
     });
   });
 
   describe('open', () => {
-    test('should launch browser', async () => {
+    test('should call provideBrowser', async () => {
       // Arrange
       page.goto.mockReturnValueOnce(Promise.resolve({
         status: jest.fn().mockReturnValue(200)
       }));
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
 
       // Act
       const url = parse('https://example.com/');
       await browserService.open(url);
 
       // Assert
-      expect(puppeteer.launch).toBeCalledWith({
-        args: [],
-        defaultViewport: undefined,
-        executablePath: '/path/to/chrome',
-        headless: true
-      });
+      expect(browserProvider.provideBrowser).toBeCalledTimes(1);
       expect(browser.newPage).toBeCalledWith();
       expect(page.goto).toBeCalledWith('https://example.com/', { waitUntil: 'load' });
     });
@@ -74,6 +92,7 @@ describe('ChromeBrowserService', () => {
       page.goto.mockReturnValueOnce(Promise.resolve({
         status: jest.fn().mockReturnValue(200)
       }));
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
 
       // Act
       const comUrl = parse('https://example.com/');
@@ -83,13 +102,7 @@ describe('ChromeBrowserService', () => {
       await browserService.open(orgUrl);
 
       // Assert
-      expect(puppeteer.launch).toBeCalledTimes(1);
-      expect(puppeteer.launch).toBeCalledWith({
-        args: [],
-        defaultViewport: undefined,
-        executablePath: '/path/to/chrome',
-        headless: true
-      });
+      expect(browserProvider.provideBrowser).toBeCalledTimes(1);
       expect(browser.newPage).toBeCalledTimes(2);
       expect(page.goto).toBeCalledTimes(2);
       expect(page.goto).toBeCalledWith('https://example.com/', { waitUntil: 'load' });
@@ -97,11 +110,8 @@ describe('ChromeBrowserService', () => {
     });
 
     test('should set request interceptor when headless is true', async () => {
-      // Act
-      const browserService = new ChromeBrowserService({
-        path: '/path/to/chrome',
-        headless: true
-      });
+      // Arrange
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
 
       // Act
       const url = parse('https://example.com/');
@@ -119,10 +129,7 @@ describe('ChromeBrowserService', () => {
       ['stylesheet']
     ]).test('should abort request when resource type is blocking: %s', async (resourceType: string) => {
       // Act
-      const browserService = new ChromeBrowserService({
-        path: '/path/to/chrome',
-        headless: true
-      });
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
       const request = {
         abort: jest.fn(),
         continue: jest.fn(),
@@ -156,10 +163,7 @@ describe('ChromeBrowserService', () => {
       ['unknown']
     ]).test('should continue request when resource type is not blocking: %s', async (resourceType: string) => {
       // Act
-      const browserService = new ChromeBrowserService({
-        path: '/path/to/chrome',
-        headless: true
-      });
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
       const request = {
         abort: jest.fn(),
         continue: jest.fn(),
@@ -180,12 +184,12 @@ describe('ChromeBrowserService', () => {
       expect(request.continue).toBeCalled();
     });
 
-    test('should not set request interceptor when headless is true', async () => {
+    test('should not set request interceptor when headless is false', async () => {
       // Act
-      const browserService = new ChromeBrowserService({
-        path: '/path/to/chrome',
-        headless: false
-      });
+      const browserProvider = new BrowserProvider('/path/to/chrome', false);
+      browserProvider.provideBrowser = jest.fn().mockReturnValue(browser);
+
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
 
       // Act
       const url = parse('https://example.com/');
@@ -198,6 +202,7 @@ describe('ChromeBrowserService', () => {
 
     test('should set default timeout when property is set', async () => {
       // Act
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
       const url = parse('https://example.com/');
       await browserService.open(url, { timeout: 5000 });
 
@@ -208,6 +213,7 @@ describe('ChromeBrowserService', () => {
 
     test('should set userAgent when property is set', async () => {
       // Act
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
       const url = parse('https://example.com/');
       await browserService.open(url, { userAgent: 'CustomUserAgent/1.0.0' });
 
@@ -218,6 +224,7 @@ describe('ChromeBrowserService', () => {
 
     test('should set waitUntil when property is set', async () => {
       // Act
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
       const url = parse('https://example.com/');
       await browserService.open(url, { waitUntil: 'networkidle2' });
 
@@ -229,6 +236,7 @@ describe('ChromeBrowserService', () => {
     test('should throw an Error when received response is null', async () => {
       // Arrange
       page.goto.mockReturnValueOnce(Promise.resolve(null));
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
 
       // Act
       const url = parse('https://example.com/');
@@ -243,6 +251,7 @@ describe('ChromeBrowserService', () => {
       page.goto.mockReturnValueOnce(Promise.resolve({
         status: jest.fn().mockReturnValue(404)
       }));
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
 
       // Act
       const url = parse('https://example.com/');
@@ -296,6 +305,7 @@ describe('ChromeBrowserService', () => {
     ]).test('should throw an Error when error %p', async (error: Error, urlString: string, expected: jest.Constructable) => {
       // Arrange
       page.goto.mockReturnValueOnce(Promise.reject(error));
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
 
       // Act
       const url = parse(urlString);
@@ -307,8 +317,9 @@ describe('ChromeBrowserService', () => {
   });
 
   describe('dispose', () => {
-    test('should close browser', async () => {
+    test('should disconnect browser', async () => {
       // Arrange
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
       const url = parse('https://example.com/');
       await browserService.open(url);
 
@@ -316,12 +327,12 @@ describe('ChromeBrowserService', () => {
       await browserService.dispose();
 
       // Assert
-      expect(browser.close).toBeCalledTimes(1);
       expect(browser.disconnect).toBeCalledTimes(1);
     });
 
-    test('should close and disconnect browser when browser throws an Error', async () => {
+    test('should disconnect browser when browser throws an Error', async () => {
       // Arrange
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
       const url = parse('https://example.com/');
       await browserService.open(url);
       browser.close = jest.fn(() => {
@@ -332,12 +343,12 @@ describe('ChromeBrowserService', () => {
       await browserService.dispose();
 
       // Assert
-      expect(browser.close).toBeCalledTimes(1);
       expect(browser.disconnect).toBeCalledTimes(1);
     });
 
-    test('should close and disconnect browser when page throws an Error', async () => {
+    test('should disconnect browser when page throws an Error', async () => {
       // Arrange
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
       const url = parse('https://example.com/');
       await browserService.open(url);
       page.close.mockImplementationOnce(() => {
@@ -349,16 +360,17 @@ describe('ChromeBrowserService', () => {
       await browserService.dispose();
 
       // Assert
-      expect(browser.close).toBeCalledTimes(1);
       expect(browser.disconnect).toBeCalledTimes(1);
     });
 
-    test('should not close when browser is not set', async () => {
+    test('should not disconnect when browser is not set', async () => {
+      // Arrange
+      const browserService = new ChromeBrowserService(browserProvider, loggerProvider);
+
       // Act
       await browserService.dispose();
 
       // Assert
-      expect(browser.close).not.toBeCalled();
       expect(browser.disconnect).not.toBeCalled();
     });
   });

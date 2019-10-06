@@ -15,15 +15,16 @@
  */
 
 import { DataSourceConfig } from 'apollo-datasource';
-import axios from 'axios';
+import 'reflect-metadata';
 import { parse } from 'url';
 import { NodeType } from '../../../src/dom';
-import { Context } from '../../../src/graphql/context';
+import { Context } from '../../../src/context';
 import { BrowserDataSource } from '../../../src/graphql/dataSources/browserDataSource';
-import { BrowserService } from '../../../src/service/browserService';
-
-jest.mock('axios');
-jest.mock('../../../src/util/logging');
+import { ChromeBrowserService } from '../../../src/service/chromeBrowserService';
+import { GraphQLModule } from '@graphql-modules/core';
+import { RobotsTxtFetcher } from '../../../src/service/robotsTxtFetcher';
+import { LoggerProvider } from '../../../src/infrastructure/loggerProvider';
+import { RobotsTxt } from '../../../src/service/robotsTxt';
 
 const document = {
   title: 'Example Domain',
@@ -49,48 +50,79 @@ const document = {
 };
 
 describe('BrowserDataSource', () => {
+  const browserService = {
+    open: jest.fn(),
+    dispose: jest.fn()
+  };
+
+  const fetcher = {
+    fetch: jest.fn()
+  };
+
+  const loggerProvider = {
+    provideLogger: jest.fn()
+  };
+
+  const { injector } = new GraphQLModule({
+    providers: [
+      {
+        provide: ChromeBrowserService,
+        overwrite: true,
+        useValue: browserService
+      },
+      {
+        provide: RobotsTxtFetcher,
+        overwrite: true,
+        useValue: fetcher
+      },
+      {
+        provide: LoggerProvider,
+        overwrite: true,
+        useValue: loggerProvider
+      }
+    ],
+  });
+
   const cache = {
     get: jest.fn(),
     set: jest.fn(),
     delete: jest.fn()
   };
-
-  const browser: BrowserService = {
-    open: jest.fn(),
-    dispose: jest.fn()
+  const context = {
+    injector
   };
-
-  const dataSource = new BrowserDataSource();
-
-  const context: Context = {
-    axios,
-    browser,
-    dataSources: {
-      browser: dataSource
-    }
-  };
-
   const config: DataSourceConfig<Context> = { cache, context };
 
+  let dataSource!: BrowserDataSource;
   beforeEach(() => {
     jest.resetAllMocks();
+
+    loggerProvider.provideLogger.mockReturnValue({
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      trace: jest.fn()
+    });
+
+    dataSource = new BrowserDataSource(
+      injector.get(ChromeBrowserService),
+      injector.get(RobotsTxtFetcher),
+      injector.get(LoggerProvider)
+    );
   });
 
   describe('initialize', () => {
     test('should setup internal properties', () => {
       // Arrange
-      expect(dataSource).not.toHaveProperty('browserService');
       expect(dataSource).not.toHaveProperty('robotsTxtCache');
-      expect(dataSource).not.toHaveProperty('robotsTxtFetcher');
 
       // Act
       dataSource.initialize(config);
 
       // Assert
       // Due to this implementation is fragile, consider to use alternative way.
-      expect(dataSource).toHaveProperty('browserService');
       expect(dataSource).toHaveProperty('robotsTxtCache');
-      expect(dataSource).toHaveProperty('robotsTxtFetcher');
     });
   });
 
@@ -98,14 +130,15 @@ describe('BrowserDataSource', () => {
     test('should return document', async () => {
       // Arrange
       cache.get.mockReturnValue(Promise.resolve(undefined));
-      axios.get = jest.fn().mockReturnValue({
-        status: 200,
-        data: `
+      fetcher.fetch.mockImplementationOnce(() => {
+        const url = parse('https://example.com/robots.txt');
+        const content = `
           User-Agent: *
           Allow: /
-        `
+        `;
+        return RobotsTxt.parse(url, content);
       });
-      browser.open = jest.fn().mockReturnValue(Promise.resolve(document));
+      browserService.open.mockReturnValueOnce(Promise.resolve(document));
       dataSource.initialize(config);
 
       // Act
@@ -122,7 +155,6 @@ describe('BrowserDataSource', () => {
       });
       expect(config.cache.get).toBeCalledTimes(1);
       expect(config.cache.set).toBeCalledTimes(1);
-      expect(config.context.axios.get).toBeCalledTimes(1);
     });
 
     test('should return document when robots.txt is cached', async () => {
@@ -134,7 +166,7 @@ describe('BrowserDataSource', () => {
         `;
         return Promise.resolve(content);
       });
-      browser.open = jest.fn().mockReturnValue(Promise.resolve(document));
+      browserService.open.mockReturnValueOnce(Promise.resolve(document));
       dataSource.initialize(config);
 
       // Act
@@ -151,19 +183,19 @@ describe('BrowserDataSource', () => {
       });
       expect(cache.get).toBeCalledTimes(1);
       expect(cache.set).not.toBeCalled();
-      expect(context.axios.get).not.toBeCalled();
     });
 
     test('should throw an Error when URL is not allowed to fetch', async () => {
       // Arrange
       cache.get.mockReturnValue(Promise.resolve(undefined));
-      (axios as jest.Mocked<typeof axios>).get.mockReturnValue(Promise.resolve({
-        status: 200,
-        data: `
+      fetcher.fetch.mockImplementationOnce(() => {
+        const url = parse('https://example.com/robots.txt');
+        const content = `
           User-Agent: *
           Disallow: /
-        `
-      }));
+        `;
+        return RobotsTxt.parse(url, content);
+      });
       dataSource.initialize(config);
 
       // Act

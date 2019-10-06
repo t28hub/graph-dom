@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
+import { ModuleContext } from '@graphql-modules/core';
 import { IResolverObject } from 'graphql-tools';
 import { parse } from 'url';
-import { Context } from '../context';
+import { BrowserDataSource } from '../dataSources/browserDataSource';
 import { Document } from '../../dom';
 import { validateUrl } from '../../validator';
 
 export const resolver: IResolverObject = {
   /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
-  page: async (parent: any, args: { url: string }, context: Context): Promise<Document> => {
+  page: async (parent: any, args: { url: string }, { injector }: ModuleContext): Promise<Document> => {
     const { url } = args;
     validateUrl(url);
 
     const parsed = parse(url);
-    const { browser } = context.dataSources;
+    const browser = injector.get(BrowserDataSource);
     return await browser.fetch(parsed, { waitUntil: 'load' });
   },
 };

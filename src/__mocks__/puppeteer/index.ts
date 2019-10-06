@@ -31,6 +31,7 @@ export const page = {
 export const browser = {
   newPage: jest.fn(),
   close: jest.fn(),
+  isConnected: jest.fn(),
   disconnect: jest.fn(),
   pages: jest.fn().mockReturnValue([]),
 };

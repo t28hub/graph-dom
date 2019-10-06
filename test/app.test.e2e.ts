@@ -19,8 +19,14 @@ import each from 'jest-each';
 import { resolve } from 'path';
 import supertest, { Test } from 'supertest';
 import app from '../src/app';
+import { AppModule } from '../src/appModule';
+import { Browser } from 'puppeteer';
+import { BrowserProvider } from '../src/infrastructure/browserProvider';
+import { Logger } from '../src/util/logging/logger';
+import { LoggerProvider } from '../src/infrastructure/loggerProvider';
 
 jest.unmock('puppeteer');
+jest.setTimeout(30000);
 
 const readGraphqlFile = async (name: string): Promise<string> => {
   const path = resolve(__dirname, './fixtures/graphql/', name);
@@ -47,8 +53,17 @@ const postQuery = (payload: Payload): Test => {
 };
 
 describe('App', () => {
-  beforeAll(() => {
-    jest.setTimeout(30000);
+  const { injector } = AppModule;
+
+  let browser!: Browser;
+  let logger!: Logger;
+  beforeAll(async () => {
+    browser = await injector.get(BrowserProvider).provideBrowser();
+    logger = injector.get(LoggerProvider).provideLogger('App E2E');
+  });
+
+  afterAll(async () => {
+    await browser.close();
   });
 
   describe('POST /graphql', () => {
@@ -92,6 +107,7 @@ describe('App', () => {
 
       // Assert
       const { status, body } = response;
+      logger.info('Received %d %p', status, body);
       expect(status).toBe(200);
       expect(body).toMatchObject(expected);
       expect(body).not.toHaveProperty('errors');
@@ -113,6 +129,7 @@ describe('App', () => {
 
       // Assert
       const { status, body } = response;
+      logger.info('Received %d %p', status, body);
       expect(status).toBe(200);
       expect(body).toMatchObject(expected);
     });
@@ -149,8 +166,7 @@ describe('App', () => {
       // Act
       const response = await supertest(app)
         .post('/graphql')
-        .set('Content-Type', 'application/json; charset=utf-8')
-        .send();
+        .set('Content-Type', 'application/json; charset=utf-8');
 
       // Assert
       const { status, body } = response;

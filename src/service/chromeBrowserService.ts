@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import { Injectable, ProviderScope } from '@graphql-modules/di';
 import Chrome from 'chrome-aws-lambda';
-import { Browser, LaunchOptions, NavigationOptions, Page, Request, ResourceType, Response } from 'puppeteer';
+import { Browser, BrowserOptions, NavigationOptions, Page, Request, ResourceType, Response } from 'puppeteer';
 import { format, Url } from 'url';
 import { Document } from '../dom';
 import { createDocument } from '../dom/puppeteer';
 import { BrowserService, Options } from './browserService';
-import { getLogger, Logger } from '../util/logging';
+import { Logger } from '../util/logging/logger';
 import { ApolloError } from 'apollo-server-errors';
 import { RequestTimeoutError } from './errors/requestTimeoutError';
 import { SslCertificateError } from './errors/sslCertificateError';
@@ -28,11 +29,9 @@ import { NoResponseError } from './errors/noResponseError';
 import { NotAvailableError } from './errors/notAvailableError';
 import { NetworkError } from './errors/networkError';
 import { InvalidUrlError } from './errors/invalidUrlError';
-
-export interface BrowserOptions {
-  readonly path: string;
-  readonly headless: boolean;
-}
+import { BrowserProvider } from '../infrastructure/browserProvider';
+import { LoggerProvider } from '../infrastructure/loggerProvider';
+import { ModuleSessionInfo, OnResponse } from '@graphql-modules/core';
 
 const DEFAULT_TIMEOUT = 50000;
 const DEFAULT_NAVIGATION_TIMEOUT = 50000;
@@ -40,22 +39,31 @@ const STATUS_CODE_OK = 200;
 const STATUS_CODE_MULTIPLE_CHOICE = 300;
 const IGNORED_RESOURCE_TYPES: ResourceType[] = ['font', 'image', 'media', 'stylesheet'];
 
-export class ChromeBrowserService implements BrowserService {
-  private static readonly logger: Logger = getLogger(ChromeBrowserService.name);
+@Injectable({
+  scope: ProviderScope.Session,
+  overwrite: false,
+})
+export class ChromeBrowserService implements BrowserService, OnResponse {
+  private readonly logger: Logger;
 
   // Avoid to instantiate multiple browsers.
   private browserPromise?: Promise<Browser>;
 
-  public constructor(private readonly browserOptions: BrowserOptions) {}
+  public constructor(private readonly browserProvider: BrowserProvider, loggerProvider: LoggerProvider) {
+    this.logger = loggerProvider.provideLogger(ChromeBrowserService.name);
+  }
+
+  public async onResponse(moduleSessionInfo: ModuleSessionInfo): Promise<void> {
+    await this.dispose();
+  }
 
   public async open(url: Url, options: Partial<Options> = {}): Promise<Document> {
-    const { logger } = ChromeBrowserService;
     const browser = await this.ensureBrowser();
     const page = await browser.newPage();
     page.setDefaultTimeout(DEFAULT_TIMEOUT);
     page.setDefaultNavigationTimeout(DEFAULT_NAVIGATION_TIMEOUT);
 
-    if (this.browserOptions.headless) {
+    if (this.browserProvider.headless) {
       await page.setRequestInterception(true);
       page.on('request', (request: Request) => {
         if (IGNORED_RESOURCE_TYPES.includes(request.resourceType())) {
@@ -71,36 +79,37 @@ export class ChromeBrowserService implements BrowserService {
       const response: Response = await ChromeBrowserService.goto(page, urlString, options);
       const status = response.status();
       if (status >= STATUS_CODE_OK && status < STATUS_CODE_MULTIPLE_CHOICE) {
-        logger.info("Received successful status '%d' from %s", status, urlString);
+        this.logger.info("Received successful status '%d' from %s", status, urlString);
       } else {
-        logger.warn("Received non-successful status '%d' from %s", status, urlString);
+        this.logger.warn("Received non-successful status '%d' from %s", status, urlString);
       }
       return await createDocument(page);
     } catch (e) {
-      await ChromeBrowserService.closePage(page);
+      await this.closePage(page);
 
-      logger.warn('Failed to navigate to %s: %s', urlString, e.message);
+      this.logger.warn('Failed to navigate to %s: %s', urlString, e.message);
       throw ChromeBrowserService.translateError(e, urlString);
     }
   }
 
   public async dispose(): Promise<void> {
-    const { logger } = ChromeBrowserService;
     if (this.browserPromise === undefined) {
+      this.logger.debug('Browser is missing');
       return;
     }
 
     const browser = await this.browserPromise;
+    this.logger.debug('Browser is connected: %s', browser.isConnected());
+
     const pages: Page[] = await browser.pages();
-    await Promise.all(pages.map((page: Page) => ChromeBrowserService.closePage(page)));
+    await Promise.all(pages.map((page: Page) => this.closePage(page)));
 
     try {
-      await browser.close();
-      logger.info('Browser is closed');
-    } catch (e) {
-      logger.warn('Failed to close a browser: %s', e.message);
-    } finally {
       browser.disconnect();
+      this.logger.info('Browser is disconnected');
+    } catch (e) {
+      this.logger.warn('Failed to disconnect a browser: %s', e.message);
+    } finally {
       this.browserPromise = undefined;
     }
   }
@@ -110,15 +119,10 @@ export class ChromeBrowserService implements BrowserService {
       return this.browserPromise;
     }
 
-    const { path: executablePath, headless } = this.browserOptions;
-    ChromeBrowserService.logger.warn('Launch options %s', Chrome.args);
-    const options: LaunchOptions = {
-      args: Chrome.args,
+    const options: BrowserOptions = {
       defaultViewport: Chrome.defaultViewport,
-      executablePath,
-      headless,
     };
-    const browserPromise = Chrome.puppeteer.launch(options);
+    const browserPromise = this.browserProvider.provideBrowser(options);
     this.browserPromise = browserPromise;
     return browserPromise;
   }
@@ -141,13 +145,12 @@ export class ChromeBrowserService implements BrowserService {
     return response;
   }
 
-  private static async closePage(page: Page): Promise<void> {
-    const { logger } = ChromeBrowserService;
+  private async closePage(page: Page): Promise<void> {
     const url: string = page.url();
     try {
       await page.close();
     } catch (e) {
-      logger.warn('Failed to close a page(%s): %s', url, e.message);
+      this.logger.warn('Failed to close a page(%s): %s', url, e.message);
     }
   }
 

@@ -56,7 +56,10 @@ jobs:
       - restore_cache: *restore-cache
       - run: *install-dependencies
       - save_cache: *save-cache
-      - run: yarn test:e2e --ci
+      - run:
+          name: Run E2E tests
+          command: yarn test:e2e --ci --runInBand
+          no_output_timeout: 5m
       - store_test_results:
           path: ./reports/test
       - store_artifacts:
@@ -88,7 +91,4 @@ workflows:
           requires:
             - lint
             - test
-      - e2e:
-          requires:
-            - build
 

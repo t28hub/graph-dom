@@ -14,23 +14,62 @@
  * limitations under the License.
  */
 
+import 'reflect-metadata';
 import axios from 'axios';
 import each from 'jest-each';
 import { parse } from 'url';
 import { RobotsTxtFetcher } from '../../src/service/robotsTxtFetcher';
+import { GraphQLModule } from '@graphql-modules/core';
+import { AxiosProvider } from '../../src/infrastructure/axiosProvider';
+import { LoggerProvider } from '../../src/infrastructure/loggerProvider';
 
 jest.mock('axios');
-jest.mock('../../src/util/logging');
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('RobotsTxtFetcher', () => {
+  const axiosProvider = {
+    provideInstance: () => mockedAxios
+  };
+
+  const loggerProvider = {
+    provideLogger: jest.fn()
+  };
+
+  const { injector } = new GraphQLModule({
+    providers: [
+      {
+        provide: AxiosProvider,
+        overwrite: true,
+        useValue: axiosProvider
+      },
+      {
+        provide: LoggerProvider,
+        overwrite: true,
+        useValue: loggerProvider
+      }
+    ]
+  });
+
+  let fetcher!: RobotsTxtFetcher;
   beforeEach(() => {
     jest.clearAllMocks();
+
+    loggerProvider.provideLogger.mockReturnValue({
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      trace: jest.fn()
+    });
+
+    fetcher = new RobotsTxtFetcher(
+      injector.get(AxiosProvider),
+      injector.get(LoggerProvider)
+    );
   });
 
   describe('fetch', () => {
-    const fetcher = new RobotsTxtFetcher(axios);
 
     each([
       'https://example.com',

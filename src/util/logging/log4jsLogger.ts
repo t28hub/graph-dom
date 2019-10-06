@@ -15,7 +15,7 @@
  */
 
 import { Logger } from 'log4js';
-import { Logger as ILogger } from './';
+import { Logger as ILogger } from './logger';
 
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 export class Log4jsLogger implements ILogger {
