@@ -34,10 +34,12 @@ export const browser = {
   isConnected: jest.fn(),
   disconnect: jest.fn(),
   pages: jest.fn().mockReturnValue([]),
+  wsEndpoint: jest.fn(),
 };
 
 export default {
   executablePath: jest.fn().mockReturnValue('/path/to/chrome'),
   launch: jest.fn(),
+  connect: jest.fn(),
   errors,
 };

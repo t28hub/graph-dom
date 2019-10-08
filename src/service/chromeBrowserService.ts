@@ -126,7 +126,7 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
     const options: BrowserOptions = {
       defaultViewport: Chrome.defaultViewport,
     };
-    const browserPromise = this.browserProvider.provideBrowser(options);
+    const browserPromise = this.browserProvider.connect(options);
     this.browserPromise = browserPromise;
     return browserPromise;
   }

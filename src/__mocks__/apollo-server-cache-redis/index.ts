@@ -14,27 +14,12 @@
  * limitations under the License.
  */
 
-import { Injectable, ProviderScope } from '@graphql-modules/di';
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+export const cache = {
+  set: jest.fn(),
+  get: jest.fn(),
+  delete: jest.fn(),
+  flush: jest.fn(),
+  close: jest.fn(),
+};
 
-@Injectable({
-  scope: ProviderScope.Application,
-  overwrite: false,
-})
-export class AxiosProvider {
-  private readonly instance: AxiosInstance;
-
-  public constructor() {
-    const config: AxiosRequestConfig = {
-      timeout: 5000,
-      headers: {
-        'User-Agent': 'GraphDOM/1.0.0',
-      },
-    };
-    this.instance = axios.create(config);
-  }
-
-  public provideInstance(): AxiosInstance {
-    return this.instance;
-  }
-}
+export const RedisCache = jest.fn();

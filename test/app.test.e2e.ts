@@ -24,6 +24,7 @@ import { AppModule } from '../src/appModule';
 import { BrowserProvider } from '../src/infrastructure/browserProvider';
 import { RedisCacheProvider } from '../src/infrastructure/redisCacheProvider';
 
+jest.unmock('apollo-server-cache-redis');
 jest.unmock('puppeteer');
 jest.setTimeout(10000);
 

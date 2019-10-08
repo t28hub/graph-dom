@@ -44,7 +44,7 @@ export class BrowserProvider implements OnInit {
     });
   }
 
-  public async provideBrowser(options: Partial<BrowserOptions> = {}): Promise<Browser> {
+  public async connect(options: Partial<BrowserOptions> = {}): Promise<Browser> {
     const browser = await this.sharedBrowserPromise;
     const connectOptions: ConnectOptions = {
       browserWSEndpoint: browser.wsEndpoint(),
