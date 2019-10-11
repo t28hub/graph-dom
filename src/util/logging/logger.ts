@@ -22,6 +22,23 @@ export enum Level {
   TRACE,
 }
 
+export function parseLevel(level: string): Level {
+  switch (level.toUpperCase()) {
+    case Level[Level.DEBUG]:
+      return Level.DEBUG;
+    case Level[Level.INFO]:
+      return Level.INFO;
+    case Level[Level.WARN]:
+      return Level.WARN;
+    case Level[Level.ERROR]:
+      return Level.ERROR;
+    case Level[Level.TRACE]:
+      return Level.TRACE;
+    default:
+      throw new TypeError(`Invalid log level: ${level}`);
+  }
+}
+
 export interface Logger {
   /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
   debug(message: string, ...args: any[]): void;

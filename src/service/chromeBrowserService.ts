@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { ModuleSessionInfo, OnResponse } from '@graphql-modules/core';
 import { Injectable, ProviderScope } from '@graphql-modules/di';
 import Chrome from 'chrome-aws-lambda';
 import { Browser, BrowserOptions, NavigationOptions, Page, Request, ResourceType, Response } from 'puppeteer';
@@ -30,8 +31,7 @@ import { NotAvailableError } from './errors/notAvailableError';
 import { NetworkError } from './errors/networkError';
 import { InvalidUrlError } from './errors/invalidUrlError';
 import { BrowserProvider } from '../infrastructure/browserProvider';
-import { LoggerProvider } from '../infrastructure/loggerProvider';
-import { ModuleSessionInfo, OnResponse } from '@graphql-modules/core';
+import { LoggerFactory } from '../util/logging/loggerFactory';
 
 const DEFAULT_TIMEOUT = 50000;
 const DEFAULT_NAVIGATION_TIMEOUT = 50000;
@@ -49,8 +49,8 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
   // Avoid to instantiate multiple browsers.
   private browserPromise?: Promise<Browser>;
 
-  public constructor(private readonly browserProvider: BrowserProvider, loggerProvider: LoggerProvider) {
-    this.logger = loggerProvider.provideLogger(ChromeBrowserService.name);
+  public constructor(private readonly browserProvider: BrowserProvider) {
+    this.logger = LoggerFactory.getLogger(ChromeBrowserService.name);
   }
 
   public async onResponse(moduleSessionInfo: ModuleSessionInfo): Promise<void> {

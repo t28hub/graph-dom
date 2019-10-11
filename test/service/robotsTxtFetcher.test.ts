@@ -21,7 +21,6 @@ import { parse } from 'url';
 import { RobotsTxtFetcher } from '../../src/service/robotsTxtFetcher';
 import { GraphQLModule } from '@graphql-modules/core';
 import { AxiosProvider } from '../../src/infrastructure/axiosProvider';
-import { LoggerProvider } from '../../src/infrastructure/loggerProvider';
 
 jest.mock('axios');
 
@@ -42,11 +41,6 @@ describe('RobotsTxtFetcher', () => {
         provide: AxiosProvider,
         overwrite: true,
         useValue: axiosProvider
-      },
-      {
-        provide: LoggerProvider,
-        overwrite: true,
-        useValue: loggerProvider
       }
     ]
   });
@@ -63,10 +57,7 @@ describe('RobotsTxtFetcher', () => {
       trace: jest.fn()
     });
 
-    fetcher = new RobotsTxtFetcher(
-      injector.get(AxiosProvider),
-      injector.get(LoggerProvider)
-    );
+    fetcher = new RobotsTxtFetcher(injector.get(AxiosProvider));
   });
 
   describe('fetch', () => {

@@ -14,51 +14,44 @@
  * limitations under the License.
  */
 
-import { GraphQLModule, OnInit } from '@graphql-modules/core';
-import { Inject, Injectable, ProviderScope } from '@graphql-modules/di';
+import { Level, Logger } from './logger';
 import log4js, { Configuration } from 'log4js';
-import { Log4jsLogger } from '../util/logging/log4jsLogger';
-import { Level, Logger } from '../util/logging/logger';
+import { Log4jsLogger } from './log4jsLogger';
 
+export interface Config {
+  readonly level: Level;
+  readonly pattern: string;
+}
+
+const DEFAULT_LEVEL = Level.INFO;
+const DEFAULT_PATTERN = '[%r] [%p] %c - %m';
 const DEFAULT_LOGGER_NAME = 'GraphDOM';
 
-@Injectable({
-  scope: ProviderScope.Application,
-  overwrite: false,
-})
-export class LoggerProvider implements OnInit {
-  public constructor(
-    @Inject('LoggingLevel') private readonly level: Level,
-    @Inject('LoggingPattern') private readonly pattern: string
-  ) {}
-
-  public onInit(module: GraphQLModule): void {
-    this.configureLog4js();
-  }
-
-  public provideLogger(name: string = DEFAULT_LOGGER_NAME): Logger {
-    return new Log4jsLogger(log4js.getLogger(name));
-  }
-
-  private configureLog4js(): void {
+export class LoggerFactory {
+  public static configure(config: Partial<Config>): void {
+    const { level, pattern } = config;
     const configuration: Configuration = {
       appenders: {
         default: {
           type: 'console',
           layout: {
             type: 'pattern',
-            pattern: this.pattern,
+            pattern: pattern || DEFAULT_PATTERN,
           },
         },
       },
       categories: {
         default: {
           appenders: ['default'],
-          level: Level[this.level].toLowerCase(),
+          level: Level[level || DEFAULT_LEVEL].toLowerCase(),
           enableCallStack: true,
         },
       },
     };
     log4js.configure(configuration);
+  }
+
+  public static getLogger(name: string = DEFAULT_LOGGER_NAME): Logger {
+    return new Log4jsLogger(log4js.getLogger(name));
   }
 }

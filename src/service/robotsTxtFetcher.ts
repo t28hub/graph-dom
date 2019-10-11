@@ -18,10 +18,10 @@ import { Injectable, ProviderScope } from '@graphql-modules/di';
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { format, Url } from 'url';
 import { RobotsTxt } from './robotsTxt';
-import { LoggerProvider } from '../infrastructure/loggerProvider';
 import { AxiosProvider } from '../infrastructure/axiosProvider';
 import { NetworkError } from './errors/networkError';
 import { Logger } from '../util/logging/logger';
+import { LoggerFactory } from '../util/logging/loggerFactory';
 
 const STATUS_CODE_OK = 200;
 
@@ -33,9 +33,9 @@ export class RobotsTxtFetcher {
   private readonly axios: AxiosInstance;
   private readonly logger: Logger;
 
-  public constructor(axiosProvider: AxiosProvider, loggerProvider: LoggerProvider) {
+  public constructor(axiosProvider: AxiosProvider) {
     this.axios = axiosProvider.provideInstance();
-    this.logger = loggerProvider.provideLogger(RobotsTxtFetcher.name);
+    this.logger = LoggerFactory.getLogger(RobotsTxtFetcher.name);
   }
 
   public async fetch(url: Url): Promise<RobotsTxt> {

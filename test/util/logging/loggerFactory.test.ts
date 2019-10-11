@@ -14,37 +14,32 @@
  * limitations under the License.
  */
 
-import { GraphQLModule } from '@graphql-modules/core';
-import 'reflect-metadata';
-import log4js from '../../src/__mocks__/log4js';
-import { LoggerProvider } from '../../src/infrastructure/loggerProvider';
-import { Level } from '../../src/util/logging/logger';
+import { Level } from '../../../src/util/logging/logger';
+import { LoggerFactory } from '../../../src/util/logging/loggerFactory';
+import log4js from '../../../src/__mocks__/log4js';
 
-describe('LoggerProvider', () => {
-  const testModule = new GraphQLModule();
+describe('LoggerFactory', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  describe('onInit', () => {
+  describe('configure', () => {
     test('should configure log4js', () => {
       // Act
-      const loggerProvider = new LoggerProvider(Level.INFO, '[%r] [%p] %c - %m');
-      loggerProvider.onInit(testModule);
+      LoggerFactory.configure({
+        level: Level.DEBUG,
+        pattern: '[%r] [%p] TEST - %m'
+      });
 
       // Assert
-      expect(log4js.configure).toBeCalledTimes(1);
+      expect(log4js.configure).toBeCalledTimes(1)
     });
   });
 
-  describe('provideLogger', () => {
+  describe('getLogger', () => {
     test('should instantiate logger with default category', () => {
-      // Arrange
-      const loggerProvider = new LoggerProvider(Level.INFO, '[%r] [%p] %c - %m');
-      loggerProvider.onInit(testModule);
-
       // Act
-      const actual = loggerProvider.provideLogger();
+      const actual = LoggerFactory.getLogger();
 
       // Assert
       expect(actual).toBeDefined();
@@ -53,12 +48,8 @@ describe('LoggerProvider', () => {
     });
 
     test('should instantiate logger with specified category', () => {
-      // Arrange
-      const loggerProvider = new LoggerProvider(Level.INFO, '[%r] [%p] %c - %m');
-      loggerProvider.onInit(testModule);
-
       // Act
-      const actual = loggerProvider.provideLogger('Test');
+      const actual = LoggerFactory.getLogger('Test');
 
       // Assert
       expect(actual).toBeDefined();

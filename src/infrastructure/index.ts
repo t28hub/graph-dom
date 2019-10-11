@@ -18,9 +18,7 @@ import { GraphQLModule } from '@graphql-modules/core';
 import { puppeteer } from 'chrome-aws-lambda';
 import { AxiosProvider } from './axiosProvider';
 import { BrowserModule } from './browserModule';
-import { DEFAULT_LOGGING_PATTERN, LoggingModule } from './loggingModule';
 import { DEFAULT_REDIS_HOST, DEFAULT_REDIS_PORT, CacheModule } from './cacheModule';
-import { Level } from '../util/logging/logger';
 
 function parseInt(value: string | undefined, defaultValue: number): number {
   if (!Number.isInteger(defaultValue)) {
@@ -32,35 +30,11 @@ function parseInt(value: string | undefined, defaultValue: number): number {
   return Number.parseInt(value);
 }
 
-function parseLevel(value: string | undefined, defaultValue: Level): Level {
-  if (!value) {
-    return defaultValue;
-  }
-  switch (value) {
-    case Level[Level.DEBUG]:
-      return Level.DEBUG;
-    case Level[Level.INFO]:
-      return Level.INFO;
-    case Level[Level.WARN]:
-      return Level.WARN;
-    case Level[Level.ERROR]:
-      return Level.ERROR;
-    case Level[Level.TRACE]:
-      return Level.TRACE;
-    default:
-      return defaultValue;
-  }
-}
-
 export const InfrastructureModule = new GraphQLModule({
   imports: [
     BrowserModule.forRoot({
       path: process.env.GRAPH_DOM_BROWSER_PATH || puppeteer.executablePath(),
       headless: process.env.GRAPH_DOM_BROWSER_HEADLESS !== 'false',
-    }),
-    LoggingModule.forRoot({
-      level: parseLevel(process.env.GRAPH_DOM_LOGGING_LEVEL, Level.INFO),
-      pattern: process.env.GRAPH_DOM_LOGGING_PATTERN || DEFAULT_LOGGING_PATTERN,
     }),
     CacheModule.forRoot({
       host: process.env.GRAPH_DOM_REDIS_HOST || DEFAULT_REDIS_HOST,

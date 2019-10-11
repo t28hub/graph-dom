@@ -20,13 +20,13 @@ import { PrefixingKeyValueCache } from 'apollo-server-caching';
 import { format, Url } from 'url';
 import { Context } from '../../context';
 import { Document } from '../../dom';
-import { LoggerProvider } from '../../infrastructure/loggerProvider';
 import { WaitUntil } from '../../service/browserService';
 import { ChromeBrowserService } from '../../service/chromeBrowserService';
 import { RobotsTxt } from '../../service/robotsTxt';
 import { RobotsTxtCache } from '../../service/robotsTxtCache';
 import { RobotsTxtFetcher } from '../../service/robotsTxtFetcher';
 import { Logger } from '../../util/logging/logger';
+import { LoggerFactory } from '../../util/logging/loggerFactory';
 
 export interface Options {
   readonly timeout: number;
@@ -46,11 +46,10 @@ export class BrowserDataSource extends DataSource<Context> {
 
   public constructor(
     private readonly browserService: ChromeBrowserService,
-    private readonly robotsTxtFetcher: RobotsTxtFetcher,
-    loggerProvider: LoggerProvider
+    private readonly robotsTxtFetcher: RobotsTxtFetcher
   ) {
     super();
-    this.logger = loggerProvider.provideLogger(BrowserDataSource.name);
+    this.logger = LoggerFactory.getLogger(BrowserDataSource.name);
   }
 
   public initialize(config: DataSourceConfig<Context>): void {

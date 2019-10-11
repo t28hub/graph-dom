@@ -17,16 +17,20 @@
 import './env'; // Load environment variables at first
 import { install } from 'source-map-support';
 import app from './app';
-import { AppModule } from './appModule';
-import { LoggerProvider } from './infrastructure/loggerProvider';
+import { LoggerFactory } from './util/logging/loggerFactory';
+import { parseLevel } from './util/logging/logger';
 
 install();
 
 const mode = `${process.env.NODE_ENV}`;
 const port = parseInt(process.env.GRAPH_DOM_SERVER_PORT || '8080');
-const { injector } = AppModule;
+
+LoggerFactory.configure({
+  level: parseLevel(process.env.GRAPH_DOM_LOGGING_LEVEL || 'INFO'),
+  pattern: process.env.GRAPH_DOM_LOGGING_PATTERN,
+});
 
 app.listen(port, () => {
-  const logger = injector.get(LoggerProvider).provideLogger();
+  const logger = LoggerFactory.getLogger();
   logger.info('Application is running at http://localhost:%d in %s mode', port, mode);
 });

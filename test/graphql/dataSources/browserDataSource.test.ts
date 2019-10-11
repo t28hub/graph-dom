@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { DataSourceConfig } from 'apollo-datasource';
 import 'reflect-metadata';
+import { DataSourceConfig } from 'apollo-datasource';
+import log4js from 'log4js';
 import { parse } from 'url';
 import { NodeType } from '../../../src/dom';
 import { Context } from '../../../src/context';
@@ -23,8 +24,10 @@ import { BrowserDataSource } from '../../../src/graphql/dataSources/browserDataS
 import { ChromeBrowserService } from '../../../src/service/chromeBrowserService';
 import { GraphQLModule } from '@graphql-modules/core';
 import { RobotsTxtFetcher } from '../../../src/service/robotsTxtFetcher';
-import { LoggerProvider } from '../../../src/infrastructure/loggerProvider';
 import { RobotsTxt } from '../../../src/service/robotsTxt';
+import { logger } from '../../../src/__mocks__/log4js';
+
+jest.mock('log4js');
 
 const document = {
   title: 'Example Domain',
@@ -59,10 +62,6 @@ describe('BrowserDataSource', () => {
     fetch: jest.fn()
   };
 
-  const loggerProvider = {
-    provideLogger: jest.fn()
-  };
-
   const { injector } = new GraphQLModule({
     providers: [
       {
@@ -74,11 +73,6 @@ describe('BrowserDataSource', () => {
         provide: RobotsTxtFetcher,
         overwrite: true,
         useValue: fetcher
-      },
-      {
-        provide: LoggerProvider,
-        overwrite: true,
-        useValue: loggerProvider
       }
     ],
   });
@@ -97,18 +91,11 @@ describe('BrowserDataSource', () => {
   beforeEach(() => {
     jest.resetAllMocks();
 
-    loggerProvider.provideLogger.mockReturnValue({
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      trace: jest.fn()
-    });
+    (log4js.getLogger as jest.Mock).mockReturnValue(logger);
 
     dataSource = new BrowserDataSource(
       injector.get(ChromeBrowserService),
       injector.get(RobotsTxtFetcher),
-      injector.get(LoggerProvider)
     );
   });
 
