@@ -57,6 +57,12 @@ export const resolver: IResolverObject = {
     const parentNode = await document.parentNode();
     return parentNode.orElse(null);
   },
+  textContent: async (document: Document): Promise<string> => {
+    return document.textContent();
+  },
+  innerText: async (document: Document): Promise<string> => {
+    return document.innerText();
+  },
   nodeType: (document: Document): string => {
     const { nodeType } = document;
     return NodeType[nodeType];

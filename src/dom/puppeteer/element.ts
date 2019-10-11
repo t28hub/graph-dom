@@ -15,14 +15,32 @@
  */
 
 import { ElementHandle, Page } from 'puppeteer';
+import { Node } from './';
 import { Attribute } from '../attribute';
-import { DOMElement } from '../web';
 import { Data } from '../data';
 import { Element as IElement, SerializableElement } from '../element';
-import { Node } from './node';
 import { Optional } from '../../util';
 
 export class Element extends Node<SerializableElement> implements IElement {
+  public static async create(page: Page, element: ElementHandle): Promise<IElement> {
+    const properties = await page.evaluate(
+      /* istanbul ignore next */
+      (element: HTMLElement): SerializableElement => {
+        const { id, className, classList, nodeName, nodeType, nodeValue } = element;
+        return {
+          id: id,
+          className: className,
+          classList: Array.from(classList || []),
+          nodeName,
+          nodeType,
+          nodeValue,
+        };
+      },
+      element
+    );
+    return new Element(page, element, properties);
+  }
+
   public get id(): string {
     return this.properties.id;
   }
@@ -41,7 +59,7 @@ export class Element extends Node<SerializableElement> implements IElement {
 
   public async attributes(): Promise<Array<Attribute>> {
     const { page, element } = this;
-    return await page.evaluate((element: DOMElement): Array<Attribute> => {
+    return await page.evaluate((element: HTMLElement): Array<Attribute> => {
       const items = element.attributes;
       const itemSize = items.length;
       const attributes: Array<Attribute> = [];
@@ -60,7 +78,7 @@ export class Element extends Node<SerializableElement> implements IElement {
 
   public async dataset(): Promise<Array<Data>> {
     const { page, element } = this;
-    return await page.evaluate((element: DOMElement): Array<Data> => {
+    return await page.evaluate((element: HTMLElement): Array<Data> => {
       if (!(element instanceof HTMLElement)) {
         return [];
       }
@@ -77,18 +95,18 @@ export class Element extends Node<SerializableElement> implements IElement {
 
   public async innerHTML(): Promise<string> {
     const { page, element } = this;
-    return await page.evaluate((element: DOMElement): string => element.innerHTML, element);
+    return await page.evaluate((element: HTMLElement): string => element.innerHTML, element);
   }
 
   public async outerHTML(): Promise<string> {
     const { page, element } = this;
-    return await page.evaluate((element: DOMElement): string => element.outerHTML, element);
+    return await page.evaluate((element: HTMLElement): string => element.outerHTML, element);
   }
 
   public async getAttribute(name: string): Promise<Optional<string>> {
     const { page, element } = this;
     const attribute = await page.evaluate(
-      (element: DOMElement, name: string): string | null => {
+      (element: HTMLElement, name: string): string | null => {
         return element.getAttribute(name);
       },
       element,

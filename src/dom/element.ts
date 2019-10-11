@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { Node, SerializableNode } from './';
 import { Attribute } from './attribute';
 import { Data } from './data';
-import { Node, SerializableNode } from './node';
 import { Optional } from '../util';
 
 export interface Element extends Node {

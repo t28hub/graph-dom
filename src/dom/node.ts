@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import { Element } from './element';
+import { Element } from './';
 import { Optional } from '../util';
 
 export interface Node {
   readonly nodeName: string;
   readonly nodeType: NodeType;
   readonly nodeValue: string | null;
-  readonly textContent: string | null;
+
+  textContent(): Promise<string>;
+
+  innerText(): Promise<string>;
 
   children(): Promise<Array<Node>>;
 
@@ -40,7 +43,7 @@ export interface Node {
   previousSibling(): Promise<Optional<Node>>;
 }
 
-export type SerializableNode = Pick<Node, 'nodeName' | 'nodeType' | 'nodeValue' | 'textContent'>;
+export type SerializableNode = Pick<Node, 'nodeName' | 'nodeType' | 'nodeValue'>;
 
 export enum NodeType {
   // noinspection JSUnusedGlobalSymbols

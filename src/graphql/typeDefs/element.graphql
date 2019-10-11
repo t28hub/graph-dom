@@ -76,8 +76,11 @@ type Element implements Node {
   "The value of node"
   nodeValue: String
 
-  "The textual content"
+  "The text content of node"
   textContent: String
+
+  "The rendered text content of node"
+  innerText: String
 
   "Return an attribute value by attribute name"
   getAttribute(

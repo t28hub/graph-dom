@@ -51,8 +51,11 @@ interface Node {
   "The value of node"
   nodeValue: String
 
-  "The textual content"
+  "The text content of node"
   textContent: String
+
+  "The rendered text content of node"
+  innerText: String
 }
 
 """

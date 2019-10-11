@@ -58,6 +58,12 @@ export const resolver: IResolverObject = {
   dataset: async (element: Element): Promise<Array<Data>> => {
     return element.dataset();
   },
+  textContent: async (element: Element): Promise<string> => {
+    return element.textContent();
+  },
+  innerText: async (element: Element): Promise<string> => {
+    return element.innerText();
+  },
   innerHTML: async (element: Element): Promise<string> => {
     return element.innerHTML();
   },

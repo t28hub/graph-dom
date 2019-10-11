@@ -31,7 +31,13 @@ jest.mock('chrome-aws-lambda', () => {
   return { puppeteer };
 });
 jest.mock('log4js');
-jest.mock('../../src/dom/puppeteer');
+jest.mock('../../src/dom/puppeteer/document', () => {
+ return {
+   Document: {
+     create: jest.fn()
+   }
+ }
+});
 jest.mock('../../src/infrastructure/browserProvider', () => {
   return {
     BrowserProvider: jest.fn((path: string, headless: boolean) => {
