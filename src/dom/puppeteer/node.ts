@@ -83,41 +83,51 @@ export abstract class Node<T extends SerializableNode> implements INode {
 
   public async firstChild(): Promise<Optional<INode>> {
     const { page, element } = this;
-    const handle = await page.evaluateHandle((element: HTMLElement): HTMLNode | null => {
-      return element.firstChild;
-    }, element);
+    const handle = await page.evaluateHandle(
+      /* istanbul ignore next */
+      (element: HTMLElement): HTMLNode | null => element.firstChild,
+      element
+    );
     return this.toNode(handle);
   }
 
   public async lastChild(): Promise<Optional<INode>> {
     const { page, element } = this;
-    const handle = await page.evaluateHandle((element: HTMLElement): HTMLNode | null => {
-      return element.lastChild;
-    }, element);
+    const handle = await page.evaluateHandle(
+      /* istanbul ignore next */
+      (element: HTMLElement): HTMLNode | null => element.lastChild,
+      element
+    );
     return this.toNode(handle);
   }
 
   public async nextSibling(): Promise<Optional<INode>> {
     const { page, element } = this;
-    const handle = await page.evaluateHandle((element: HTMLElement): HTMLNode | null => {
-      return element.nextSibling;
-    }, element);
+    const handle = await page.evaluateHandle(
+      /* istanbul ignore next */
+      (element: HTMLElement): HTMLNode | null => element.nextSibling,
+      element
+    );
     return this.toNode(handle);
   }
 
   public async previousSibling(): Promise<Optional<INode>> {
     const { page, element } = this;
-    const handle = await page.evaluateHandle((element: HTMLElement): HTMLNode | null => {
-      return element.previousSibling;
-    }, element);
+    const handle = await page.evaluateHandle(
+      /* istanbul ignore next */
+      (element: HTMLElement): HTMLNode | null => element.previousSibling,
+      element
+    );
     return this.toNode(handle);
   }
 
   public async parentElement(): Promise<Optional<IElement>> {
     const { page, element } = this;
-    const handle = await page.evaluateHandle((element: HTMLElement): HTMLNode | null => {
-      return element.parentElement;
-    }, element);
+    const handle = await page.evaluateHandle(
+      /* istanbul ignore next */
+      (element: HTMLElement): HTMLNode | null => element.parentElement,
+      element
+    );
 
     const optionalNode = await this.toNode(handle);
     if (!optionalNode.isPresent()) {
@@ -129,9 +139,11 @@ export abstract class Node<T extends SerializableNode> implements INode {
 
   public async parentNode(): Promise<Optional<INode>> {
     const { page, element } = this;
-    const handle = await page.evaluateHandle((element: HTMLElement): HTMLNode | null => {
-      return element.parentNode;
-    }, element);
+    const handle = await page.evaluateHandle(
+      /* istanbul ignore next */
+      (element: HTMLElement): HTMLNode | null => element.parentNode,
+      element
+    );
     return this.toNode(handle);
   }
 

@@ -15,7 +15,7 @@
  */
 
 import puppeteer, { Browser, ElementHandle, Page } from 'puppeteer';
-import { SerializableNode } from '../../../src/dom';
+import { NodeType, SerializableNode } from '../../../src/dom';
 import { Node } from '../../../src/dom/puppeteer';
 
 jest.unmock('puppeteer');
@@ -89,6 +89,37 @@ describe('Node', () => {
     await browser.close();
   });
 
+  describe('properties', () => {
+    let node: NodeImpl;
+    beforeAll(async () => {
+      node = await createNode(page, 'p');
+    });
+
+    test('should return node name', async () => {
+      // Act
+      const actual = node.nodeName;
+
+      // Assert
+      expect(actual).toEqual('P');
+    });
+
+    test('should return node type', async () => {
+      // Act
+      const actual = node.nodeType;
+
+      // Assert
+      expect(actual).toEqual(NodeType.ELEMENT_NODE);
+    });
+
+    test('should return node value', async () => {
+      // Act
+      const actual = node.nodeValue;
+
+      // Assert
+      expect(actual).toEqual(null);
+    });
+  });
+
   describe('textContent', () => {
     test('should return text content ', async () => {
       // Act
@@ -108,6 +139,166 @@ describe('Node', () => {
 
       // Assert
       expect(actual).toEqual('1st paragraph This is 1st paragraph.');
+    });
+  });
+
+  describe('children', () => {
+    test('should return children nodes', async () => {
+      // Act
+      const node = await createNode(page, 'div');
+      const actual = await node.children();
+
+      // Assert
+      expect(actual).toHaveLength(3);
+      expect(actual[0].nodeName).toEqual('H1');
+      expect(actual[1].nodeName).toEqual('P');
+      expect(actual[2].nodeName).toEqual('P');
+    });
+  });
+
+  describe('childNodes', () => {
+    test('should return child nodes', async () => {
+      // Act
+      const node = await createNode(page, 'div');
+      const actual = await node.childNodes();
+
+      // Assert
+      expect(actual).toHaveLength(7);
+      expect(actual[0].nodeName).toEqual('#text');
+      expect(actual[1].nodeName).toEqual('H1');
+      expect(actual[2].nodeName).toEqual('#text');
+      expect(actual[3].nodeName).toEqual('P');
+      expect(actual[4].nodeName).toEqual('#text');
+      expect(actual[5].nodeName).toEqual('P');
+      expect(actual[6].nodeName).toEqual('#text');
+
+    });
+  });
+
+  describe('firstChild', () => {
+    test('should return first child node', async () => {
+      // Act
+      const node = await createNode(page, 'div');
+      const actual = await node.firstChild();
+
+      // Assert
+      expect(actual.isPresent()).toBeTruthy();
+      expect(actual.get().nodeName).toEqual('#text');
+    });
+
+    test('should return empty when child node does not exist', async () => {
+      // Act
+      const node = await createNode(page, 'meta');
+      const actual = await node.firstChild();
+
+      // Assert
+      expect(actual.isPresent()).toBeFalsy();
+    });
+  });
+
+  describe('lastChild', () => {
+    test('should return last child node', async () => {
+      // Act
+      const node = await createNode(page, 'div');
+      const actual = await node.lastChild();
+
+      // Assert
+      expect(actual.isPresent()).toBeTruthy();
+      expect(actual.get().nodeName).toEqual('#text');
+    });
+
+    test('should return empty when child node does not exist', async () => {
+      // Act
+      const node = await createNode(page, 'meta');
+      const actual = await node.lastChild();
+
+      // Assert
+      expect(actual.isPresent()).toBeFalsy();
+    });
+  });
+
+  describe('nextSibling', () => {
+    test('should return next node of the node in parent node', async () => {
+      // Act
+      const node = await createNode(page, 'h1');
+      const actual = await node.nextSibling();
+
+      // Assert
+      expect(actual.isPresent()).toBeTruthy();
+      expect(actual.get().nodeName).toEqual('#text');
+    });
+
+    test('should return empty when the node is last node', async () => {
+      // Act
+      const node = await createNode(page, 'html');
+      const actual = await node.nextSibling();
+
+      // Assert
+      expect(actual.isPresent()).toBeFalsy();
+    });
+  });
+
+  describe('previousSibling', () => {
+    test('should return previous node of the node in parent node', async () => {
+      // Act
+      const node = await createNode(page, 'h1');
+      const actual = await node.previousSibling();
+
+      // Assert
+      expect(actual.isPresent()).toBeTruthy();
+      expect(actual.get().nodeName).toEqual('#text');
+    });
+
+    test('should return empty when the node is first node', async () => {
+      // Act
+      const node = await createNode(page, 'a');
+      const actual = await node.previousSibling();
+
+      // Assert
+      expect(actual.isPresent()).toBeFalsy();
+    });
+  });
+
+  describe('parentElement', () => {
+    test('should return parent element', async () => {
+      // Act
+      const node = await createNode(page, 'h1');
+      const actual = await node.parentElement();
+
+      // Assert
+      expect(actual.isPresent()).toBeTruthy();
+      expect(actual.get().nodeName).toEqual('DIV');
+    });
+
+    test('should return empty when node does not have parent element', async () => {
+      // Act
+      const node = await createNode(page, 'html');
+      const actual = await node.parentElement();
+
+      // Assert
+      expect(actual.isPresent()).toBeFalsy();
+    });
+  });
+
+  describe('parentNode', () => {
+    test('should return parent node', async () => {
+      // Act
+      const node = await createNode(page, 'html');
+      const actual = await node.parentNode();
+
+      // Assert
+      expect(actual.isPresent()).toBeTruthy();
+      expect(actual.get().nodeName).toEqual('#document');
+    });
+
+    test('should return empty when node does not have parent node', async () => {
+      // Act
+      const node = await createNode(page, 'html');
+      const document = (await node.parentNode()).get();
+      const actual = await document.parentNode();
+
+      // Assert
+      expect(actual.isPresent()).toBeFalsy();
     });
   });
 });
