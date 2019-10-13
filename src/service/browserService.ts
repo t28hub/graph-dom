@@ -15,7 +15,7 @@
  */
 
 import { Url } from 'url';
-import { Document } from '../dom';
+import { Document } from '../domain';
 
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagegotourl-options
 export type WaitUntil =

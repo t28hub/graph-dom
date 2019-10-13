@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
-export { Optional } from './optional';
+export * from './optional';
+export * from './validator';

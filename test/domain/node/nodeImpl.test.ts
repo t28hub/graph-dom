@@ -15,13 +15,11 @@
  */
 
 import puppeteer, { Browser, ElementHandle, Page } from 'puppeteer';
-import { NodeType, SerializableNode } from '../../../src/dom';
-import { Node } from '../../../src/dom/puppeteer';
+import { NodeImpl, NodeType, SerializableNode } from '../../../src/domain';
 
 jest.unmock('puppeteer');
-jest.unmock('../../../src/dom/puppeteer');
 
-class NodeImpl extends Node<SerializableNode> {
+class Node extends NodeImpl<SerializableNode> {
   public constructor(page: Page, element: ElementHandle, properties: SerializableNode) {
     super(page, element, properties);
   }
@@ -56,21 +54,21 @@ async function findElement(page: Page, selector: string): Promise<ElementHandle>
 
   const element = handle.asElement();
   if (element === null) {
-    throw new Error('Could not convert JavaScript Object as an Element');
+    throw new Error('Could not convert JavaScript Object as an ElementImpl');
   }
   return element;
 }
 
-async function createNode(page: Page, selector: string): Promise<Node<SerializableNode>> {
+async function createNode(page: Page, selector: string): Promise<NodeImpl<SerializableNode>> {
   const element = await findElement(page, selector);
   const properties: SerializableNode = await page.evaluate((element: HTMLElement): SerializableNode => {
     const { nodeName, nodeType, nodeValue } = element;
     return { nodeName, nodeType, nodeValue };
   }, element);
-  return new NodeImpl(page, element, properties);
+  return new Node(page, element, properties);
 }
 
-describe('Node', () => {
+describe('NodeImpl', () => {
   let browser: Browser;
   let page: Page;
   beforeAll(async () => {
@@ -90,7 +88,7 @@ describe('Node', () => {
   });
 
   describe('properties', () => {
-    let node: NodeImpl;
+    let node: Node;
     beforeAll(async () => {
       node = await createNode(page, 'p');
     });

@@ -18,8 +18,8 @@ import { Injectable, ProviderScope } from '@graphql-modules/di';
 import { DataSource, DataSourceConfig } from 'apollo-datasource';
 import { PrefixingKeyValueCache } from 'apollo-server-caching';
 import { format, Url } from 'url';
+import { Document } from '..';
 import { Context } from '../../context';
-import { Document } from '../../dom';
 import { WaitUntil } from '../../service/browserService';
 import { ChromeBrowserService } from '../../service/chromeBrowserService';
 import { RobotsTxt } from '../../service/robotsTxt';
@@ -38,8 +38,9 @@ const ROBOTS_TXT_CACHE_KEY_PREFIX = 'robotstxt:';
 
 @Injectable({
   scope: ProviderScope.Session,
+  overwrite: false,
 })
-export class BrowserDataSource extends DataSource<Context> {
+export class DocumentDataSource extends DataSource<Context> {
   private readonly logger: Logger;
 
   private robotsTxtCache!: RobotsTxtCache;
@@ -49,13 +50,13 @@ export class BrowserDataSource extends DataSource<Context> {
     private readonly robotsTxtFetcher: RobotsTxtFetcher
   ) {
     super();
-    this.logger = LoggerFactory.getLogger(BrowserDataSource.name);
+    this.logger = LoggerFactory.getLogger(DocumentDataSource.name);
   }
 
   public initialize(config: DataSourceConfig<Context>): void {
     const { cache } = config;
     this.robotsTxtCache = new RobotsTxtCache(new PrefixingKeyValueCache(cache, ROBOTS_TXT_CACHE_KEY_PREFIX));
-    this.logger.debug('Initialized BrowserDataSource');
+    this.logger.debug('Initialized DocumentDataSource');
   }
 
   public async fetch(url: Url, options: Partial<Options> = {}): Promise<Document> {

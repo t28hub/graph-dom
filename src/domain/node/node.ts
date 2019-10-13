@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Element } from './';
-import { Optional } from '../util';
+import { Element } from '..';
+import { Optional } from '../../util';
 
 export interface Node {
   readonly nodeName: string;

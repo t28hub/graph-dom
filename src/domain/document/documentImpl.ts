@@ -15,37 +15,10 @@
  */
 
 import { ElementHandle, Page } from 'puppeteer';
-import { Node } from './';
-import { Document as IDocument, Element as IElement, SerializableDocument } from '../';
+import { Document, Element, NodeImpl, SerializableDocument } from '../';
 import { Optional } from '../../util';
 
-export class Document extends Node<SerializableDocument> implements IDocument {
-  public static async create(page: Page, element?: ElementHandle): Promise<IDocument> {
-    const document = element ? element : await Document.findDocument(page);
-    const properties = await page.evaluate(
-      /* istanbul ignore next */
-      (document: HTMLDocument): SerializableDocument => {
-        const { title, nodeName, nodeType, nodeValue } = document;
-        return { title, nodeName, nodeType, nodeValue };
-      },
-      document
-    );
-    return new Document(page, document, properties);
-  }
-
-  private static async findDocument(page: Page): Promise<ElementHandle> {
-    const handle = await page.evaluateHandle((): HTMLDocument => window.document);
-    if (handle === null) {
-      throw new Error(`window.document does not exist in ${page.url()}`);
-    }
-
-    const document = handle.asElement();
-    if (document === null) {
-      throw new Error(`window.document does not exist in ${page.url()}`);
-    }
-    return document;
-  }
-
+export class DocumentImpl extends NodeImpl<SerializableDocument> implements Document {
   public get title(): string {
     return this.properties.title;
   }
@@ -54,7 +27,7 @@ export class Document extends Node<SerializableDocument> implements IDocument {
     super(page, element, properties);
   }
 
-  public async head(): Promise<Optional<IElement>> {
+  public async head(): Promise<Optional<Element>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle((document: HTMLDocument): HTMLElement | null => {
       return document.head;
@@ -62,7 +35,7 @@ export class Document extends Node<SerializableDocument> implements IDocument {
     return this.toElement(handle);
   }
 
-  public async body(): Promise<Optional<IElement>> {
+  public async body(): Promise<Optional<Element>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle((document: HTMLDocument): HTMLElement | null => {
       return document.body;
@@ -70,7 +43,7 @@ export class Document extends Node<SerializableDocument> implements IDocument {
     return this.toElement(handle);
   }
 
-  public async getElementById(id: string): Promise<Optional<IElement>> {
+  public async getElementById(id: string): Promise<Optional<Element>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle(
       (document: HTMLDocument, id: string): HTMLElement | null => {
@@ -82,19 +55,19 @@ export class Document extends Node<SerializableDocument> implements IDocument {
     return this.toElement(handle);
   }
 
-  public async getElementsByClassName(name: string): Promise<Array<IElement>> {
+  public async getElementsByClassName(name: string): Promise<Array<Element>> {
     return super.getElementsByClassName(name);
   }
 
-  public async getElementsByTagName(name: string): Promise<Array<IElement>> {
+  public async getElementsByTagName(name: string): Promise<Array<Element>> {
     return super.getElementsByTagName(name);
   }
 
-  public async querySelector(selector: string): Promise<Optional<IElement>> {
+  public async querySelector(selector: string): Promise<Optional<Element>> {
     return super.querySelector(selector);
   }
 
-  public async querySelectorAll(selector: string): Promise<Array<IElement>> {
+  public async querySelectorAll(selector: string): Promise<Array<Element>> {
     return super.querySelectorAll(selector);
   }
 }

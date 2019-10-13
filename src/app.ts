@@ -22,7 +22,7 @@ import helmet from 'helmet';
 import 'reflect-metadata';
 import { AppModule } from './appModule';
 import { Context } from './context';
-import { BrowserDataSource } from './graphql/dataSources/browserDataSource';
+import { DocumentDataSource } from './domain/document/documentDataSource';
 import { RedisCacheProvider } from './infrastructure/redisCacheProvider';
 
 const app = express();
@@ -48,7 +48,7 @@ const serverConfig: ServerConfig = {
   modules: [AppModule],
   context,
   dataSources: (): DataSources<Context> => {
-    const browser = injector.get(BrowserDataSource);
+    const browser = injector.get(DocumentDataSource);
     return { browser };
   },
   engine: undefined,

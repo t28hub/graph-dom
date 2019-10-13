@@ -15,12 +15,16 @@
  */
 
 import { ElementHandle, JSHandle, Page } from 'puppeteer';
-import { isElement, Document, Element } from './';
-import { Element as IElement, Node as INode, NodeType, SerializableNode } from '../';
+import { create } from '.';
+import { HTMLNode } from './htmlNode';
+import { Element, Node, NodeType, SerializableNode } from '..';
 import { Optional } from '../../util';
-import { HTMLNode } from '../web';
 
-export abstract class Node<T extends SerializableNode> implements INode {
+function isElement(node: Node): node is Element {
+  return node.nodeType === NodeType.ELEMENT_NODE;
+}
+
+export abstract class NodeImpl<T extends SerializableNode> implements Node {
   public get nodeName(): string {
     return this.properties.nodeName;
   }
@@ -61,7 +65,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     );
   }
 
-  public async children(): Promise<Array<INode>> {
+  public async children(): Promise<Array<Node>> {
     const { page, element } = this;
     const collection = await page.evaluateHandle(
       /* istanbul ignore next */
@@ -71,7 +75,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return this.toNodeArray(collection);
   }
 
-  public async childNodes(): Promise<Array<INode>> {
+  public async childNodes(): Promise<Array<Node>> {
     const { page, element } = this;
     const collection = await page.evaluateHandle(
       /* istanbul ignore next */
@@ -81,7 +85,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return this.toNodeArray(collection);
   }
 
-  public async firstChild(): Promise<Optional<INode>> {
+  public async firstChild(): Promise<Optional<Node>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle(
       /* istanbul ignore next */
@@ -91,7 +95,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return this.toNode(handle);
   }
 
-  public async lastChild(): Promise<Optional<INode>> {
+  public async lastChild(): Promise<Optional<Node>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle(
       /* istanbul ignore next */
@@ -101,7 +105,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return this.toNode(handle);
   }
 
-  public async nextSibling(): Promise<Optional<INode>> {
+  public async nextSibling(): Promise<Optional<Node>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle(
       /* istanbul ignore next */
@@ -111,7 +115,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return this.toNode(handle);
   }
 
-  public async previousSibling(): Promise<Optional<INode>> {
+  public async previousSibling(): Promise<Optional<Node>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle(
       /* istanbul ignore next */
@@ -121,7 +125,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return this.toNode(handle);
   }
 
-  public async parentElement(): Promise<Optional<IElement>> {
+  public async parentElement(): Promise<Optional<Element>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle(
       /* istanbul ignore next */
@@ -137,7 +141,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return Optional.ofNullable(isElement(node) ? node : null);
   }
 
-  public async parentNode(): Promise<Optional<INode>> {
+  public async parentNode(): Promise<Optional<Node>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle(
       /* istanbul ignore next */
@@ -147,7 +151,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return this.toNode(handle);
   }
 
-  protected async getElementsByClassName(name: string): Promise<Array<IElement>> {
+  protected async getElementsByClassName(name: string): Promise<Array<Element>> {
     const { page, element } = this;
     const collection = await page.evaluateHandle(
       (element: HTMLElement, name: string): HTMLCollection => {
@@ -159,7 +163,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return this.toElementArray(collection);
   }
 
-  protected async getElementsByTagName(name: string): Promise<Array<IElement>> {
+  protected async getElementsByTagName(name: string): Promise<Array<Element>> {
     const { page, element } = this;
     const collection = await page.evaluateHandle(
       (element: HTMLElement, name: string): HTMLCollection => {
@@ -171,18 +175,18 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return this.toElementArray(collection);
   }
 
-  protected async querySelector(selector: string): Promise<Optional<IElement>> {
+  protected async querySelector(selector: string): Promise<Optional<Element>> {
     const { element } = this;
     const found = await element.$(selector);
     return this.toElement(found);
   }
 
-  protected async querySelectorAll(selector: string): Promise<Array<IElement>> {
+  protected async querySelectorAll(selector: string): Promise<Array<Element>> {
     const { page, element } = this;
     const found: ElementHandle<HTMLElement>[] = await element.$$(selector);
-    const promises: Promise<IElement>[] = found.map(
-      async (element: ElementHandle): Promise<IElement> => {
-        const node = await Node.create(page, element);
+    const promises: Promise<Element>[] = found.map(
+      async (element: ElementHandle): Promise<Element> => {
+        const node = await create(page, element);
         if (isElement(node)) {
           return node;
         }
@@ -192,7 +196,7 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return Promise.all(promises);
   }
 
-  protected async toNode(handle: JSHandle | null): Promise<Optional<INode>> {
+  protected async toNode(handle: JSHandle | null): Promise<Optional<Node>> {
     if (handle === null) {
       return Optional.empty();
     }
@@ -201,21 +205,21 @@ export abstract class Node<T extends SerializableNode> implements INode {
     if (element === null) {
       return Optional.empty();
     }
-    return Optional.ofNullable(await Node.create(this.page, element));
+    return Optional.ofNullable(await create(this.page, element));
   }
 
-  protected async toNodeArray(collection: JSHandle): Promise<Array<INode>> {
+  protected async toNodeArray(collection: JSHandle): Promise<Array<Node>> {
     const properties = await collection.getProperties();
     const promises = Array.from(properties.values()).map(
-      async (handle: JSHandle): Promise<INode> => {
+      async (handle: JSHandle): Promise<Node> => {
         const node = await this.toNode(handle);
-        return node.orElseThrow(() => new Error('Node does not exist'));
+        return node.orElseThrow(() => new Error('NodeImpl does not exist'));
       }
     );
     return Promise.all(promises);
   }
 
-  protected async toElement(handle: JSHandle | null): Promise<Optional<IElement>> {
+  protected async toElement(handle: JSHandle | null): Promise<Optional<Element>> {
     const optionalNode = await this.toNode(handle);
     if (!optionalNode.isPresent()) {
       return Optional.empty();
@@ -225,32 +229,14 @@ export abstract class Node<T extends SerializableNode> implements INode {
     return Optional.ofNullable(isElement(node) ? node : null);
   }
 
-  protected async toElementArray(collection: JSHandle): Promise<Array<IElement>> {
+  protected async toElementArray(collection: JSHandle): Promise<Array<Element>> {
     const properties = await collection.getProperties();
     const promises = Array.from(properties.values()).map(
-      async (handle: JSHandle): Promise<IElement> => {
+      async (handle: JSHandle): Promise<Element> => {
         const node = await this.toElement(handle);
-        return node.orElseThrow(() => new Error('Element does not exist'));
+        return node.orElseThrow(() => new Error('ElementImpl does not exist'));
       }
     );
     return Promise.all(promises);
-  }
-
-  protected static async create(page: Page, element: ElementHandle): Promise<INode> {
-    const nodeType = await page.evaluate(
-      /* istanbul ignore next */
-      (element: HTMLElement): NodeType => element.nodeType,
-      element
-    );
-
-    switch (nodeType) {
-      case NodeType.DOCUMENT_NODE:
-        return await Document.create(page, element);
-      case NodeType.ELEMENT_NODE:
-        return await Element.create(page, element);
-      default:
-        // TODO: Instantiate strict class for node type
-        return await Element.create(page, element);
-    }
   }
 }

@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import { Document as IDocument, Element as IElement, Node as INode, NodeType } from '../';
-
-export * from './node';
-export * from './document';
-export * from './element';
-
-export function isDocument(node: INode): node is IDocument {
-  return node.nodeType === NodeType.DOCUMENT_NODE;
-}
-
-export function isElement(node: INode): node is IElement {
-  return node.nodeType === NodeType.ELEMENT_NODE;
-}
+export * from './attribute/attribute';
+export * from './data/data';
+export * from './node/node';
+export * from './document/document';
+export * from './element/element';
+export * from './node/nodeImpl';
+export * from './document/documentImpl';
+export * from './element/elementImpl';

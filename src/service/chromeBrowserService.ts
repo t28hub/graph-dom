@@ -19,8 +19,8 @@ import { Injectable, ProviderScope } from '@graphql-modules/di';
 import Chrome from 'chrome-aws-lambda';
 import { Browser, BrowserOptions, NavigationOptions, Page, Request, ResourceType, Response } from 'puppeteer';
 import { format, Url } from 'url';
-import { Document as IDocument } from '../dom';
-import { Document } from '../dom/puppeteer';
+import { Document } from '../domain';
+import { create } from '../domain/document';
 import { BrowserService, Options } from './browserService';
 import { Logger } from '../util/logging/logger';
 import { ApolloError } from 'apollo-server-errors';
@@ -57,7 +57,7 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
     await this.dispose();
   }
 
-  public async open(url: Url, options: Partial<Options> = {}): Promise<IDocument> {
+  public async open(url: Url, options: Partial<Options> = {}): Promise<Document> {
     const browser = await this.ensureBrowser();
     const page = await browser.newPage();
     page.setDefaultTimeout(DEFAULT_TIMEOUT);
@@ -83,7 +83,7 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
       } else {
         this.logger.warn("Received non-successful status '%d' from %s", status, urlString);
       }
-      return await Document.create(page);
+      return await create(page);
     } catch (e) {
       await this.closePage(page);
 

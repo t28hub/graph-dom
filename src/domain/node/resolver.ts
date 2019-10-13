@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import { ModuleContext } from '@graphql-modules/core';
 import { IResolverObject } from 'graphql-tools';
-import { parse } from 'url';
-import { BrowserDataSource } from '../dataSources/browserDataSource';
-import { Document } from '../../dom';
-import { validateUrl } from '../../validator';
+import { Node, NodeType } from '..';
+
+type Type = 'Document' | 'Element' | null;
 
 export const resolver: IResolverObject = {
-  /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
-  page: async (parent: any, args: { url: string }, { injector }: ModuleContext): Promise<Document> => {
-    const { url } = args;
-    validateUrl(url);
-
-    const parsed = parse(url);
-    const browser = injector.get(BrowserDataSource);
-    return await browser.fetch(parsed, { waitUntil: 'load' });
+  __resolveType: (node: Node): Type => {
+    switch (node.nodeType) {
+      case NodeType.DOCUMENT_NODE:
+        return 'Document';
+      case NodeType.ELEMENT_NODE:
+        return 'Element';
+      default:
+        // TODO: Return strict node type such as DOCUMENT_TYPE_NODE
+        return 'Element';
+    }
   },
 };

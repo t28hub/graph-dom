@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { UserInputError } from 'apollo-server-errors';
 import {
   validate,
   validateAttributeName,
@@ -22,8 +23,7 @@ import {
   validateSelector,
   validateTagName,
   validateUrl
-} from '../src/validator';
-import { UserInputError } from 'apollo-server-errors';
+} from '../../src/util';
 
 describe('Validator', () => {
   describe('validate', () => {

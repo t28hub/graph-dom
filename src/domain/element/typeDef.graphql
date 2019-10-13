@@ -12,23 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# import Element from "element.graphql"
-# import Node from "node.graphql"
+# import Attribute from "../attribute/typeDef.graphql"
+# import Data from "../data/typeDef.graphql"
+# import Node from "../node/typeDef.graphql"
 
 """
-Document representing HTML document
+Element representing HTML element
 
-https://developer.mozilla.org/en-US/docs/Web/API/Document
+https://developer.mozilla.org/en-US/docs/Web/API/Element
 """
-type Document implements Node {
-  "The title of the document"
-  title: String!
+type Element implements Node {
+  "The ID of the element"
+  id: String!
 
-  "The <head> element"
-  head: Element
+  "The list of attributes"
+  attributes: [Attribute]!
 
-  "The <body> element"
-  body: Element
+  "The list of custom data attributes"
+  dataset: [Data]!
+
+  "The list of class name"
+  classList: [String]!
+
+  "The class name"
+  className: String!
+
+  "The HTML content of the element"
+  innerHTML: String!
+
+  "The HTML of the element including its content"
+  outerHTML: String!
 
   "All of the child elements"
   children: [Element]!
@@ -69,11 +82,11 @@ type Document implements Node {
   "The rendered text content of node"
   innerText: String
 
-  "Return the element by ID"
-  getElementById(
-    "The ID of the element"
-    id: String!
-  ): Element
+  "Return an attribute value by attribute name"
+  getAttribute(
+    "The name of the attribute"
+    name: String!
+  ): String
 
   "Return a list of elements with the class name"
   getElementsByClassName(
@@ -83,7 +96,7 @@ type Document implements Node {
 
   "Return a list of elements with the tag name"
   getElementsByTagName(
-    "The tag of the class"
+    "The name of the tag"
     name: String!
   ): [Element]!
 

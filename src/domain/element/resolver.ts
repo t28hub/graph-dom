@@ -15,10 +15,8 @@
  */
 
 import { IResolverObject } from 'graphql-tools';
-import { Element, Node, NodeType } from '../../dom';
-import { Attribute } from '../../dom/attribute';
-import { Data } from '../../dom/data';
-import { validateAttributeName, validateClassName, validateSelector, validateTagName } from '../../validator';
+import { Attribute, Data, Element, Node, NodeType } from '..';
+import { validateAttributeName, validateClassName, validateSelector, validateTagName } from '../../util';
 
 // noinspection JSUnusedGlobalSymbols
 export const resolver: IResolverObject = {

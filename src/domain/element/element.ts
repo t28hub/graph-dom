@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { Node, SerializableNode } from './';
-import { Attribute } from './attribute';
-import { Data } from './data';
-import { Optional } from '../util';
+import { Attribute, Data, Node, SerializableNode } from '..';
+import { Optional } from '../../util';
 
 export interface Element extends Node {
   readonly id: string;

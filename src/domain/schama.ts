@@ -16,18 +16,17 @@
 
 import { importSchema } from 'graphql-import';
 import { resolve } from 'path';
-import { resolver as queryResolver } from './resolvers/query';
-import { resolver as nodeResolver } from './resolvers/node';
-import { resolver as documentResolver } from './resolvers/document';
-import { resolver as elementResolver } from './resolvers/element';
+import { resolver as queryResolver } from './query/resolver';
+import { resolver as nodeResolver } from './node/resolver';
+import { resolver as documentResolver } from './document/resolver';
+import { resolver as elementResolver } from './element/resolver';
 
-const path = resolve(__dirname, './typeDefs/query.graphql');
+const path = resolve(__dirname, './query/typeDef.graphql');
 export const typeDefs = importSchema(path);
+
 export const resolvers = {
   Query: queryResolver,
   Node: nodeResolver,
   Document: documentResolver,
   Element: elementResolver,
 };
-
-// export const schema: GraphQLSchema = makeExecutableSchema({ typeDefs, resolvers });

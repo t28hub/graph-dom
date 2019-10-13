@@ -15,32 +15,10 @@
  */
 
 import { ElementHandle, Page } from 'puppeteer';
-import { Node } from './';
-import { Attribute } from '../attribute';
-import { Data } from '../data';
-import { Element as IElement, SerializableElement } from '../element';
+import { Attribute, Data, Element, SerializableElement, NodeImpl } from '..';
 import { Optional } from '../../util';
 
-export class Element extends Node<SerializableElement> implements IElement {
-  public static async create(page: Page, element: ElementHandle): Promise<IElement> {
-    const properties = await page.evaluate(
-      /* istanbul ignore next */
-      (element: HTMLElement): SerializableElement => {
-        const { id, className, classList, nodeName, nodeType, nodeValue } = element;
-        return {
-          id: id,
-          className: className,
-          classList: Array.from(classList || []),
-          nodeName,
-          nodeType,
-          nodeValue,
-        };
-      },
-      element
-    );
-    return new Element(page, element, properties);
-  }
-
+export class ElementImpl extends NodeImpl<SerializableElement> implements Element {
   public get id(): string {
     return this.properties.id;
   }
@@ -115,19 +93,19 @@ export class Element extends Node<SerializableElement> implements IElement {
     return Optional.ofNullable(attribute);
   }
 
-  public async getElementsByClassName(name: string): Promise<Array<IElement>> {
+  public async getElementsByClassName(name: string): Promise<Array<Element>> {
     return super.getElementsByClassName(name);
   }
 
-  public async getElementsByTagName(name: string): Promise<Array<IElement>> {
+  public async getElementsByTagName(name: string): Promise<Array<Element>> {
     return super.getElementsByTagName(name);
   }
 
-  public async querySelector(selector: string): Promise<Optional<IElement>> {
+  public async querySelector(selector: string): Promise<Optional<Element>> {
     return super.querySelector(selector);
   }
 
-  public async querySelectorAll(selector: string): Promise<Array<IElement>> {
+  public async querySelectorAll(selector: string): Promise<Array<Element>> {
     return super.querySelectorAll(selector);
   }
 }

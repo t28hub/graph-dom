@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# import Document from "document.graphql"
+# import Document from "../document/typeDef.graphql"
 
 """
 The root query

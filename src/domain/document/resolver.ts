@@ -15,8 +15,8 @@
  */
 
 import { IResolverObject } from 'graphql-tools';
-import { Document, Element, Node, NodeType } from '../../dom';
-import { validateClassName, validateId, validateSelector, validateTagName } from '../../validator';
+import { Document, Element, Node, NodeType } from '..';
+import { validateClassName, validateId, validateSelector, validateTagName } from '../../util/validator';
 
 export const resolver: IResolverObject = {
   head: async (document: Document): Promise<Element | null> => {

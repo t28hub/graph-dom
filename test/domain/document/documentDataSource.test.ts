@@ -18,9 +18,9 @@ import 'reflect-metadata';
 import { DataSourceConfig } from 'apollo-datasource';
 import log4js from 'log4js';
 import { parse } from 'url';
-import { NodeType } from '../../../src/dom';
+import { NodeType } from '../../../src/domain';
 import { Context } from '../../../src/context';
-import { BrowserDataSource } from '../../../src/graphql/dataSources/browserDataSource';
+import { DocumentDataSource } from '../../../src/domain/document/documentDataSource';
 import { ChromeBrowserService } from '../../../src/service/chromeBrowserService';
 import { GraphQLModule } from '@graphql-modules/core';
 import { RobotsTxtFetcher } from '../../../src/service/robotsTxtFetcher';
@@ -52,7 +52,7 @@ const document = {
   querySelectorAll: jest.fn()
 };
 
-describe('BrowserDataSource', () => {
+describe('DocumentDataSource', () => {
   const browserService = {
     open: jest.fn(),
     dispose: jest.fn()
@@ -87,13 +87,13 @@ describe('BrowserDataSource', () => {
   };
   const config: DataSourceConfig<Context> = { cache, context };
 
-  let dataSource!: BrowserDataSource;
+  let dataSource!: DocumentDataSource;
   beforeEach(() => {
     jest.resetAllMocks();
 
     (log4js.getLogger as jest.Mock).mockReturnValue(logger);
 
-    dataSource = new BrowserDataSource(
+    dataSource = new DocumentDataSource(
       injector.get(ChromeBrowserService),
       injector.get(RobotsTxtFetcher),
     );
