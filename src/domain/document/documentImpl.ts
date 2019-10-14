@@ -15,7 +15,7 @@
  */
 
 import { ElementHandle, Page } from 'puppeteer';
-import { Document, Element, NodeImpl, SerializableDocument } from '../';
+import { Document, Element, NodeImpl, SerializableDocument } from '..';
 import { Optional } from '../../util';
 
 export class DocumentImpl extends NodeImpl<SerializableDocument> implements Document {
@@ -29,26 +29,29 @@ export class DocumentImpl extends NodeImpl<SerializableDocument> implements Docu
 
   public async head(): Promise<Optional<Element>> {
     const { page, element } = this;
-    const handle = await page.evaluateHandle((document: HTMLDocument): HTMLElement | null => {
-      return document.head;
-    }, element);
+    const handle = await page.evaluateHandle(
+      /* istanbul ignore next */
+      (document: HTMLDocument): HTMLElement | null => document.head,
+      element
+    );
     return this.toElement(handle);
   }
 
   public async body(): Promise<Optional<Element>> {
     const { page, element } = this;
-    const handle = await page.evaluateHandle((document: HTMLDocument): HTMLElement | null => {
-      return document.body;
-    }, element);
+    const handle = await page.evaluateHandle(
+      /* istanbul ignore next */
+      (document: HTMLDocument): HTMLElement | null => document.body,
+      element
+    );
     return this.toElement(handle);
   }
 
   public async getElementById(id: string): Promise<Optional<Element>> {
     const { page, element } = this;
     const handle = await page.evaluateHandle(
-      (document: HTMLDocument, id: string): HTMLElement | null => {
-        return document.getElementById(id);
-      },
+      /* istanbul ignore next */
+      (document: HTMLDocument, id: string): HTMLElement | null => document.getElementById(id),
       element,
       id
     );

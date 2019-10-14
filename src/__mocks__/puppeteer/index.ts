@@ -17,7 +17,9 @@
 import { errors } from 'puppeteer';
 
 export const page = {
+  $: jest.fn(),
   close: jest.fn(),
+  evaluate: jest.fn(),
   evaluateHandle: jest.fn().mockReturnValue(Promise.resolve(null)),
   goto: jest.fn().mockReturnValue(Promise.resolve(null)),
   on: jest.fn(),

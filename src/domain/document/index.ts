@@ -14,20 +14,31 @@
  * limitations under the License.
  */
 
+import { AssertionError } from 'assert';
 import { ElementHandle, Page } from 'puppeteer';
 import { Document, DocumentImpl, SerializableDocument } from '..';
 
 async function findDocumentElement(page: Page): Promise<ElementHandle> {
-  const handle = await page.evaluateHandle((): HTMLDocument => window.document);
+  const handle = await page.evaluateHandle(
+    /* istanbul ignore next */
+    (): HTMLDocument => window.document
+  );
+
   if (handle === null) {
-    throw new Error(`window.document does not exist in ${page.url()}`);
+    // Since window.document basically exists in a page, use AssertionError
+    throw new AssertionError({
+      message: `window.document does not exist in ${page.url()}`,
+    });
   }
 
-  const document = handle.asElement();
-  if (document === null) {
-    throw new Error(`window.document does not exist in ${page.url()}`);
+  const element = handle.asElement();
+  if (element === null) {
+    // Since window.document is basically a element, use AssertionError
+    throw new AssertionError({
+      message: `window.document is not an Element in ${page.url()}`,
+    });
   }
-  return document;
+  return element;
 }
 
 export async function create(page: Page, element?: ElementHandle): Promise<Document> {

@@ -154,9 +154,8 @@ export abstract class NodeImpl<T extends SerializableNode> implements Node {
   protected async getElementsByClassName(name: string): Promise<Array<Element>> {
     const { page, element } = this;
     const collection = await page.evaluateHandle(
-      (element: HTMLElement, name: string): HTMLCollection => {
-        return element.getElementsByClassName(name);
-      },
+      /* istanbul ignore next */
+      (element: HTMLElement, name: string): HTMLCollection => element.getElementsByClassName(name),
       element,
       name
     );
@@ -166,9 +165,8 @@ export abstract class NodeImpl<T extends SerializableNode> implements Node {
   protected async getElementsByTagName(name: string): Promise<Array<Element>> {
     const { page, element } = this;
     const collection = await page.evaluateHandle(
-      (element: HTMLElement, name: string): HTMLCollection => {
-        return element.getElementsByTagName(name);
-      },
+      /* istanbul ignore next */
+      (element: HTMLElement, name: string): HTMLCollection => element.getElementsByTagName(name),
       element,
       name
     );
