@@ -44,15 +44,7 @@ const html = `
 `;
 
 async function findElement(page: Page, selector: string): Promise<ElementHandle> {
-  const handle = await page.evaluateHandle((selector: string): HTMLElement => {
-    const found = window.document.querySelector(selector);
-    if (found === null) {
-      throw new Error('Could not find required element');
-    }
-    return found as HTMLElement;
-  }, selector);
-
-  const element = handle.asElement();
+  const element = await page.$(selector);
   if (element === null) {
     throw new Error('Could not convert JavaScript Object as an ElementImpl');
   }

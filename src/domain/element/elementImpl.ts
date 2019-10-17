@@ -37,56 +37,51 @@ export class ElementImpl extends NodeImpl<SerializableElement> implements Elemen
 
   public async attributes(): Promise<Array<Attribute>> {
     const { page, element } = this;
-    return await page.evaluate((element: HTMLElement): Array<Attribute> => {
-      const items = element.attributes;
-      const itemSize = items.length;
-      const attributes: Array<Attribute> = [];
-      for (let index = 0; index < itemSize; index++) {
-        const item: Attr | null = items.item(index);
-        if (item === null) {
-          continue;
-        }
-
-        const { name, value } = item;
-        attributes.push({ name, value });
-      }
-      return attributes;
-    }, element);
+    return await page.evaluate(
+      /* istanbul ignore next */
+      (element: HTMLElement): Array<Attribute> => {
+        /* eslint-disable-next-line @typescript-eslint/typedef */
+        return Array.from(element.attributes, ({ name, value }): Attribute => ({ name, value }));
+      },
+      element
+    );
   }
 
   public async dataset(): Promise<Array<Data>> {
     const { page, element } = this;
-    return await page.evaluate((element: HTMLElement): Array<Data> => {
-      if (!(element instanceof HTMLElement)) {
-        return [];
-      }
-
-      const { dataset } = element;
-      return Object.keys(dataset).map(
-        (name: string): Data => {
-          const value = dataset[name];
-          return { name, value };
-        }
-      );
-    }, element);
+    return await page.evaluate(
+      /* istanbul ignore next */
+      (element: HTMLElement): Array<Data> => {
+        const dataset = element.dataset;
+        return Object.keys(dataset).map((key: string): Data => ({ name: key, value: dataset[key] }));
+      },
+      element
+    );
   }
 
   public async innerHTML(): Promise<string> {
     const { page, element } = this;
-    return await page.evaluate((element: HTMLElement): string => element.innerHTML, element);
+    return await page.evaluate(
+      /* istanbul ignore next */
+      (element: HTMLElement): string => element.innerHTML,
+      element
+    );
   }
 
   public async outerHTML(): Promise<string> {
     const { page, element } = this;
-    return await page.evaluate((element: HTMLElement): string => element.outerHTML, element);
+    return await page.evaluate(
+      /* istanbul ignore next */
+      (element: HTMLElement): string => element.outerHTML,
+      element
+    );
   }
 
   public async getAttribute(name: string): Promise<Optional<string>> {
     const { page, element } = this;
     const attribute = await page.evaluate(
-      (element: HTMLElement, name: string): string | null => {
-        return element.getAttribute(name);
-      },
+      /* istanbul ignore next */
+      (element: HTMLElement, name: string): string | null => element.getAttribute(name),
       element,
       name
     );
