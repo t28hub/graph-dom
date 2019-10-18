@@ -21,7 +21,7 @@ import { Browser, BrowserOptions, NavigationOptions, Page, Request, ResourceType
 import { format, Url } from 'url';
 import { Document } from '../domain';
 import { create } from '../domain/document';
-import { BrowserService, Options } from './browserService';
+import { BrowserService, Options, WaitUntil } from './browserService';
 import { Logger } from '../util/logging/logger';
 import { ApolloError } from 'apollo-server-errors';
 import { RequestTimeoutError } from './errors/requestTimeoutError';
@@ -60,8 +60,16 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
   public async open(url: Url, options: Partial<Options> = {}): Promise<Document> {
     const browser = await this.ensureBrowser();
     const page = await browser.newPage();
-    page.setDefaultTimeout(DEFAULT_TIMEOUT);
     page.setDefaultNavigationTimeout(DEFAULT_NAVIGATION_TIMEOUT);
+
+    if (options.timeout) {
+      page.setDefaultTimeout(options.timeout);
+    } else {
+      page.setDefaultTimeout(DEFAULT_TIMEOUT);
+    }
+    if (options.userAgent) {
+      await page.setUserAgent(options.userAgent);
+    }
 
     if (this.browserProvider.headless) {
       await page.setRequestInterception(true);
@@ -76,7 +84,7 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
 
     const urlString = format(url);
     try {
-      const response: Response = await ChromeBrowserService.goto(page, urlString, options);
+      const response: Response = await ChromeBrowserService.goto(page, urlString, options.waitUntil);
       const status = response.status();
       if (status >= STATUS_CODE_OK && status < STATUS_CODE_MULTIPLE_CHOICE) {
         this.logger.info("Received successful status '%d' from %s", status, urlString);
@@ -131,15 +139,7 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
     return browserPromise;
   }
 
-  private static async goto(page: Page, urlString: string, options: Partial<Options>): Promise<Response> {
-    const { timeout, userAgent, waitUntil } = options;
-    if (timeout !== undefined) {
-      page.setDefaultTimeout(timeout);
-    }
-    if (userAgent !== undefined) {
-      await page.setUserAgent(userAgent);
-    }
-
+  private static async goto(page: Page, urlString: string, waitUntil?: WaitUntil): Promise<Response> {
     // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagegotourl-options
     const navigationOptions: NavigationOptions = { waitUntil: waitUntil || 'load' };
     const response: Response | null = await page.goto(urlString, navigationOptions);

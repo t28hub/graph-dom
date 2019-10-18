@@ -16,6 +16,10 @@
           "name": "String"
         },
         {
+          "kind": "ENUM",
+          "name": "WaitUntil"
+        },
+        {
           "kind": "OBJECT",
           "name": "Document"
         },
