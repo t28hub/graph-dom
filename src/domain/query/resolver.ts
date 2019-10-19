@@ -19,24 +19,25 @@ import { IResolverObject } from 'graphql-tools';
 import { parse } from 'url';
 import { Document } from '..';
 import { WaitUntil } from './options';
-import { DocumentDataSource } from '../document/documentDataSource';
+import { DocumentDataSource, Options } from '../document/documentDataSource';
 import { validateUrl } from '../../util';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 export const resolver: IResolverObject = {
   page: async (
     parent: any,
-    args: { url: string; waitUntil?: string; userAgent?: string },
+    args: { url: string; waitUntil?: string; userAgent?: string; javaScriptEnabled?: boolean },
     { injector }: ModuleContext
   ): Promise<Document> => {
-    const { url, waitUntil, userAgent } = args;
+    const { url, waitUntil, userAgent, javaScriptEnabled } = args;
     validateUrl(url);
 
     const parsed = parse(url);
     const browser = injector.get(DocumentDataSource);
-    const fetchOptions = {
+    const fetchOptions: Partial<Options> = {
       waitUntil: waitUntil ? (<any>WaitUntil)[waitUntil] : WaitUntil.NETWORK_IDLE2,
       userAgent: userAgent ? userAgent : 'GraphDOM/1.0.0',
+      javaScriptEnabled: javaScriptEnabled,
     };
     return await browser.fetch(parsed, { ...fetchOptions });
   },

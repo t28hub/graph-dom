@@ -32,6 +32,7 @@ export interface Options {
   readonly timeout: number;
   readonly userAgent: string;
   readonly waitUntil: WaitUntil;
+  readonly javaScriptEnabled: boolean;
 }
 
 const ROBOTS_TXT_CACHE_KEY_PREFIX = 'robotstxt:';

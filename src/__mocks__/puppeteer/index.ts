@@ -25,6 +25,7 @@ export const page = {
   on: jest.fn(),
   setDefaultTimeout: jest.fn(),
   setDefaultNavigationTimeout: jest.fn(),
+  setJavaScriptEnabled: jest.fn(),
   setRequestInterception: jest.fn(),
   setUserAgent: jest.fn(),
   url: jest.fn(),
@@ -36,6 +37,7 @@ export const browser = {
   isConnected: jest.fn(),
   disconnect: jest.fn(),
   pages: jest.fn().mockReturnValue([]),
+  userAgent: jest.fn(),
   wsEndpoint: jest.fn(),
 };
 

@@ -20,6 +20,10 @@
           "name": "WaitUntil"
         },
         {
+          "kind": "SCALAR",
+          "name": "Boolean"
+        },
+        {
           "kind": "OBJECT",
           "name": "Document"
         },
@@ -54,10 +58,6 @@
         {
           "kind": "ENUM",
           "name": "__TypeKind"
-        },
-        {
-          "kind": "SCALAR",
-          "name": "Boolean"
         },
         {
           "kind": "OBJECT",

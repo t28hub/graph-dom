@@ -32,9 +32,8 @@ import { NetworkError } from './errors/networkError';
 import { InvalidUrlError } from './errors/invalidUrlError';
 import { BrowserProvider } from '../infrastructure/browserProvider';
 import { LoggerFactory } from '../util/logging/loggerFactory';
+import { PageBuilder } from './pageBuilder';
 
-const DEFAULT_TIMEOUT = 50000;
-const DEFAULT_NAVIGATION_TIMEOUT = 50000;
 const STATUS_CODE_OK = 200;
 const STATUS_CODE_MULTIPLE_CHOICE = 300;
 const IGNORED_RESOURCE_TYPES: ResourceType[] = ['font', 'image', 'media', 'stylesheet'];
@@ -59,21 +58,14 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
 
   public async open(url: Url, options: Partial<Options> = {}): Promise<Document> {
     const browser = await this.ensureBrowser();
-    const page = await browser.newPage();
-    page.setDefaultNavigationTimeout(DEFAULT_NAVIGATION_TIMEOUT);
-
-    if (options.timeout) {
-      page.setDefaultTimeout(options.timeout);
-    } else {
-      page.setDefaultTimeout(DEFAULT_TIMEOUT);
-    }
-    if (options.userAgent) {
-      await page.setUserAgent(options.userAgent);
-    }
+    const builder = PageBuilder.builder(browser)
+      .setUserAgent(options.userAgent)
+      .setTimeout(options.timeout)
+      .setNavigationTimeout(options.timeout)
+      .setJavaScriptEnabled(options.javaScriptEnabled);
 
     if (this.browserProvider.headless) {
-      await page.setRequestInterception(true);
-      page.on('request', (request: Request) => {
+      builder.setRequestInterceptor((request: Request) => {
         if (IGNORED_RESOURCE_TYPES.includes(request.resourceType())) {
           request.abort('aborted');
         } else {
@@ -82,6 +74,7 @@ export class ChromeBrowserService implements BrowserService, OnResponse {
       });
     }
 
+    const page = await builder.build();
     const urlString = format(url);
     try {
       const response: Response = await ChromeBrowserService.goto(page, urlString, options.waitUntil);

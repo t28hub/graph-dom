@@ -32,6 +32,8 @@ type Query {
     "User Agent string"
     userAgent: String,
     "Wait for event to be fired"
-    waitUntil: WaitUntil
+    waitUntil: WaitUntil,
+    "Whether or not to enable JavaScript"
+    javaScriptEnabled: Boolean,
   ): Document!
 }

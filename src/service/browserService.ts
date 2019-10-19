@@ -28,6 +28,7 @@ export interface Options {
   readonly timeout: number;
   readonly userAgent: string;
   readonly waitUntil: WaitUntil;
+  readonly javaScriptEnabled: boolean;
 }
 
 export interface BrowserService {
