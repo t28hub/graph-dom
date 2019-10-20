@@ -17,7 +17,15 @@
         },
         {
           "kind": "ENUM",
-          "name": "WaitUntil"
+          "name": "LoadEvent"
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "Options"
+        },
+        {
+          "kind": "SCALAR",
+          "name": "Int"
         },
         {
           "kind": "SCALAR",

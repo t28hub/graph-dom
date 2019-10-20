@@ -18,27 +18,31 @@ import { ModuleContext } from '@graphql-modules/core';
 import { IResolverObject } from 'graphql-tools';
 import { parse } from 'url';
 import { Document } from '..';
-import { WaitUntil } from './options';
-import { DocumentDataSource, Options } from '../document/documentDataSource';
+import { Options } from './options';
+import { Options as RequestOptions, LoadEvent } from '../browserDataSource';
+import { DocumentDataSource } from '../document/documentDataSource';
 import { validateUrl } from '../../util';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 export const resolver: IResolverObject = {
   page: async (
     parent: any,
-    args: { url: string; waitUntil?: string; userAgent?: string; javaScriptEnabled?: boolean },
+    args: { url: string; waitFor?: string; options?: Options },
     { injector }: ModuleContext
   ): Promise<Document> => {
-    const { url, waitUntil, userAgent, javaScriptEnabled } = args;
+    const { url } = args;
     validateUrl(url);
 
+    const dataSource = injector.get(DocumentDataSource);
+
     const parsed = parse(url);
-    const browser = injector.get(DocumentDataSource);
-    const fetchOptions: Partial<Options> = {
-      waitUntil: waitUntil ? (<any>WaitUntil)[waitUntil] : WaitUntil.NETWORK_IDLE2,
-      userAgent: userAgent ? userAgent : 'GraphDOM/1.0.0',
-      javaScriptEnabled: javaScriptEnabled,
+    const options = args.options || {};
+    const waitFor: LoadEvent | undefined = args.waitFor ? (<any>LoadEvent)[args.waitFor] : undefined;
+    const requestOptions: RequestOptions = {
+      timeout: options.timeout,
+      userAgent: options.userAgent ? options.userAgent : 'GraphDOM/1.0.0',
+      javaScriptEnabled: options.javaScriptEnabled,
     };
-    return await browser.fetch(parsed, { ...fetchOptions });
+    return await dataSource.request(parsed, waitFor, requestOptions);
   },
 };

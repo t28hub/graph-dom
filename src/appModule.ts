@@ -19,7 +19,6 @@ import express from 'express';
 import { resolvers, typeDefs } from './domain/schama';
 import { InfrastructureModule } from './infrastructure';
 import { DocumentDataSource } from './domain/document/documentDataSource';
-import { ChromeBrowserService } from './service/chromeBrowserService';
 import { RobotsTxtFetcher } from './service/robotsTxtFetcher';
 
 export const AppModule = new GraphQLModule({
@@ -28,6 +27,6 @@ export const AppModule = new GraphQLModule({
   context: (session: express.Request, context: ModuleContext): ModuleContext => {
     return context;
   },
-  providers: [RobotsTxtFetcher, ChromeBrowserService, DocumentDataSource],
+  providers: [RobotsTxtFetcher, DocumentDataSource],
   imports: [InfrastructureModule],
 });

@@ -15,49 +15,35 @@
  */
 
 import 'reflect-metadata';
+import { GraphQLModule } from '@graphql-modules/core';
 import { DataSourceConfig } from 'apollo-datasource';
 import log4js from 'log4js';
 import { parse } from 'url';
+import { logger } from '../../../src/__mocks__/log4js';
+import puppeteer, { browser, page, response } from '../../../src/__mocks__/puppeteer';
 import { NodeType } from '../../../src/domain';
 import { Context } from '../../../src/context';
 import { DocumentDataSource } from '../../../src/domain/document/documentDataSource';
-import { ChromeBrowserService } from '../../../src/service/chromeBrowserService';
-import { GraphQLModule } from '@graphql-modules/core';
 import { RobotsTxtFetcher } from '../../../src/service/robotsTxtFetcher';
 import { RobotsTxt } from '../../../src/service/robotsTxt';
-import { logger } from '../../../src/__mocks__/log4js';
+import { BrowserProvider } from '../../../src/infrastructure/browserProvider';
 
 jest.mock('log4js');
-
-const document = {
-  title: 'Example Domain',
-  nodeName: '#document',
-  nodeType: NodeType.DOCUMENT_NODE,
-  nodeValue: null,
-  textContent: null,
-  children: jest.fn(),
-  childNodes: jest.fn(),
-  firstChild: jest.fn(),
-  lastChild: jest.fn(),
-  parentNode: jest.fn(),
-  parentElement: jest.fn(),
-  nextSibling: jest.fn(),
-  previousSibling: jest.fn(),
-  head: jest.fn(),
-  body: jest.fn(),
-  getElementById: jest.fn(),
-  getElementsByClassName: jest.fn(),
-  getElementsByTagName: jest.fn(),
-  querySelector: jest.fn(),
-  querySelectorAll: jest.fn()
-};
+jest.mock('chrome-aws-lambda', () => {
+  return { puppeteer };
+});
+jest.mock('../../../src/domain/document', () => {
+  return {
+    create: () => ({
+      title: 'Example Domain',
+      nodeName: '#document',
+      nodeType: NodeType.DOCUMENT_NODE,
+      nodeValue: null
+    })
+  };
+});
 
 describe('DocumentDataSource', () => {
-  const browserService = {
-    open: jest.fn(),
-    dispose: jest.fn()
-  };
-
   const fetcher = {
     fetch: jest.fn()
   };
@@ -65,9 +51,14 @@ describe('DocumentDataSource', () => {
   const { injector } = new GraphQLModule({
     providers: [
       {
-        provide: ChromeBrowserService,
+        provide: BrowserProvider,
         overwrite: true,
-        useValue: browserService
+        useValue: {
+          path: '/path/to/browser',
+          headless: true,
+          connect: jest.fn(),
+          provideBrowser: jest.fn()
+        }
       },
       {
         provide: RobotsTxtFetcher,
@@ -82,21 +73,23 @@ describe('DocumentDataSource', () => {
     set: jest.fn(),
     delete: jest.fn()
   };
-  const context = {
-    injector
-  };
+  const context = { injector };
   const config: DataSourceConfig<Context> = { cache, context };
 
+  const url = parse('https://example.com/');
   let dataSource!: DocumentDataSource;
   beforeEach(() => {
     jest.resetAllMocks();
 
     (log4js.getLogger as jest.Mock).mockReturnValue(logger);
+    browser.newPage.mockReturnValue(Promise.resolve(page));
 
-    dataSource = new DocumentDataSource(
-      injector.get(ChromeBrowserService),
-      injector.get(RobotsTxtFetcher),
-    );
+    const browserProvider = injector.get(BrowserProvider);
+    (browserProvider.connect as jest.Mock).mockReturnValue(browser);
+
+    const robotsTxtFetcher = injector.get(RobotsTxtFetcher);
+
+    dataSource = new DocumentDataSource(browserProvider, robotsTxtFetcher);
   });
 
   describe('initialize', () => {
@@ -114,7 +107,11 @@ describe('DocumentDataSource', () => {
   });
 
   describe('fetch', () => {
-    test('should return document', async () => {
+    beforeEach(() => {
+      page.goto.mockReturnValue(Promise.resolve(response));
+    });
+
+    test('should return document when status is successful', async () => {
       // Arrange
       cache.get.mockReturnValue(Promise.resolve(undefined));
       fetcher.fetch.mockImplementationOnce(() => {
@@ -125,12 +122,11 @@ describe('DocumentDataSource', () => {
         `;
         return RobotsTxt.parse(url, content);
       });
-      browserService.open.mockReturnValueOnce(Promise.resolve(document));
+      response.status.mockReturnValue(200);
       dataSource.initialize(config);
 
       // Act
-      const url = parse('https://example.com/');
-      const actual = await dataSource.fetch(url);
+      const actual = await dataSource.request(url);
 
       // Assert
       expect(actual).toMatchObject({
@@ -138,10 +134,25 @@ describe('DocumentDataSource', () => {
         nodeName: '#document',
         nodeType: NodeType.DOCUMENT_NODE,
         nodeValue: null,
-        textContent: null
       });
-      expect(config.cache.get).toBeCalledTimes(1);
-      expect(config.cache.set).toBeCalledTimes(1);
+    });
+
+    test('should return document when status is not successful', async () => {
+      // Arrange
+      cache.get.mockReturnValue(Promise.resolve(''));
+      response.status.mockReturnValue(400);
+      dataSource.initialize(config);
+
+      // Act
+      const actual = await dataSource.request(url);
+
+      // Assert
+      expect(actual).toMatchObject({
+        title: 'Example Domain',
+        nodeName: '#document',
+        nodeType: NodeType.DOCUMENT_NODE,
+        nodeValue: null,
+      });
     });
 
     test('should return document when robots.txt is cached', async () => {
@@ -153,12 +164,10 @@ describe('DocumentDataSource', () => {
         `;
         return Promise.resolve(content);
       });
-      browserService.open.mockReturnValueOnce(Promise.resolve(document));
       dataSource.initialize(config);
 
       // Act
-      const url = parse('https://example.com/');
-      const actual = await dataSource.fetch(url);
+      const actual = await dataSource.request(url);
 
       // Assert
       expect(actual).toMatchObject({
@@ -166,10 +175,7 @@ describe('DocumentDataSource', () => {
         nodeName: '#document',
         nodeType: NodeType.DOCUMENT_NODE,
         nodeValue: null,
-        textContent: null
       });
-      expect(cache.get).toBeCalledTimes(1);
-      expect(cache.set).not.toBeCalled();
     });
 
     test('should throw an Error when URL is not allowed to fetch', async () => {
@@ -186,12 +192,23 @@ describe('DocumentDataSource', () => {
       dataSource.initialize(config);
 
       // Act
-      const url = parse('https://example.com/');
-      const actual = dataSource.fetch(url);
+      const actual = dataSource.request(url);
 
       // Assert
       await expect(actual).rejects.toThrow(/^URL is not allowed to fetch by robots.txt: .+/);
-      expect(cache.get).toBeCalledTimes(1);
+    });
+  });
+
+  describe('onResponse', () => {
+    test('should dispose data source', async () => {
+      // Arrange
+      const spiedDispose = jest.spyOn(dataSource, 'dispose');
+
+      // Act
+      await dataSource.onResponse();
+
+      // Assert
+      expect(spiedDispose).toBeCalledTimes(1);
     });
   });
 });

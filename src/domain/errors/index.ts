@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-export interface Options {
-  readonly timeout?: number;
-  readonly userAgent?: string;
-  readonly javaScriptEnabled?: boolean;
-}
+export * from './invalidUrlError';
+export * from './networkError';
+export * from './noResponseError';
+export * from './notAvailableError';
+export * from './requestTimeoutError';
+export * from './sslCertificateError';

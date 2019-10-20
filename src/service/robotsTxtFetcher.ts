@@ -19,7 +19,7 @@ import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { format, Url } from 'url';
 import { RobotsTxt } from './robotsTxt';
 import { AxiosProvider } from '../infrastructure/axiosProvider';
-import { NetworkError } from './errors/networkError';
+import { NetworkError } from '../domain/errors';
 import { Logger } from '../util/logging/logger';
 import { LoggerFactory } from '../util/logging/loggerFactory';
 

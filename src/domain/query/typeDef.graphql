@@ -14,11 +14,20 @@
 
 # import Document from "../document/typeDef.graphql"
 
-enum WaitUntil {
+enum LoadEvent {
   LOAD,
   DOM_CONTENT_LOADED,
   NETWORK_IDLE0,
   NETWORK_IDLE2
+}
+
+input Options {
+  "Timeout milliseconds"
+  timeout: Int,
+  "User Agent string"
+  userAgent: String,
+  "Whether JavaScript enabled or not"
+  javaScriptEnabled: Boolean,
 }
 
 """
@@ -29,11 +38,9 @@ type Query {
   page(
     "URL to be fetched"
     url: String!,
-    "User Agent string"
-    userAgent: String,
-    "Wait for event to be fired"
-    waitUntil: WaitUntil,
-    "Whether or not to enable JavaScript"
-    javaScriptEnabled: Boolean,
+    "Wait for load event to be fired"
+    waitFor: LoadEvent,
+    "Options for fetching"
+    options: Options
   ): Document!
 }

@@ -16,6 +16,11 @@
 
 import { errors } from 'puppeteer';
 
+export const response = {
+  status: jest.fn(),
+  text: jest.fn(),
+};
+
 export const page = {
   $: jest.fn(),
   close: jest.fn(),
