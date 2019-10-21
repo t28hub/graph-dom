@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'reflect-metadata';
 import puppeteer, { Browser, ElementHandle, Page } from 'puppeteer';
 import { ElementImpl, SerializableElement } from '../../../src/domain';
 

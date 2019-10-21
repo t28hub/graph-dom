@@ -22,7 +22,6 @@ import {
   validateId,
   validateSelector,
   validateTagName,
-  validateUrl
 } from '../../src/util';
 
 describe('Validator', () => {
@@ -41,48 +40,6 @@ describe('Validator', () => {
         // Act
         validate(false, 'condition === false');
       }).toThrowError(new UserInputError('condition === false'));
-    });
-  });
-
-  describe('validateUrl', () => {
-    test('should not throw an Error when URL is valid', () => {
-      // Assert
-      expect(() => {
-        // Act
-        validateUrl('https://example.com/');
-      }).not.toThrowError();
-    });
-
-    test('should throw an UserInputError when URL is empty', () => {
-      // Assert
-      expect(() => {
-        // Act
-        validateUrl('');
-      }).toThrowError(new UserInputError('URL must not be empty'));
-    });
-
-    test('should throw an UserInputError when URL is invalid', () => {
-      // Assert
-      expect(() => {
-        // Act
-        validateUrl('https://user:p@ssw0rd%@example.com/');
-      }).toThrowError(new UserInputError('URL is invalid: https://user:p@ssw0rd%@example.com/'));
-    });
-
-    test('should throw an UserInputError when protocol is not defined', () => {
-      // Assert
-      expect(() => {
-        // Act
-        validateUrl('//example.com/');
-      }).toThrowError(new UserInputError('URL must contain protocol: //example.com/'));
-    });
-
-    test('should throw an UserInputError when protocol is not allowed', () => {
-      // Assert
-      expect(() => {
-        // Act
-        validateUrl('ftp://user:p@ssw0rd@example.com:21/path');
-      }).toThrowError(new UserInputError('URL contains disallowed protocol: ftp://user:p@ssw0rd@example.com:21/path'));
     });
   });
 

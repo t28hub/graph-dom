@@ -20,7 +20,7 @@ import { DataSourceConfig } from 'apollo-datasource';
 import each from 'jest-each';
 import { NavigationOptions, Page, Response } from 'puppeteer';
 import { parse, Url } from 'url';
-import puppeteer, { browser, page, response } from '../../src/__mocks__/puppeteer';
+import puppeteer, { browser, context, page, response } from '../../src/__mocks__/puppeteer';
 import { BrowserDataSource, Options, LoadEvent } from '../../src/domain/browserDataSource';
 import {
   InvalidUrlError, NetworkError,
@@ -75,7 +75,8 @@ describe('BrowserDataSource', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    browser.newPage.mockReturnValue(Promise.resolve(page));
+    context.newPage.mockReturnValue(Promise.resolve(page));
+    browser.createIncognitoBrowserContext.mockReturnValue(Promise.resolve(context));
 
     browserProvider = injector.get(BrowserProvider);
     (browserProvider.connect as jest.Mock).mockReturnValue(browser);
@@ -174,7 +175,8 @@ describe('BrowserDataSource', () => {
 
       // Assert
       expect(browserProvider.connect).toBeCalledTimes(1);
-      expect(browser.newPage).toBeCalledTimes(1);
+      expect(browser.createIncognitoBrowserContext).toBeCalledTimes(1);
+      expect(context.newPage).toBeCalledTimes(1);
     });
 
     test('should connect browser only once when request is called over 2 times', async () => {
@@ -187,7 +189,8 @@ describe('BrowserDataSource', () => {
 
       // Assert
       expect(browserProvider.connect).toBeCalledTimes(1);
-      expect(browser.newPage).toBeCalledTimes(2);
+      expect(browser.createIncognitoBrowserContext).toBeCalledTimes(2);
+      expect(context.newPage).toBeCalledTimes(2);
     });
 
     each([

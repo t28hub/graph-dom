@@ -15,27 +15,12 @@
  */
 
 import { UserInputError } from 'apollo-server-errors';
-import { parse, Url } from 'url';
 
 export function validate(condition: boolean, message: string): void {
   if (condition) {
     return;
   }
   throw new UserInputError(message);
-}
-
-export function validateUrl(input: string, allowedProtocols: string[] = ['http:', 'https:']): void {
-  validate(input.length !== 0, `URL must not be empty`);
-
-  let parsed!: Url;
-  try {
-    parsed = parse(input);
-  } catch (e) {
-    throw new UserInputError(`URL is invalid: ${input}`);
-  }
-
-  validate(parsed.protocol !== null, `URL must contain protocol: ${input}`);
-  validate(allowedProtocols.includes(`${parsed.protocol}`), `URL contains disallowed protocol: ${input}`);
 }
 
 // https://www.w3.org/TR/2011/WD-html5-20110525/elements.html#the-id-attribute

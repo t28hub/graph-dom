@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-import { UserInputError } from 'apollo-server-errors';
+export type Orientation = 'LANDSCAPE' | 'PORTRAIT';
 
-interface Throwable<E extends Error = Error> {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  new (message: string, ...args: any[]): E;
-}
-
-export * from './optional';
-export * from './validator';
-
-export function check(condition: boolean, message: string, throwable: Throwable = UserInputError): void {
-  if (!condition) {
-    throw new throwable(message);
-  }
+export interface Viewport {
+  readonly width: number;
+  readonly height: number;
+  readonly scale?: number;
+  readonly orientation?: Orientation;
+  readonly mobile?: boolean;
+  readonly touch?: boolean;
 }

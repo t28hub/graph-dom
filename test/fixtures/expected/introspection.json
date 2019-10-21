@@ -28,8 +28,40 @@
           "name": "Int"
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "Cookie"
+        },
+        {
           "kind": "SCALAR",
           "name": "Boolean"
+        },
+        {
+          "kind": "ENUM",
+          "name": "SameSite"
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "Header"
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "Viewport"
+        },
+        {
+          "kind": "ENUM",
+          "name": "Orientation"
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "Location"
+        },
+        {
+          "kind": "SCALAR",
+          "name": "Float"
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "Credentials"
         },
         {
           "kind": "OBJECT",

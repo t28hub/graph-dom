@@ -15,17 +15,19 @@
  */
 
 import { UserInputError } from 'apollo-server-errors';
+import { Translator } from './translator';
+import { LoadEvent } from '../../browserDataSource';
 
-interface Throwable<E extends Error = Error> {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  new (message: string, ...args: any[]): E;
-}
-
-export * from './optional';
-export * from './validator';
-
-export function check(condition: boolean, message: string, throwable: Throwable = UserInputError): void {
-  if (!condition) {
-    throw new throwable(message);
+export class LoadEventTranslator implements Translator<string, LoadEvent> {
+  public translate(input: string): LoadEvent {
+    switch (input) {
+      case 'LOAD':
+      case 'NETWORK_IDLE0':
+      case 'NETWORK_IDLE2':
+      case 'DOM_CONTENT_LOADED':
+        return LoadEvent[input];
+      default:
+        throw new UserInputError(`Unknown load event: input=${input}`);
+    }
   }
 }

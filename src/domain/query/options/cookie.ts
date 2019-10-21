@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import { UserInputError } from 'apollo-server-errors';
+export type SameSite = 'STRICT' | 'LAX';
 
-interface Throwable<E extends Error = Error> {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  new (message: string, ...args: any[]): E;
-}
-
-export * from './optional';
-export * from './validator';
-
-export function check(condition: boolean, message: string, throwable: Throwable = UserInputError): void {
-  if (!condition) {
-    throw new throwable(message);
-  }
+export interface Cookie {
+  readonly name: string;
+  readonly value: string;
+  readonly url?: string;
+  readonly domain?: string;
+  readonly path?: string;
+  readonly expires?: number;
+  readonly httpOnly?: boolean;
+  readonly secure?: boolean;
+  readonly sameSite?: SameSite;
 }

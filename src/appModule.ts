@@ -16,10 +16,9 @@
 
 import { GraphQLModule, ModuleContext } from '@graphql-modules/core';
 import express from 'express';
+import { DomainModule } from './domain';
 import { resolvers, typeDefs } from './domain/schama';
 import { InfrastructureModule } from './infrastructure';
-import { DocumentDataSource } from './domain/document/documentDataSource';
-import { RobotsTxtFetcher } from './service/robotsTxtFetcher';
 
 export const AppModule = new GraphQLModule({
   typeDefs,
@@ -27,6 +26,5 @@ export const AppModule = new GraphQLModule({
   context: (session: express.Request, context: ModuleContext): ModuleContext => {
     return context;
   },
-  providers: [RobotsTxtFetcher, DocumentDataSource],
-  imports: [InfrastructureModule],
+  imports: [InfrastructureModule, DomainModule],
 });

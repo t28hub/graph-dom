@@ -12,22 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# import Document from "./options/options.graphql"
 # import Document from "../document/typeDef.graphql"
 
 enum LoadEvent {
   LOAD,
-  DOM_CONTENT_LOADED,
   NETWORK_IDLE0,
-  NETWORK_IDLE2
-}
-
-input Options {
-  "Timeout milliseconds"
-  timeout: Int,
-  "User Agent string"
-  userAgent: String,
-  "Whether JavaScript enabled or not"
-  javaScriptEnabled: Boolean,
+  NETWORK_IDLE2,
+  DOM_CONTENT_LOADED,
 }
 
 """
@@ -37,10 +29,12 @@ type Query {
   "Return the document by URL"
   page(
     "URL to be fetched"
-    url: String!,
+    url: String!
+
     "Wait for load event to be fired"
-    waitFor: LoadEvent,
-    "Options for fetching"
+    waitFor: LoadEvent
+
+    "Options for request"
     options: Options
   ): Document!
 }

@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-import { UserInputError } from 'apollo-server-errors';
-
-interface Throwable<E extends Error = Error> {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  new (message: string, ...args: any[]): E;
-}
-
-export * from './optional';
-export * from './validator';
-
-export function check(condition: boolean, message: string, throwable: Throwable = UserInputError): void {
-  if (!condition) {
-    throw new throwable(message);
-  }
+export interface Location {
+  readonly latitude: number;
+  readonly longitude: number;
+  readonly accuracy?: number;
 }

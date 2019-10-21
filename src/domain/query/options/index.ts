@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-import { UserInputError } from 'apollo-server-errors';
+import { Cookie } from './cookie';
+import { Header } from './header';
+import { Location } from './location';
+import { Viewport } from './viewport';
+import { Credentials } from './credentials';
 
-interface Throwable<E extends Error = Error> {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  new (message: string, ...args: any[]): E;
-}
+export * from './cookie';
+export * from './header';
+export * from './location';
+export * from './viewport';
 
-export * from './optional';
-export * from './validator';
-
-export function check(condition: boolean, message: string, throwable: Throwable = UserInputError): void {
-  if (!condition) {
-    throw new throwable(message);
-  }
+export interface Options {
+  readonly headers?: Header[];
+  readonly cookies?: Cookie[];
+  readonly timeout?: number;
+  readonly location?: Location;
+  readonly viewport?: Viewport;
+  readonly userAgent?: string;
+  readonly credentials?: Credentials;
+  readonly javaScriptEnabled?: boolean;
 }

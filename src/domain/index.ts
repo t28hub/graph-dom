@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+import { GraphQLModule } from '@graphql-modules/core';
+import { DocumentDataSource } from './document/documentDataSource';
+import { LoadEventTranslator, OptionsTranslator, UrlTranslator } from './query/translator';
+import { InfrastructureModule } from '../infrastructure';
+import { RobotsTxtFetcher } from '../service/robotsTxtFetcher';
+
 export * from './attribute/attribute';
 export * from './data/data';
 export * from './node/node';
@@ -22,3 +28,8 @@ export * from './element/element';
 export * from './node/nodeImpl';
 export * from './document/documentImpl';
 export * from './element/elementImpl';
+
+export const DomainModule = new GraphQLModule({
+  providers: [RobotsTxtFetcher, DocumentDataSource, LoadEventTranslator, OptionsTranslator, UrlTranslator],
+  imports: [InfrastructureModule],
+});

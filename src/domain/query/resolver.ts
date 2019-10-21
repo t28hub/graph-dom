@@ -16,33 +16,29 @@
 
 import { ModuleContext } from '@graphql-modules/core';
 import { IResolverObject } from 'graphql-tools';
-import { parse } from 'url';
 import { Document } from '..';
 import { Options } from './options';
-import { Options as RequestOptions, LoadEvent } from '../browserDataSource';
 import { DocumentDataSource } from '../document/documentDataSource';
-import { validateUrl } from '../../util';
+import { LoadEventTranslator, OptionsTranslator, UrlTranslator } from './translator';
+
+type Arguments = {
+  url: string;
+  waitFor?: string;
+  options?: Options;
+};
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 export const resolver: IResolverObject = {
-  page: async (
-    parent: any,
-    args: { url: string; waitFor?: string; options?: Options },
-    { injector }: ModuleContext
-  ): Promise<Document> => {
-    const { url } = args;
-    validateUrl(url);
-
+  page: async (parent: any, args: Arguments, { injector }: ModuleContext): Promise<Document> => {
     const dataSource = injector.get(DocumentDataSource);
+    const urlTranslator = injector.get(UrlTranslator);
+    const loadEventTranslator = injector.get(LoadEventTranslator);
+    const optionsTranslator = injector.get(OptionsTranslator);
 
-    const parsed = parse(url);
-    const options = args.options || {};
-    const waitFor: LoadEvent | undefined = args.waitFor ? (<any>LoadEvent)[args.waitFor] : undefined;
-    const requestOptions: RequestOptions = {
-      timeout: options.timeout,
-      userAgent: options.userAgent ? options.userAgent : 'GraphDOM/1.0.0',
-      javaScriptEnabled: options.javaScriptEnabled,
-    };
-    return await dataSource.request(parsed, waitFor, requestOptions);
+    const { url, waitFor, options } = args;
+    const parsed = urlTranslator.translate(url);
+    const loadEvent = loadEventTranslator.translate(waitFor || 'LOAD');
+    const requestOptions = optionsTranslator.translate(options || {});
+    return await dataSource.request(parsed, loadEvent, requestOptions);
   },
 };

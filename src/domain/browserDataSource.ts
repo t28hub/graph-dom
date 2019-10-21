@@ -19,13 +19,18 @@ import { ApolloError } from 'apollo-server-errors';
 import Chrome from 'chrome-aws-lambda';
 import { PromiseOrValue } from 'graphql/jsutils/PromiseOrValue';
 import {
+  AuthOptions,
   Browser,
   BrowserOptions,
+  GeoOptions,
   LoadEvent as LoadEventString,
   NavigationOptions,
   Page,
   Request,
   Response,
+  SameSiteSetting,
+  SetCookie,
+  Viewport,
 } from 'puppeteer';
 import { format, Url } from 'url';
 import {
@@ -39,18 +44,33 @@ import {
 import { BrowserProvider } from '../infrastructure/browserProvider';
 import { Logger } from '../util/logging/logger';
 
-export interface Options {
-  readonly timeout?: number;
-  readonly userAgent?: string;
-  readonly javaScriptEnabled?: boolean;
-}
-
 // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagegotourl-options
 export enum LoadEvent {
-  LOAD, // Wait until 'load' event is fired.
-  DOM_CONTENT_LOADED, // Wait until 'DOMContentLoaded' event is fired.
-  NETWORK_IDLE0, // Wait until network connections are no more than 0.
-  NETWORK_IDLE2, // Wait until network connections are no more than 2.
+  LOAD = 'load', // Wait until 'load' event is fired.
+  NETWORK_IDLE0 = 'networkidle0', // Wait until network connections are no more than 0.
+  NETWORK_IDLE2 = 'networkidle2', // Wait until network connections are no more than 2.
+  DOM_CONTENT_LOADED = 'domcontentloaded', // Wait until 'DOMContentLoaded' event is fired.
+}
+
+export interface Headers {
+  [name: string]: string;
+}
+
+export type AuthSetting = AuthOptions;
+export type CookieSetting = SetCookie;
+export type GeoSetting = GeoOptions;
+export type SameSiteSetting = SameSiteSetting;
+export type ViewportSetting = Viewport;
+
+export interface Options {
+  readonly timeout?: number;
+  readonly cookies?: CookieSetting[];
+  readonly headers?: Headers;
+  readonly viewport?: ViewportSetting;
+  readonly userAgent?: string;
+  readonly geolocation?: GeoSetting;
+  readonly credentials?: AuthOptions;
+  readonly javaScriptEnabled?: boolean;
 }
 
 /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
@@ -72,7 +92,7 @@ export abstract class BrowserDataSource<TContext = any, R = any> extends DataSou
     const urlString = format(url);
     try {
       // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagegotourl-options
-      const navigationOptions: NavigationOptions = { waitUntil: BrowserDataSource.toLoadEventString(waitFor) };
+      const navigationOptions: NavigationOptions = { waitUntil: waitFor as LoadEventString };
       const response = await page.goto(urlString, navigationOptions);
       if (response === null) {
         // noinspection ExceptionCaughtLocallyJS
@@ -167,16 +187,33 @@ export abstract class BrowserDataSource<TContext = any, R = any> extends DataSou
   }
 
   private async ensurePage(options: Options): Promise<Page> {
+    // Avoid sharing state between each request using incognito browser
     const browser = await this.ensureBrowser();
-    const page = await browser.newPage();
+    const context = await browser.createIncognitoBrowserContext();
+    const page = await context.newPage();
     if (options.timeout !== undefined) {
       page.setDefaultTimeout(options.timeout);
       page.setDefaultNavigationTimeout(options.timeout);
     }
 
     const promises: Promise<void>[] = [];
-    if (options.userAgent !== undefined) {
+    if (options.cookies) {
+      promises.push(page.setCookie(...options.cookies));
+    }
+    if (options.headers) {
+      promises.push(page.setExtraHTTPHeaders(options.headers));
+    }
+    if (options.viewport) {
+      promises.push(page.setViewport(options.viewport));
+    }
+    if (options.userAgent) {
       promises.push(page.setUserAgent(options.userAgent));
+    }
+    if (options.geolocation) {
+      promises.push(page.setGeolocation(options.geolocation));
+    }
+    if (options.credentials) {
+      promises.push(page.authenticate(options.credentials));
     }
     if (options.javaScriptEnabled !== undefined) {
       promises.push(page.setJavaScriptEnabled(options.javaScriptEnabled));
@@ -195,19 +232,6 @@ export abstract class BrowserDataSource<TContext = any, R = any> extends DataSou
       await page.close();
     } catch (e) {
       this.logger.warn('Failed to close a page(%s): %s', page.url(), e.message);
-    }
-  }
-
-  private static toLoadEventString(event: LoadEvent): LoadEventString {
-    switch (event) {
-      case LoadEvent.LOAD:
-        return 'load';
-      case LoadEvent.DOM_CONTENT_LOADED:
-        return 'domcontentloaded';
-      case LoadEvent.NETWORK_IDLE0:
-        return 'networkidle0';
-      case LoadEvent.NETWORK_IDLE2:
-        return 'networkidle2';
     }
   }
 }

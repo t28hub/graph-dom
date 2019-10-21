@@ -16,17 +16,23 @@
 
 import { errors } from 'puppeteer';
 
-export const response = {
-  status: jest.fn(),
-  text: jest.fn(),
+export const browser = {
+  newPage: jest.fn(),
+  close: jest.fn(),
+  isConnected: jest.fn(),
+  disconnect: jest.fn(),
+  pages: jest.fn(),
+  userAgent: jest.fn(),
+  wsEndpoint: jest.fn(),
+  createIncognitoBrowserContext: jest.fn(),
 };
 
 export const page = {
   $: jest.fn(),
   close: jest.fn(),
   evaluate: jest.fn(),
-  evaluateHandle: jest.fn().mockReturnValue(Promise.resolve(null)),
-  goto: jest.fn().mockReturnValue(Promise.resolve(null)),
+  evaluateHandle: jest.fn(),
+  goto: jest.fn(),
   on: jest.fn(),
   setDefaultTimeout: jest.fn(),
   setDefaultNavigationTimeout: jest.fn(),
@@ -36,18 +42,17 @@ export const page = {
   url: jest.fn(),
 };
 
-export const browser = {
+export const response = {
+  status: jest.fn(),
+  text: jest.fn(),
+};
+
+export const context = {
   newPage: jest.fn(),
-  close: jest.fn(),
-  isConnected: jest.fn(),
-  disconnect: jest.fn(),
-  pages: jest.fn().mockReturnValue([]),
-  userAgent: jest.fn(),
-  wsEndpoint: jest.fn(),
 };
 
 export default {
-  executablePath: jest.fn().mockReturnValue('/path/to/chrome'),
+  executablePath: jest.fn(),
   launch: jest.fn(),
   connect: jest.fn(),
   errors,

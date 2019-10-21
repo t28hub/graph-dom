@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'reflect-metadata';
 import puppeteer, { Browser, Page } from 'puppeteer';
 import { Document, DocumentImpl } from '../../../src/domain';
 import { create } from '../../../src/domain/document';

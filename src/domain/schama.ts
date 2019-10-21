@@ -21,7 +21,7 @@ import { resolver as nodeResolver } from './node/resolver';
 import { resolver as documentResolver } from './document/resolver';
 import { resolver as elementResolver } from './element/resolver';
 
-const path = resolve(__dirname, './query/typeDef.graphql');
+const path = resolve(__dirname, './query/query.graphql');
 export const typeDefs = importSchema(path);
 
 export const resolvers = {

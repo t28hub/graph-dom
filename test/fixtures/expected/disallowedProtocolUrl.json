@@ -2,7 +2,7 @@
   "data": null,
   "errors": [
     {
-      "message": "URL contains disallowed protocol: ftp://user:p@ssw0rd@example.com/path",
+      "message": "URL contains disallowed protocol: protocol=ftp:",
       "extensions": {
         "code": "BAD_USER_INPUT"
       }

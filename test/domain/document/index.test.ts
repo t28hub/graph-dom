@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
+import 'reflect-metadata';
 import { AssertionError } from 'assert';
-import { browser as mockBrowser, page as mockPage } from '../../../src/__mocks__/puppeteer';
+import puppeteer, { context as mockContext, page as mockPage } from '../../../src/__mocks__/puppeteer';
 import { create } from '../../../src/domain/document';
 import { DocumentImpl, NodeType } from '../../../src/domain';
+
+jest.mock('chrome-aws-lambda', () => {
+  return { puppeteer };
+});
 
 describe('create', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
 
-    mockBrowser.newPage.mockReturnValue(Promise.resolve(mockPage));
+    mockContext.newPage.mockReturnValue(Promise.resolve(mockPage));
   });
 
   test('should instantiate Document from page', async () => {
@@ -37,7 +42,7 @@ describe('create', () => {
     mockPage.evaluateHandle.mockReturnValue({
       asElement: jest.fn().mockReturnValue({})
     });
-    const page = await mockBrowser.newPage();
+    const page = await mockContext.newPage();
 
     // Act
     const actual = await create(page);
@@ -63,7 +68,7 @@ describe('create', () => {
     }));
     mockPage.$.mockReturnValue(Promise.resolve({}));
 
-    const page = await mockBrowser.newPage();
+    const page = await mockContext.newPage();
     const element = await page.$('');
 
     // Act
@@ -80,7 +85,7 @@ describe('create', () => {
   test('should throw an Error when window.document is missing', async () => {
     // Arrange
     mockPage.evaluateHandle.mockReturnValue(Promise.resolve(null));
-    const page = await mockBrowser.newPage();
+    const page = await mockContext.newPage();
 
     // Act
     const actual = create(page);
@@ -94,7 +99,7 @@ describe('create', () => {
     mockPage.evaluateHandle.mockReturnValue(Promise.resolve({
       asElement: jest.fn().mockReturnValue(null)
     }));
-    const page = await mockBrowser.newPage();
+    const page = await mockContext.newPage();
 
     // Act
     const actual = create(page);

@@ -2,7 +2,7 @@
   "data": null,
   "errors": [
     {
-      "message": "URL must contain protocol: //example.com",
+      "message": "URL must contain protocol: URL=//example.com",
       "extensions": {
         "code": "BAD_USER_INPUT"
       }
