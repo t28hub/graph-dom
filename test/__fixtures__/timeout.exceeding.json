@@ -1,0 +1,11 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "message": "Request timed out http://httpbin.org/delay/1",
+      "extensions": {
+        "code": "REQUEST_TIMEOUT"
+      }
+    }
+  ]
+}

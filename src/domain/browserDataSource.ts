@@ -63,7 +63,6 @@ export type SameSiteSetting = SameSiteSetting;
 export type ViewportSetting = Viewport;
 
 export interface Options {
-  readonly timeout?: number;
   readonly cookies?: CookieSetting[];
   readonly headers?: Headers;
   readonly viewport?: ViewportSetting;
@@ -72,6 +71,8 @@ export interface Options {
   readonly credentials?: AuthOptions;
   readonly javaScriptEnabled?: boolean;
 }
+
+const DEFAULT_TIMEOUT = 10000;
 
 /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
 export abstract class BrowserDataSource<TContext = any, R = any> extends DataSource {
@@ -86,13 +87,18 @@ export abstract class BrowserDataSource<TContext = any, R = any> extends DataSou
     super();
   }
 
-  public async request(url: Url, waitFor: LoadEvent = LoadEvent.LOAD, options: Options = {}): Promise<R> {
+  public async request(
+    url: Url,
+    timeout: number = DEFAULT_TIMEOUT,
+    waitFor: LoadEvent = LoadEvent.LOAD,
+    options: Options = {}
+  ): Promise<R> {
     const page = await this.ensurePage(options);
     await this.willSendRequest(url, waitFor, options);
     const urlString = format(url);
     try {
       // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagegotourl-options
-      const navigationOptions: NavigationOptions = { waitUntil: waitFor as LoadEventString };
+      const navigationOptions: NavigationOptions = { timeout, waitUntil: waitFor as LoadEventString };
       const response = await page.goto(urlString, navigationOptions);
       if (response === null) {
         // noinspection ExceptionCaughtLocallyJS
@@ -191,10 +197,6 @@ export abstract class BrowserDataSource<TContext = any, R = any> extends DataSou
     const browser = await this.ensureBrowser();
     const context = await browser.createIncognitoBrowserContext();
     const page = await context.newPage();
-    if (options.timeout !== undefined) {
-      page.setDefaultTimeout(options.timeout);
-      page.setDefaultNavigationTimeout(options.timeout);
-    }
 
     const promises: Promise<void>[] = [];
     if (options.cookies) {

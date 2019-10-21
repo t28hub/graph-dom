@@ -22,9 +22,6 @@
 The page request options
 """
 input Options {
-  "Timeout milliseconds"
-  timeout: Int
-
   "HTTP cookies"
   cookies: [Cookie]
 

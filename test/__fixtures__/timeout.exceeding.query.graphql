@@ -12,32 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# import Document from "./options/options.graphql"
-# import Document from "../document/typeDef.graphql"
-
-enum LoadEvent {
-  LOAD,
-  NETWORK_IDLE0,
-  NETWORK_IDLE2,
-  DOM_CONTENT_LOADED,
-}
-
-"""
-The root query
-"""
-type Query {
-  "Return the document by URL"
+query TimeoutExceedingQuery {
   page(
-    "URL to be fetched"
-    url: String!
-
-    "Timeout milliseconds"
-    timeout: Int
-
-    "Wait for load event to be fired"
-    waitFor: LoadEvent
-
-    "Options for request"
-    options: Options
-  ): Document!
+    url: "http://httpbin.org/delay/1",
+    timeout: 500
+  ) {
+    body {
+      json: innerText
+    }
+  }
 }

@@ -37,7 +37,6 @@ const DEFAULT_SCALE = 1;
 export class OptionsTranslator implements Translator<Options, RequestOptions> {
   public translate(input: Options): RequestOptions {
     return {
-      timeout: input.timeout,
       cookies: OptionsTranslator.translateCookies(input.cookies),
       headers: OptionsTranslator.translateHeaders(input.headers),
       viewport: OptionsTranslator.translateViewport(input.viewport),

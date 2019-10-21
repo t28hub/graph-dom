@@ -16,16 +16,16 @@
           "name": "String"
         },
         {
+          "kind": "SCALAR",
+          "name": "Int"
+        },
+        {
           "kind": "ENUM",
           "name": "LoadEvent"
         },
         {
           "kind": "INPUT_OBJECT",
           "name": "Options"
-        },
-        {
-          "kind": "SCALAR",
-          "name": "Int"
         },
         {
           "kind": "INPUT_OBJECT",

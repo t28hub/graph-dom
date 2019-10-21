@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-export * from './cookie';
-export * from './header';
-export * from './location';
-export * from './viewport';
-export * from './options';
+import { Cookie } from './cookie';
+import { Header } from './header';
+import { Location } from './location';
+import { Viewport } from './viewport';
+import { Credentials } from './credentials';
+
+export interface Options {
+  readonly headers?: Header[];
+  readonly cookies?: Cookie[];
+  readonly location?: Location;
+  readonly viewport?: Viewport;
+  readonly userAgent?: string;
+  readonly credentials?: Credentials;
+  readonly javaScriptEnabled?: boolean;
+}

@@ -96,22 +96,33 @@ describe('BrowserDataSource', () => {
       await expect(actual).rejects.toThrow(NoResponseError);
     });
 
-    each([
-      [undefined, { waitUntil: 'load' }],
-      [LoadEvent.LOAD, { waitUntil: 'load' }],
-      [LoadEvent.DOM_CONTENT_LOADED, { waitUntil: 'domcontentloaded' }],
-      [LoadEvent.NETWORK_IDLE0, { waitUntil: 'networkidle0' }],
-      [LoadEvent.NETWORK_IDLE2, { waitUntil: 'networkidle2' }]
-    ]).test('should call page.goto with load event %p', async (loadEvent: LoadEvent | undefined, options: NavigationOptions) => {
+    test('should configure timeout', async () => {
       // Arrange
       page.goto.mockReturnValue(Promise.resolve(response));
 
       // Act
-      await dataSource.request(url, loadEvent);
+      await dataSource.request(url, 5000, LoadEvent.LOAD);
+
+      // Assert
+      expect(page.goto).toBeCalledWith('https://example.com/', { timeout: 5000, waitUntil: 'load' });
+    });
+
+    each([
+      [undefined, 'load'],
+      [LoadEvent.LOAD, 'load'],
+      [LoadEvent.NETWORK_IDLE0, 'networkidle0'],
+      [LoadEvent.NETWORK_IDLE2, 'networkidle2'],
+      [LoadEvent.DOM_CONTENT_LOADED, 'domcontentloaded'],
+    ]).test('should call page.goto with load event %p', async (loadEvent: LoadEvent | undefined, waitUntil: string) => {
+      // Arrange
+      page.goto.mockReturnValue(Promise.resolve(response));
+
+      // Act
+      await dataSource.request(url, 1000, loadEvent);
 
       // Assert
       expect(page.goto).toBeCalledTimes(1);
-      expect(page.goto).toBeCalledWith('https://example.com/', options);
+      expect(page.goto).toBeCalledWith('https://example.com/', { timeout: 1000, waitUntil });
     });
 
     test('should configure request interceptor', async () => {
@@ -128,26 +139,12 @@ describe('BrowserDataSource', () => {
       expect(page.on).toBeCalledWith('request', expect.anything());
     });
 
-    test('should configure default timeout when timeout is set', async () => {
-      // Arrange
-      page.goto.mockReturnValue(Promise.resolve(response));
-
-      // Act
-      await dataSource.request(url, LoadEvent.LOAD, { timeout: 1000 });
-
-      // Assert
-      expect(page.setDefaultTimeout).toBeCalledTimes(1);
-      expect(page.setDefaultTimeout).toBeCalledWith(1000);
-      expect(page.setDefaultNavigationTimeout).toBeCalledTimes(1);
-      expect(page.setDefaultNavigationTimeout).toBeCalledWith(1000);
-    });
-
     test('should configure user agent when userAgent is set', async () => {
       // Arrange
       page.goto.mockReturnValue(Promise.resolve(response));
 
       // Act
-      await dataSource.request(url, LoadEvent.LOAD, { userAgent: 'BrowserDataSource/1.0.0' });
+      await dataSource.request(url, 1000, LoadEvent.LOAD, { userAgent: 'BrowserDataSource/1.0.0' });
 
       // Assert
       expect(page.setUserAgent).toBeCalledTimes(1);
@@ -159,7 +156,7 @@ describe('BrowserDataSource', () => {
       page.goto.mockReturnValue(Promise.resolve(response));
 
       // Act
-      await dataSource.request(url, LoadEvent.LOAD, { javaScriptEnabled: false });
+      await dataSource.request(url, 1000, LoadEvent.LOAD, { javaScriptEnabled: false });
 
       // Assert
       expect(page.setJavaScriptEnabled).toBeCalledTimes(1);

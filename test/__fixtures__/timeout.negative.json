@@ -1,0 +1,11 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "message": "Timeout must be positive: timeout=-1000",
+      "extensions": {
+        "code": "BAD_USER_INPUT"
+      }
+    }
+  ]
+}

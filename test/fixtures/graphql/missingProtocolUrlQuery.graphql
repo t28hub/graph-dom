@@ -1,5 +1,0 @@
-query {
-  page(url: "//example.com") {
-    title
-  }
-}

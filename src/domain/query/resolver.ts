@@ -20,9 +20,11 @@ import { Document } from '..';
 import { Options } from './options';
 import { DocumentDataSource } from '../document/documentDataSource';
 import { LoadEventTranslator, OptionsTranslator, UrlTranslator } from './translator';
+import { check } from '../../util';
 
 type Arguments = {
   url: string;
+  timeout?: number;
   waitFor?: string;
   options?: Options;
 };
@@ -35,10 +37,11 @@ export const resolver: IResolverObject = {
     const loadEventTranslator = injector.get(LoadEventTranslator);
     const optionsTranslator = injector.get(OptionsTranslator);
 
-    const { url, waitFor, options } = args;
+    const { url, timeout, waitFor, options } = args;
+    check(timeout === undefined || timeout >= 0, `Timeout must be positive: timeout=${timeout}`);
     const parsed = urlTranslator.translate(url);
     const loadEvent = loadEventTranslator.translate(waitFor || 'LOAD');
     const requestOptions = optionsTranslator.translate(options || {});
-    return await dataSource.request(parsed, loadEvent, requestOptions);
+    return await dataSource.request(parsed, timeout, loadEvent, requestOptions);
   },
 };

@@ -1,5 +1,0 @@
-query {
-  page(url: "https://user:%@example.com/") {
-    title
-  }
-}
