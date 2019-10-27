@@ -15,15 +15,12 @@
  */
 
 import { GraphQLModule } from '@graphql-modules/core';
-import { RedisCacheProvider } from './redisCacheProvider';
+import { CacheProvider } from './cacheProvider';
 import { Provider } from '@graphql-modules/di';
 
-export const DEFAULT_REDIS_HOST = '127.0.0.1';
-export const DEFAULT_REDIS_PORT = 6379;
-
 export interface Config {
-  readonly host: string;
-  readonly port: number;
+  readonly host?: string;
+  readonly port?: number;
   readonly password?: string;
 }
 
@@ -41,6 +38,6 @@ export const CacheModule = new GraphQLModule<Config>({
       provide: 'RedisPassword',
       useValue: config.password,
     },
-    RedisCacheProvider,
+    CacheProvider,
   ],
 });

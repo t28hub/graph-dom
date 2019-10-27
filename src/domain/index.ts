@@ -18,7 +18,8 @@ import { GraphQLModule } from '@graphql-modules/core';
 import { DocumentDataSource } from './document/documentDataSource';
 import { LoadEventTranslator, OptionsTranslator, UrlTranslator } from './query/translator';
 import { InfrastructureModule } from '../infrastructure';
-import { RobotsTxtFetcher } from '../service/robotsTxtFetcher';
+import { RobotsTxtTranslator } from './robots/translator/robotsTxtTranslator';
+import { RobotsService } from './robots/robotsService';
 
 export * from './attribute/attribute';
 export * from './data/data';
@@ -30,6 +31,13 @@ export * from './document/documentImpl';
 export * from './element/elementImpl';
 
 export const DomainModule = new GraphQLModule({
-  providers: [RobotsTxtFetcher, DocumentDataSource, LoadEventTranslator, OptionsTranslator, UrlTranslator],
+  providers: [
+    RobotsTxtTranslator,
+    RobotsService,
+    DocumentDataSource,
+    LoadEventTranslator,
+    OptionsTranslator,
+    UrlTranslator,
+  ],
   imports: [InfrastructureModule],
 });

@@ -16,7 +16,7 @@
 
 import { UserInputError } from 'apollo-server-errors';
 import { parse, Url } from 'url';
-import { Translator } from './translator';
+import { Translator } from '../../translator';
 import { check } from '../../../util';
 
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];

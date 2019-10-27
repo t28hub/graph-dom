@@ -23,7 +23,7 @@ import 'reflect-metadata';
 import { AppModule } from './appModule';
 import { Context } from './context';
 import { DocumentDataSource } from './domain/document/documentDataSource';
-import { RedisCacheProvider } from './infrastructure/redisCacheProvider';
+import { CacheProvider } from './infrastructure/cacheProvider';
 
 const app = express();
 app.use(
@@ -39,7 +39,7 @@ app.use(
 );
 
 const { schema, injector, context } = AppModule;
-const cache = injector.get(RedisCacheProvider).provideCache();
+const cache = injector.get(CacheProvider).provideCache();
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const serverConfig: ServerConfig = {

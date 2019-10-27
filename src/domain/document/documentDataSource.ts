@@ -16,8 +16,6 @@
 
 import { OnResponse } from '@graphql-modules/core';
 import { Injectable, ProviderScope } from '@graphql-modules/di';
-import { DataSourceConfig } from 'apollo-datasource';
-import { PrefixingKeyValueCache } from 'apollo-server-caching';
 import { Page, Request, ResourceType, Response } from 'puppeteer';
 import { format, Url } from 'url';
 import { create } from '.';
@@ -25,14 +23,11 @@ import { Document } from '..';
 import { BrowserDataSource, Options, LoadEvent } from '../browserDataSource';
 import { Context } from '../../context';
 import { BrowserProvider } from '../../infrastructure/browserProvider';
-import { RobotsTxt } from '../../service/robotsTxt';
-import { RobotsTxtCache } from '../../service/robotsTxtCache';
-import { RobotsTxtFetcher } from '../../service/robotsTxtFetcher';
 import { LoggerFactory } from '../../util/logging/loggerFactory';
+import { RobotsService } from '../robots/robotsService';
 
 const STATUS_CODE_OK = 200;
 const STATUS_CODE_MULTIPLE_CHOICE = 300;
-const ROBOTS_TXT_CACHE_KEY_PREFIX = 'robotstxt:';
 const IGNORED_RESOURCE_TYPES: ResourceType[] = ['font', 'image', 'media', 'stylesheet'];
 
 @Injectable({
@@ -40,15 +35,8 @@ const IGNORED_RESOURCE_TYPES: ResourceType[] = ['font', 'image', 'media', 'style
   overwrite: false,
 })
 export class DocumentDataSource extends BrowserDataSource<Context, Document> implements OnResponse {
-  private robotsTxtCache!: RobotsTxtCache;
-
-  public constructor(browserProvider: BrowserProvider, private readonly robotsTxtFetcher: RobotsTxtFetcher) {
+  public constructor(browserProvider: BrowserProvider, private readonly robotsService: RobotsService) {
     super(browserProvider, LoggerFactory.getLogger(DocumentDataSource.name));
-  }
-
-  public initialize(config: DataSourceConfig<Context>): void {
-    const { cache } = config;
-    this.robotsTxtCache = new RobotsTxtCache(new PrefixingKeyValueCache(cache, ROBOTS_TXT_CACHE_KEY_PREFIX));
   }
 
   protected async willSendRequest(
@@ -56,9 +44,9 @@ export class DocumentDataSource extends BrowserDataSource<Context, Document> imp
     waitUntil: LoadEvent = LoadEvent.LOAD,
     options: Options = {}
   ): Promise<void> {
-    const robotsTxt = await this.getRobotsTxt(url);
-    if (!robotsTxt.isAllowed(url, options.userAgent)) {
-      throw new Error(`URL is not allowed to fetch by robots.txt: ${format(url)}`);
+    const isAccessible = await this.robotsService.isAccessible(url, options.userAgent);
+    if (!isAccessible) {
+      throw new Error(`URL is not allowed to fetch by robots.txt: URL=${format(url)}`);
     }
   }
 
@@ -91,22 +79,5 @@ export class DocumentDataSource extends BrowserDataSource<Context, Document> imp
 
   public async onResponse(): Promise<void> {
     await this.dispose();
-  }
-
-  private async getRobotsTxt(url: Url): Promise<RobotsTxt> {
-    const urlString = format(url);
-    this.logger.info('Getting robots.txt from %s', urlString);
-
-    const robotsTxtUrl = RobotsTxtFetcher.buildRobotsTxtUrl(url);
-    const cached = (await this.robotsTxtCache.get(robotsTxtUrl)).orElse(null);
-    if (cached) {
-      this.logger.info('Received cached robots.txt for %s', urlString);
-      return cached;
-    }
-
-    const robotsTxt = await this.robotsTxtFetcher.fetch(url);
-    this.logger.info('Received fetched robots.txt for %s', urlString);
-    await this.robotsTxtCache.set(robotsTxtUrl, robotsTxt);
-    return robotsTxt;
   }
 }

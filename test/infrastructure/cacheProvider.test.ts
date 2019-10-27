@@ -16,23 +16,33 @@
 
 import 'reflect-metadata';
 import { GraphQLModule } from '@graphql-modules/core';
-import { RedisCacheProvider } from '../../src/infrastructure/redisCacheProvider';
-import { cache, RedisCache } from '../../src/__mocks__/apollo-server-cache-redis';
+import { CacheProvider } from '../../src/infrastructure/cacheProvider';
+import { RedisCache } from '../../src/__mocks__/apollo-server-cache-redis';
+import { cache, InMemoryLRUCache } from '../../src/__mocks__/apollo-server-caching';
 
-describe('RedisCacheProvider', () => {
+describe('CacheProvider', () => {
   const TestModule = new GraphQLModule();
 
-  let provider!: RedisCacheProvider;
   beforeEach(() => {
     jest.resetAllMocks();
     RedisCache.mockImplementation(() => cache);
-
-    provider = new RedisCacheProvider('127.0.0.1', 6379, 'p@ssw0rd');
+    InMemoryLRUCache.mockImplementation(() => cache);
   });
 
   describe('onInit', () => {
+    test('should instantiate InMemoryLRUCache when redis configuration is not set', () => {
+      // Act
+      const provider = new CacheProvider();
+      provider.onInit(TestModule);
+
+      // Assert
+      expect(RedisCache).not.toBeCalled();
+      expect(InMemoryLRUCache).toBeCalledTimes(1);
+    });
+
     test('should instantiate RedisCache', () => {
       // Act
+      const provider = new CacheProvider('127.0.0.1', 6379, 'p@ssw0rd');
       provider.onInit(TestModule);
 
       // Assert
@@ -42,10 +52,16 @@ describe('RedisCacheProvider', () => {
         port: 6379,
         password: 'p@ssw0rd'
       });
+      expect(InMemoryLRUCache).not.toBeCalled();
     });
   });
 
   describe('provideCache', () => {
+    let provider!: CacheProvider;
+    beforeEach(() => {
+      provider = new CacheProvider('127.0.0.1', 6379);
+    });
+
     test('should return shared RedisCache', () => {
       // Arrange
       provider.onInit(TestModule);
@@ -60,14 +76,35 @@ describe('RedisCacheProvider', () => {
   });
 
   describe('dispose', () => {
-    test('should close RedisCache', async () => {
+    test('should not close cache when instance is not RedisCache', async () => {
       // Arrange
+      const cache = { flush: jest.fn() };
+      InMemoryLRUCache.mockImplementation(() => cache);
+
+      const provider = new CacheProvider();
       provider.onInit(TestModule);
 
       // Act
       await provider.dispose();
 
       // Assert
+      expect(RedisCache).not.toBeCalled();
+      expect(cache.flush).not.toBeCalled();
+    });
+
+    test('should close cache when instance is RedisCache', async () => {
+      // Arrange
+      const cache = { close: jest.fn() };
+      RedisCache.mockImplementation(() => cache);
+
+      const provider = new CacheProvider('127.0.0.1', 6379);
+      provider.onInit(TestModule);
+
+      // Act
+      await provider.dispose();
+
+      // Assert
+      expect(RedisCache).toBeCalled();
       expect(cache.close).toBeCalledTimes(1);
     });
   });

@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-import parse, { Robots } from 'robots-parser';
-import { format, Url } from 'url';
+import { Url } from 'url';
 
-export class RobotsTxt {
-  private constructor(public readonly url: Url, public readonly content: string, private readonly source: Robots) {}
-
-  public static parse(url: Url, content: string): RobotsTxt {
-    const urlString = format(url);
-    const parsed: Robots = parse(urlString, content);
-    return new RobotsTxt(url, content, parsed);
-  }
-
-  public isAllowed(url: Url, userAgent?: string): boolean {
-    const urlString = format(url);
-    return this.source.isAllowed(urlString, userAgent) || false;
-  }
+export interface RobotsTxt {
+  isAllowed(url: Url, userAgent?: string): boolean;
 }

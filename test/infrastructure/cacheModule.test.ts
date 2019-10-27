@@ -16,7 +16,7 @@
 
 import 'reflect-metadata';
 import { CacheModule } from '../../src/infrastructure/cacheModule';
-import { RedisCacheProvider } from '../../src/infrastructure/redisCacheProvider';
+import { CacheProvider } from '../../src/infrastructure/cacheProvider';
 
 describe('CacheModule', () => {
   const { injector } = CacheModule.forRoot({
@@ -49,11 +49,11 @@ describe('CacheModule', () => {
     expect(actual).toEqual('p@ssw0rd');
   });
 
-  test('should provide RedisCacheProvider', () => {
+  test('should provide CacheProvider', () => {
     // Act
-    const actual = injector.get(RedisCacheProvider);
+    const actual = injector.get(CacheProvider);
 
     // Assert
-    expect(actual).toBeInstanceOf(RedisCacheProvider);
+    expect(actual).toBeInstanceOf(CacheProvider);
   });
 });

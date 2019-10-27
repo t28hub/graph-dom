@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-import { Optional } from '../util';
+import { KeyValueCache } from 'apollo-server-caching';
 
-export interface Cache<K, V> {
-  get(key: K): Promise<Optional<V>>;
+export const cache = {
+  set: jest.fn(),
+  get: jest.fn(),
+  delete: jest.fn(),
+  flush: jest.fn(),
+  close: jest.fn(),
+};
 
-  set(key: K, value: V, ttl?: number): Promise<void>;
-
-  delete(key: K): Promise<void>;
-}
+export const InMemoryLRUCache = jest.fn();
+export const PrefixingKeyValueCache = jest.fn((cache: KeyValueCache, prefix: string) => {
+  return {
+    get: (key: string): Promise<string | undefined> => {
+      return cache.get(`${prefix}${key}`);
+    },
+    set: (key: string, value: string, options?: { ttl?: number }): Promise<void> => {
+      return cache.set(`${prefix}${key}`, value, options);
+    },
+  };
+});

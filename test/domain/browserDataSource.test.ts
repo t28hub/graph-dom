@@ -31,6 +31,8 @@ import {
 } from '../../src/domain/errors';
 import { BrowserProvider } from '../../src/infrastructure/browserProvider';
 import { LoggerFactory } from '../../src/util/logging/loggerFactory';
+import log4js from 'log4js';
+import { logger } from '../../src/__mocks__/log4js';
 
 class BrowserDataSourceImpl extends BrowserDataSource<any, string> {
   public constructor(browserProvider: BrowserProvider) {
@@ -52,6 +54,7 @@ class BrowserDataSourceImpl extends BrowserDataSource<any, string> {
 jest.mock('chrome-aws-lambda', () => {
   return { puppeteer };
 });
+jest.mock('log4js');
 
 describe('BrowserDataSource', () => {
   const { injector } = new GraphQLModule({
@@ -75,6 +78,7 @@ describe('BrowserDataSource', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    (log4js.getLogger as jest.Mock).mockReturnValue(logger);
     context.newPage.mockReturnValue(Promise.resolve(page));
     browser.createIncognitoBrowserContext.mockReturnValue(Promise.resolve(context));
 

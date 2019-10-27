@@ -18,16 +18,11 @@ import { GraphQLModule } from '@graphql-modules/core';
 import { puppeteer } from 'chrome-aws-lambda';
 import { AxiosProvider } from './axiosProvider';
 import { BrowserModule } from './browserModule';
-import { DEFAULT_REDIS_HOST, DEFAULT_REDIS_PORT, CacheModule } from './cacheModule';
+import { CacheModule } from './cacheModule';
+import { TextFetcher } from './textFetcher';
 
-function parseInt(value: string | undefined, defaultValue: number): number {
-  if (!Number.isInteger(defaultValue)) {
-    throw new TypeError(`Default value must be integer: ${defaultValue}`);
-  }
-  if (!value) {
-    return defaultValue;
-  }
-  return Number.parseInt(value);
+function parseInt(value: string | undefined): number | undefined {
+  return value !== undefined ? Number.parseInt(value) : undefined;
 }
 
 export const InfrastructureModule = new GraphQLModule({
@@ -37,10 +32,10 @@ export const InfrastructureModule = new GraphQLModule({
       headless: process.env.GRAPH_DOM_BROWSER_HEADLESS !== 'false',
     }),
     CacheModule.forRoot({
-      host: process.env.GRAPH_DOM_REDIS_HOST || DEFAULT_REDIS_HOST,
-      port: parseInt(process.env.GRAPH_DOM_REDIS_PORT, DEFAULT_REDIS_PORT),
+      host: process.env.GRAPH_DOM_REDIS_HOST,
+      port: parseInt(process.env.GRAPH_DOM_REDIS_PORT),
       password: process.env.GRAPH_DOM_REDIS_PASSWORD,
     }),
   ],
-  providers: [AxiosProvider],
+  providers: [AxiosProvider, TextFetcher],
 });

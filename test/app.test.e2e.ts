@@ -20,14 +20,18 @@ import { assertWrappingType } from 'graphql';
 import each from 'jest-each';
 import { resolve } from 'path';
 import supertest, { Test } from 'supertest';
+import { logger } from '../src/__mocks__/log4js';
 import app from '../src/app';
 import { AppModule } from '../src/appModule';
 import { BrowserProvider } from '../src/infrastructure/browserProvider';
-import { RedisCacheProvider } from '../src/infrastructure/redisCacheProvider';
+import { CacheProvider } from '../src/infrastructure/cacheProvider';
+import log4js from 'log4js';
 
+jest.mock('log4js');
 jest.unmock('apollo-server-cache-redis');
+jest.unmock('apollo-server-caching');
 jest.unmock('puppeteer');
-jest.setTimeout(10000);
+jest.setTimeout(5000);
 
 async function readFixtureFile(name: string): Promise<string> {
   const path = resolve(__dirname, './__fixtures__/', name);
@@ -49,9 +53,13 @@ function post(json?: any): Test {
 }
 
 describe('App', () => {
+  beforeAll(() => {
+    (log4js.getLogger as jest.Mock).mockReturnValue(logger);
+  });
+
   afterAll(async () => {
     const { injector } = AppModule;
-    await injector.get(RedisCacheProvider).dispose();
+    await injector.get(CacheProvider).dispose();
     await injector.get(BrowserProvider).dispose();
   });
 

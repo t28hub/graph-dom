@@ -15,7 +15,7 @@
  */
 
 import { UserInputError } from 'apollo-server-errors';
-import { Translator } from './translator';
+import { Translator } from '../../translator';
 import { LoadEvent } from '../../browserDataSource';
 
 export class LoadEventTranslator implements Translator<string, LoadEvent> {

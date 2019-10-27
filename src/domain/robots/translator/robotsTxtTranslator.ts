@@ -14,4 +14,22 @@
  * limitations under the License.
  */
 
-export const RedisCache = jest.fn();
+import parse from 'robots-parser';
+import { format, Url } from 'url';
+import { RobotsTxt } from '../robotsTxt';
+import { Translator } from '../../translator';
+import { RobotsTxtImpl } from '../robotsTxtImpl';
+
+export type Input = {
+  url: Url;
+  content: string;
+};
+
+export class RobotsTxtTranslator implements Translator<Input, RobotsTxt> {
+  public translate(input: Input): RobotsTxt {
+    const { url, content } = input;
+    const urlString = format(url);
+    const parsed = parse(urlString, content);
+    return new RobotsTxtImpl(parsed);
+  }
+}

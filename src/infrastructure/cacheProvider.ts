@@ -16,25 +16,29 @@
 
 import { GraphQLModule, OnInit } from '@graphql-modules/core';
 import { Inject, Injectable, ProviderScope } from '@graphql-modules/di';
-import { KeyValueCache } from 'apollo-server-caching';
+import { InMemoryLRUCache, KeyValueCache, TestableKeyValueCache } from 'apollo-server-caching';
 import { RedisCache } from 'apollo-server-cache-redis';
 
 @Injectable({
   scope: ProviderScope.Application,
   overwrite: false,
 })
-export class RedisCacheProvider implements OnInit {
-  private cache!: RedisCache;
+export class CacheProvider implements OnInit {
+  private cache!: TestableKeyValueCache;
 
   public constructor(
-    @Inject('RedisHost') private readonly host: string,
-    @Inject('RedisPort') private readonly port: number,
+    @Inject('RedisHost') private readonly host?: string,
+    @Inject('RedisPort') private readonly port?: number,
     @Inject('RedisPassword') private readonly password?: string
   ) {}
 
   public onInit(module: GraphQLModule): void {
     const { host, port, password } = this;
-    this.cache = new RedisCache({ host, port, password });
+    if (host) {
+      this.cache = new RedisCache({ host, port, password });
+    } else {
+      this.cache = new InMemoryLRUCache();
+    }
   }
 
   public provideCache(): KeyValueCache {
@@ -42,6 +46,8 @@ export class RedisCacheProvider implements OnInit {
   }
 
   public async dispose(): Promise<void> {
-    await this.cache.close();
+    if (this.cache.close) {
+      await this.cache.close();
+    }
   }
 }

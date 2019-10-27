@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import log4js from 'log4js';
+import log4js, { Logger } from 'log4js';
+import { logger as mockedLogger } from '../../../src/__mocks__/log4js';
 import { Log4jsLogger } from '../../../src/util/logging/log4jsLogger';
 
 jest.mock('log4js');
 
 describe('Log4jsLogger', () => {
-  const mockedLogger = log4js.getLogger();
-  const logger = new Log4jsLogger(mockedLogger);
-
+  let logger!: Log4jsLogger;
   beforeEach(() => {
     jest.resetAllMocks();
+    (log4js.getLogger as jest.Mock).mockReturnValue(mockedLogger);
+
+    logger = new Log4jsLogger(log4js.getLogger());
   });
 
   describe('debug', () => {

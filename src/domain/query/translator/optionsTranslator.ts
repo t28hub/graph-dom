@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Translator } from './translator';
+import { Translator } from '../../translator';
 import { Cookie, Header, Location, Options, SameSite, Viewport } from '../options';
 import {
   AuthSetting,

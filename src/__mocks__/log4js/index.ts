@@ -26,5 +26,5 @@ export const logger = {
 
 export default {
   configure: jest.fn(),
-  getLogger: jest.fn().mockReturnValue(logger),
+  getLogger: jest.fn(),
 };

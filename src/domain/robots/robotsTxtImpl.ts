@@ -14,4 +14,15 @@
  * limitations under the License.
  */
 
-export const RedisCache = jest.fn();
+import { Robots } from 'robots-parser';
+import { format, Url } from 'url';
+import { RobotsTxt } from './robotsTxt';
+
+export class RobotsTxtImpl implements RobotsTxt {
+  public constructor(private readonly robots: Robots) {}
+
+  public isAllowed(url: Url, userAgent?: string): boolean {
+    const urlString = format(url);
+    return this.robots.isAllowed(urlString, userAgent) || false;
+  }
+}
