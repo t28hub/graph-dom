@@ -15,6 +15,7 @@
  */
 
 module.exports = {
+  preset: 'ts-jest',
   rootDir: '.',
   roots: ['<rootDir>/src/', '<rootDir>/test/'],
   automock: false,
