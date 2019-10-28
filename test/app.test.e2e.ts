@@ -63,30 +63,50 @@ describe('App', () => {
     await injector.get(BrowserProvider).dispose();
   });
 
-  describe('GET /', () => {
-    test('should respond 200 with required headers', async () => {
-      // Act
-      const response = await supertest(app)
-        .get('/')
-        .send();
+  describe('POST /graphql', () => {
+    describe('ping', () => {
+      const pingQuery = `
+        query PingQuery {
+          ping
+        }
+      `;
 
-      // Assert
-      const { header } = response;
-      expect(header).toMatchObject({
-        'strict-transport-security': expect.anything(),
-        'x-download-options': 'noopen',
-        'x-content-type-options': 'nosniff',
-        'x-frame-options': 'DENY',
-        'x-xss-protection': '1; mode=block'
+      test('should respond 200 with "pong"', async () => {
+        // Act
+        const response = await post({ query: pingQuery });
+
+        // Assert
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body.data).toBeDefined();
+        expect(body.errors).toBeUndefined();
+        expect(body).toMatchObject({
+          data: {
+            ping: 'pong'
+          }
+        });
       });
-      expect(header).not.toMatchObject({
-        'x-powered-by': expect.anything(),
-        'server': expect.anything()
+
+      test('should respond required headers', async () => {
+        // Act
+        const response = await post({ query: pingQuery });
+
+        // Assert
+        const { header } = response;
+        expect(header).toMatchObject({
+          'strict-transport-security': expect.anything(),
+          'x-download-options': 'noopen',
+          'x-content-type-options': 'nosniff',
+          'x-frame-options': 'DENY',
+          'x-xss-protection': '1; mode=block'
+        });
+        expect(header).not.toMatchObject({
+          'x-powered-by': expect.anything(),
+          'server': expect.anything()
+        });
       });
     });
-  });
 
-  describe('POST /graphql', () => {
     describe('page', () => {
       each`
         graphqlFile                       | expectedFile

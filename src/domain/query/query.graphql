@@ -26,6 +26,9 @@ enum LoadEvent {
 The root query
 """
 type Query {
+  "Returns the literal string 'pong'"
+  ping: String!
+
   "Return the document by URL"
   page(
     "URL to be fetched"

@@ -16,10 +16,10 @@
 
 import { ModuleContext } from '@graphql-modules/core';
 import { IResolverObject } from 'graphql-tools';
-import { Document } from '..';
 import { Options } from './options';
-import { DocumentDataSource } from '../document/documentDataSource';
 import { LoadEventTranslator, OptionsTranslator, UrlTranslator } from './translator';
+import { Document } from '..';
+import { DocumentDataSource } from '../document/documentDataSource';
 import { check } from '../../util';
 
 type Arguments = {
@@ -31,6 +31,9 @@ type Arguments = {
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 export const resolver: IResolverObject = {
+  ping: (): string => {
+    return 'pong';
+  },
   page: async (parent: any, args: Arguments, { injector }: ModuleContext): Promise<Document> => {
     const dataSource = injector.get(DocumentDataSource);
     const urlTranslator = injector.get(UrlTranslator);
