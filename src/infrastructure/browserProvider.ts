@@ -16,13 +16,10 @@
 
 import { GraphQLModule, OnInit } from '@graphql-modules/core';
 import { Inject, Injectable, ProviderScope } from '@graphql-modules/di';
-import Chrome from 'chrome-aws-lambda';
-import { Browser, BrowserOptions, ConnectOptions } from 'puppeteer';
-
-export interface Config {
-  readonly path: string;
-  readonly headless: boolean;
-}
+import { ApolloError } from 'apollo-server-errors';
+import { puppeteer } from 'chrome-aws-lambda';
+import { Browser, BrowserOptions, ConnectOptions, LaunchOptions } from 'puppeteer-core';
+import { PromiseOrValue } from 'graphql/jsutils/PromiseOrValue';
 
 @Injectable({
   scope: ProviderScope.Application,
@@ -32,25 +29,48 @@ export class BrowserProvider implements OnInit {
   private sharedBrowserPromise!: Promise<Browser>;
 
   public constructor(
-    @Inject('BrowserPath') public readonly path: string,
+    @Inject('BrowserPath') public readonly path: PromiseOrValue<string>,
     @Inject('BrowserHeadless') public readonly headless: boolean
   ) {}
 
-  public onInit(module: GraphQLModule): void {
-    this.sharedBrowserPromise = Chrome.puppeteer.launch({
-      executablePath: this.path,
-      headless: this.headless,
-      args: ['--no-sandbox', '--disable-gpu', '--enable-logging', this.headless ? '--headless' : ''],
-    });
+  public async onInit(module: GraphQLModule): Promise<void> {
+    try {
+      const launchOptions: LaunchOptions = {
+        args: [
+          '--disable-extensions',
+          '--disable-gpu',
+          '--disable-infobars',
+          '--disable-notifications',
+          '--disable-setuid-sandbox',
+          '--disable-speech-api',
+          '--disable-voice-input',
+          '--hide-scrollbars',
+          '--mute-audio',
+          '--no-default-browser-check',
+          '--no-sandbox',
+          '--single-process',
+          this.headless ? '--headless' : '',
+        ],
+        headless: this.headless,
+        executablePath: await this.path,
+      };
+      this.sharedBrowserPromise = puppeteer.launch(launchOptions);
+    } catch (e) {
+      throw new ApolloError(`Failed to initialize BrowserProvider because of failed to launch browser: ${e.message}`);
+    }
   }
 
   public async connect(options: Partial<BrowserOptions> = {}): Promise<Browser> {
-    const browser = await this.sharedBrowserPromise;
-    const connectOptions: ConnectOptions = {
-      browserWSEndpoint: browser.wsEndpoint(),
-      ...options,
-    };
-    return await Chrome.puppeteer.connect(connectOptions);
+    try {
+      const browser = await this.sharedBrowserPromise;
+      const connectOptions: ConnectOptions = {
+        browserWSEndpoint: browser.wsEndpoint(),
+        ...options,
+      };
+      return await puppeteer.connect(connectOptions);
+    } catch (e) {
+      throw new ApolloError(`Failed to connect browser: ${e.message}`);
+    }
   }
 
   public async dispose(): Promise<void> {

@@ -15,23 +15,26 @@
  */
 
 import { GraphQLModule } from '@graphql-modules/core';
-import { BrowserProvider } from './browserProvider';
 import { Provider } from '@graphql-modules/di';
+import Chrome from 'chrome-aws-lambda';
+import { BrowserProvider } from './browserProvider';
 
 export interface Config {
-  readonly path: string;
-  readonly headless: boolean;
+  readonly path?: string;
+  readonly headless?: boolean;
 }
 
 export const BrowserModule = new GraphQLModule<Config>({
   providers: ({ config }: GraphQLModule): Provider[] => [
     {
       provide: 'BrowserPath',
-      useValue: config.path,
+      useFactory: async (): Promise<string> => {
+        return config.path || (await Chrome.executablePath);
+      },
     },
     {
       provide: 'BrowserHeadless',
-      useValue: config.headless,
+      useValue: config.headless || true,
     },
     BrowserProvider,
   ],

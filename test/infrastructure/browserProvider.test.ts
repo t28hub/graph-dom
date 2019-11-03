@@ -16,7 +16,7 @@
 
 import 'reflect-metadata';
 import { GraphQLModule } from '@graphql-modules/core';
-import puppeteer, { browser } from '../../src/__mocks__/puppeteer';
+import puppeteer, { browser } from '../../src/__mocks__/puppeteer-core';
 import { BrowserProvider } from '../../src/infrastructure/browserProvider';
 
 jest.mock('chrome-aws-lambda', () => {
@@ -34,21 +34,30 @@ describe('BrowserProvider', () => {
   });
 
   describe('onInit', () => {
-    test('should launch browser', () => {
+    test('should launch browser', async () => {
       // Act
-      provider.onInit(TestModule);
+      await provider.onInit(TestModule);
 
       // Assert
       expect(puppeteer.launch).toBeCalledTimes(1);
       expect(puppeteer.launch).toBeCalledWith({
         executablePath: '/path/to/browser',
         headless: true,
-        args: [
-          '--no-sandbox',
+        args: expect.arrayContaining([
+          '--disable-extensions',
           '--disable-gpu',
-          '--enable-logging',
+          '--disable-infobars',
+          '--disable-notifications',
+          '--disable-setuid-sandbox',
+          '--disable-speech-api',
+          '--disable-voice-input',
+          '--hide-scrollbars',
+          '--mute-audio',
+          '--no-default-browser-check',
+          '--no-sandbox',
+          '--single-process',
           '--headless'
-        ]
+        ])
       });
     });
   });
@@ -59,7 +68,7 @@ describe('BrowserProvider', () => {
       browser.wsEndpoint.mockReturnValue('ws://127.0.0.1:36000');
       puppeteer.launch.mockReturnValue(Promise.resolve(browser));
       puppeteer.connect.mockReturnValue(Promise.resolve(browser));
-      provider.onInit(TestModule);
+      await provider.onInit(TestModule);
 
       // Act
       const actual = await provider.connect();
@@ -77,7 +86,7 @@ describe('BrowserProvider', () => {
       browser.wsEndpoint.mockReturnValue('ws://127.0.0.1:36000');
       puppeteer.launch.mockReturnValue(Promise.resolve(browser));
       puppeteer.connect.mockReturnValue(Promise.resolve(browser));
-      provider.onInit(TestModule);
+      await provider.onInit(TestModule);
 
       // Act
       const actual = await provider.connect({
@@ -100,7 +109,7 @@ describe('BrowserProvider', () => {
     test('should close shared browser', async () => {
       // Arrange
       puppeteer.launch.mockReturnValue(Promise.resolve(browser));
-      provider.onInit(TestModule);
+      await provider.onInit(TestModule);
 
       // Act
       await provider.dispose();

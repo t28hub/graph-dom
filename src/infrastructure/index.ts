@@ -15,7 +15,6 @@
  */
 
 import { GraphQLModule } from '@graphql-modules/core';
-import { puppeteer } from 'chrome-aws-lambda';
 import { AxiosProvider } from './axiosProvider';
 import { BrowserModule } from './browserModule';
 import { CacheModule } from './cacheModule';
@@ -28,7 +27,7 @@ function parseInt(value: string | undefined): number | undefined {
 export const InfrastructureModule = new GraphQLModule({
   imports: [
     BrowserModule.forRoot({
-      path: process.env.GRAPH_DOM_BROWSER_PATH || puppeteer.executablePath(),
+      path: process.env.GRAPH_DOM_BROWSER_PATH,
       headless: process.env.GRAPH_DOM_BROWSER_HEADLESS !== 'false',
     }),
     CacheModule.forRoot({

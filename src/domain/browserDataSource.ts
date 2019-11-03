@@ -193,10 +193,8 @@ export abstract class BrowserDataSource<TContext = any, R = any> extends DataSou
   }
 
   private async ensurePage(options: Options): Promise<Page> {
-    // Avoid sharing state between each request using incognito browser
     const browser = await this.ensureBrowser();
-    const context = await browser.createIncognitoBrowserContext();
-    const page = await context.newPage();
+    const page = await browser.newPage();
 
     const promises: Promise<void>[] = [];
     if (options.cookies) {

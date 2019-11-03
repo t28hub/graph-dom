@@ -4,7 +4,8 @@
   "env": {
     "NODE_ENV": "production",
     "GRAPH_DOM_SERVER_PORT": "3000",
-    "GRAPH_DOM_BROWSER_HEADLESS": "true"
+    "GRAPH_DOM_BROWSER_HEADLESS": "true",
+    "GRAPH_DOM_LOGGING_LEVEL": "debug"
   },
   "builds": [
     {

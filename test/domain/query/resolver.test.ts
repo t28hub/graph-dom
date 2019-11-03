@@ -15,7 +15,7 @@
  */
 
 import 'reflect-metadata';
-import puppeteer from '../../../src/__mocks__/puppeteer';
+import puppeteer from '../../../src/__mocks__/puppeteer-core';
 import { AppModule } from '../../../src/appModule';
 import { Context } from '../../../src/context';
 import { resolver } from '../../../src/domain/query/resolver';

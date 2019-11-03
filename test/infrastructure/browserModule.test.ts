@@ -15,7 +15,7 @@
  */
 
 import 'reflect-metadata';
-import puppeteer from '../../src/__mocks__/puppeteer';
+import puppeteer from '../../src/__mocks__/puppeteer-core';
 import { BrowserModule } from '../../src/infrastructure/browserModule';
 import { BrowserProvider } from '../../src/infrastructure/browserProvider';
 
@@ -29,9 +29,9 @@ describe('BrowserModule', () => {
     headless: true
   });
 
-  test('should provide browser path by BrowserPath', () => {
+  test('should provide browser path by BrowserPath', async () => {
     // Act
-    const actual = injector.get('BrowserPath');
+    const actual = await injector.get('BrowserPath');
 
     // Assert
     expect(actual).toEqual('/path/to/browser');

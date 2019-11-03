@@ -16,7 +16,7 @@
 
 import 'reflect-metadata';
 import { AssertionError } from 'assert';
-import puppeteer, { context as mockContext, page as mockPage } from '../../../src/__mocks__/puppeteer';
+import puppeteer, { context as mockContext, page as mockPage } from '../../../src/__mocks__/puppeteer-core';
 import { create } from '../../../src/domain/document';
 import { DocumentImpl, NodeType } from '../../../src/domain';
 
