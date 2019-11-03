@@ -76,7 +76,22 @@ jobs:
       - restore_cache: *restore-cache
       - run: *install-dependencies
       - save_cache: *save-cache
-      - run: yarn build
+      - run:
+          name: Build app
+          command: yarn build
+
+  deploy:
+    docker:
+      - image: circleci/node:12
+    working_directory: ~/graph-dom
+    steps:
+      - checkout
+      - restore_cache: *restore-cache
+      - run: *install-dependencies
+      - save_cache: *save-cache
+      - deploy:
+          name: Deploy to ZEIT
+          command: yarn deploy --token $ZEIT_TOKEN
 
 workflows:
   version: 2
@@ -95,4 +110,15 @@ workflows:
       - e2e:
           requires:
             - build
-
+          filters:
+            branches:
+              only:
+                - master
+      - deploy:
+          requires:
+            - e2e
+            - build
+          filters:
+            branches:
+              only:
+                - master
