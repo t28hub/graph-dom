@@ -33,6 +33,7 @@ node_modules/
 .cache
 dist/
 reports/
+.stryker/
 
 ### Linux
 *~
