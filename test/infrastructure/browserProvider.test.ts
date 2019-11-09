@@ -24,8 +24,6 @@ jest.mock('chrome-aws-lambda', () => {
 });
 
 describe('BrowserProvider', () => {
-  const TestModule = new GraphQLModule();
-
   let provider!: BrowserProvider;
   beforeEach(() => {
     jest.resetAllMocks();
@@ -33,72 +31,55 @@ describe('BrowserProvider', () => {
     provider = new BrowserProvider('/path/to/browser', true)
   });
 
-  describe('onInit', () => {
-    test('should launch browser', async () => {
-      // Act
-      await provider.onInit(TestModule);
-
-      // Assert
-      expect(puppeteer.launch).toBeCalledTimes(1);
-      expect(puppeteer.launch).toBeCalledWith({
-        executablePath: '/path/to/browser',
-        headless: true,
-        args: expect.arrayContaining([
-          '--disable-extensions',
-          '--disable-gpu',
-          '--disable-infobars',
-          '--disable-notifications',
-          '--disable-setuid-sandbox',
-          '--disable-speech-api',
-          '--disable-voice-input',
-          '--hide-scrollbars',
-          '--mute-audio',
-          '--no-default-browser-check',
-          '--no-sandbox',
-          '--single-process',
-          '--headless'
-        ])
-      });
-    });
-  });
-
-  describe('connect', () => {
-    test('should connect browser with websocket endpoint', async () => {
+  describe('provide', () => {
+    test('should provide browser instance with default options', async () => {
       // Arrange
-      browser.wsEndpoint.mockReturnValue('ws://127.0.0.1:36000');
       puppeteer.launch.mockReturnValue(Promise.resolve(browser));
       puppeteer.connect.mockReturnValue(Promise.resolve(browser));
-      await provider.onInit(TestModule);
 
       // Act
-      const actual = await provider.connect();
+      const actual = await provider.provide();
 
       // Assert
       expect(actual).toBeTruthy();
-      expect(puppeteer.connect).toBeCalledTimes(1);
-      expect(puppeteer.connect).toBeCalledWith({
-        browserWSEndpoint: 'ws://127.0.0.1:36000'
+      expect(puppeteer.launch).toBeCalledTimes(1);
+      expect(puppeteer.launch).toBeCalledWith({
+        args: expect.arrayContaining([
+          '--disable-gpu',
+          '--disable-setuid-sandbox',
+          '--incognito',
+          '--no-sandbox',
+          '--single-process',
+        ]),
+        headless: true,
+        executablePath: '/path/to/browser'
       });
     });
 
-    test('should connect browser with specified options', async () => {
+    test('should launch browser with specified options', async () => {
       // Arrange
-      browser.wsEndpoint.mockReturnValue('ws://127.0.0.1:36000');
       puppeteer.launch.mockReturnValue(Promise.resolve(browser));
       puppeteer.connect.mockReturnValue(Promise.resolve(browser));
-      await provider.onInit(TestModule);
 
       // Act
-      const actual = await provider.connect({
+      const actual = await provider.provide({
         ignoreHTTPSErrors: true,
         slowMo: 100,
       });
 
       // Assert
       expect(actual).toBeTruthy();
-      expect(puppeteer.connect).toBeCalledTimes(1);
-      expect(puppeteer.connect).toBeCalledWith({
-        browserWSEndpoint: 'ws://127.0.0.1:36000',
+      expect(puppeteer.launch).toBeCalledTimes(1);
+      expect(puppeteer.launch).toBeCalledWith({
+        args: expect.arrayContaining([
+          '--disable-gpu',
+          '--disable-setuid-sandbox',
+          '--incognito',
+          '--no-sandbox',
+          '--single-process',
+        ]),
+        headless: true,
+        executablePath: '/path/to/browser',
         ignoreHTTPSErrors: true,
         slowMo: 100,
       });
@@ -106,15 +87,29 @@ describe('BrowserProvider', () => {
   });
 
   describe('dispose', () => {
-    test('should close shared browser', async () => {
+    test('should close launched browser', async () => {
       // Arrange
       puppeteer.launch.mockReturnValue(Promise.resolve(browser));
-      await provider.onInit(TestModule);
+      const launched = await provider.provide();
 
       // Act
-      await provider.dispose();
+      await provider.dispose(launched);
 
       // Assert
+      expect(browser.close).toBeCalledTimes(1);
+    });
+
+    test('should disconnect connected browser', async () => {
+      // Arrange
+      browser.isConnected.mockReturnValue(true);
+      puppeteer.launch.mockReturnValue(Promise.resolve(browser));
+      const launched = await provider.provide();
+
+      // Act
+      await provider.dispose(launched);
+
+      // Assert
+      expect(browser.disconnect).toBeCalledTimes(1);
       expect(browser.close).toBeCalledTimes(1);
     });
   });

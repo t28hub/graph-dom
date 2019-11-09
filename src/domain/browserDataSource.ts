@@ -118,8 +118,6 @@ export abstract class BrowserDataSource<TContext = any, R = any> extends DataSou
     }
 
     const browser = await this.browserPromise;
-    this.logger.debug('Browser is connected: %s', browser.isConnected());
-
     try {
       const pages: Page[] = await browser.pages();
       await Promise.all(pages.map(this.closePage));
@@ -128,10 +126,10 @@ export abstract class BrowserDataSource<TContext = any, R = any> extends DataSou
     }
 
     try {
-      browser.disconnect();
-      this.logger.info('Browser is disconnected');
+      await this.browserProvider.dispose(browser);
+      this.logger.info('Browser is disposed');
     } catch (e) {
-      this.logger.warn('Failed to disconnect a browser: %s', e.message);
+      this.logger.warn('Failed to dispose a browser: %s', e.message);
     } finally {
       this.browserPromise = undefined;
     }
@@ -187,9 +185,9 @@ export abstract class BrowserDataSource<TContext = any, R = any> extends DataSou
     }
 
     const options: BrowserOptions = { defaultViewport: Chrome.defaultViewport };
-    const browserPromise = this.browserProvider.connect(options);
-    this.browserPromise = browserPromise;
-    return browserPromise;
+    const provided = this.browserProvider.provide(options);
+    this.browserPromise = provided;
+    return provided;
   }
 
   private async ensurePage(options: Options): Promise<Page> {

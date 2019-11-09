@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-import { GraphQLModule, OnInit } from '@graphql-modules/core';
 import { Inject, Injectable, ProviderScope } from '@graphql-modules/di';
 import { ApolloError } from 'apollo-server-errors';
 import { puppeteer } from 'chrome-aws-lambda';
-import { Browser, BrowserOptions, ConnectOptions, LaunchOptions } from 'puppeteer-core';
+import { Browser, BrowserOptions, LaunchOptions } from 'puppeteer-core';
 import { PromiseOrValue } from 'graphql/jsutils/PromiseOrValue';
 
 @Injectable({
   scope: ProviderScope.Application,
   overwrite: false,
 })
-export class BrowserProvider implements OnInit {
-  private sharedBrowserPromise!: Promise<Browser>;
-
+export class BrowserProvider {
   public constructor(
     @Inject('BrowserPath') public readonly path: PromiseOrValue<string>,
     @Inject('BrowserHeadless') public readonly headless: boolean
   ) {}
 
-  public async onInit(module: GraphQLModule): Promise<void> {
+  public async provide(options: Partial<BrowserOptions> = {}): Promise<Browser> {
     try {
       const launchOptions: LaunchOptions = {
         args: [
@@ -45,6 +42,7 @@ export class BrowserProvider implements OnInit {
           '--disable-speech-api',
           '--disable-voice-input',
           '--hide-scrollbars',
+          '--incognito',
           '--mute-audio',
           '--no-default-browser-check',
           '--no-sandbox',
@@ -53,28 +51,27 @@ export class BrowserProvider implements OnInit {
         ],
         headless: this.headless,
         executablePath: await this.path,
+        ...options,
       };
-      this.sharedBrowserPromise = puppeteer.launch(launchOptions);
+      return await puppeteer.launch(launchOptions);
     } catch (e) {
       throw new ApolloError(`Failed to initialize BrowserProvider because of failed to launch browser: ${e.message}`);
     }
   }
 
-  public async connect(options: Partial<BrowserOptions> = {}): Promise<Browser> {
+  public async dispose(browser: Browser): Promise<void> {
     try {
-      const browser = await this.sharedBrowserPromise;
-      const connectOptions: ConnectOptions = {
-        browserWSEndpoint: browser.wsEndpoint(),
-        ...options,
-      };
-      return await puppeteer.connect(connectOptions);
+      if (browser.isConnected()) {
+        browser.disconnect();
+      }
     } catch (e) {
-      throw new ApolloError(`Failed to connect browser: ${e.message}`);
+      throw new ApolloError(`Failed to disconnect browser: ${e.message}`);
     }
-  }
 
-  public async dispose(): Promise<void> {
-    const browser = await this.sharedBrowserPromise;
-    await browser.close();
+    try {
+      await browser.close();
+    } catch (e) {
+      throw new ApolloError(`Failed to close browser: ${e.message}`);
+    }
   }
 }

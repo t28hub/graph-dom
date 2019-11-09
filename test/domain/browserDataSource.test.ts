@@ -65,8 +65,8 @@ describe('BrowserDataSource', () => {
         useValue: {
           path: '/path/to/browser',
           headless: true,
-          connect: jest.fn(),
-          provideBrowser: jest.fn()
+          provide: jest.fn(),
+          dispose: jest.fn()
         }
       }
     ]
@@ -82,7 +82,7 @@ describe('BrowserDataSource', () => {
     browser.newPage.mockReturnValue(Promise.resolve(page));
 
     browserProvider = injector.get(BrowserProvider);
-    (browserProvider.connect as jest.Mock).mockReturnValue(browser);
+    (browserProvider.provide as jest.Mock).mockReturnValue(browser);
 
     dataSource = new BrowserDataSourceImpl(browserProvider);
   });
@@ -174,7 +174,7 @@ describe('BrowserDataSource', () => {
       await dataSource.request(url);
 
       // Assert
-      expect(browserProvider.connect).toBeCalledTimes(1);
+      expect(browserProvider.provide).toBeCalledTimes(1);
       expect(browser.newPage).toBeCalledTimes(1);
     });
 
@@ -187,7 +187,7 @@ describe('BrowserDataSource', () => {
       await dataSource.request(url);
 
       // Assert
-      expect(browserProvider.connect).toBeCalledTimes(1);
+      expect(browserProvider.provide).toBeCalledTimes(1);
       expect(browser.newPage).toBeCalledTimes(2);
     });
 
@@ -251,7 +251,7 @@ describe('BrowserDataSource', () => {
       page.goto.mockReturnValue(Promise.resolve(response));
     });
 
-    test('should close page and disconnect browser', async () => {
+    test('should close pages and a browser', async () => {
       // Arrange
       browser.pages.mockReturnValue(Promise.resolve([page]));
       await dataSource.request(url);
@@ -261,13 +261,14 @@ describe('BrowserDataSource', () => {
 
       // Assert
       expect(page.close).toBeCalledTimes(1);
-      expect(browser.disconnect).toBeCalledTimes(1);
+      expect(browserProvider.dispose).toBeCalledTimes(1);
+      expect(browserProvider.dispose).toBeCalledWith(browser);
     });
 
-    test('should close page and disconnect browser when browser throws an Error', async () => {
+    test('should close pages and dispose a browser when browser throws an Error', async () => {
       // Arrange
       browser.pages.mockReturnValue(Promise.resolve([page]));
-      browser.disconnect = jest.fn(() => {
+      browser.close = jest.fn(() => {
         throw new Error('Failed to close browser');
       });
       await dataSource.request(url);
@@ -277,10 +278,11 @@ describe('BrowserDataSource', () => {
 
       // Assert
       expect(page.close).toBeCalledTimes(1);
-      expect(browser.disconnect).toBeCalledTimes(1);
+      expect(browserProvider.dispose).toBeCalledTimes(1);
+      expect(browserProvider.dispose).toBeCalledWith(browser);
     });
 
-    test('should disconnect browser when page throws an Error', async () => {
+    test('should dispose browser when page throws an Error', async () => {
       // Arrange
       page.close.mockImplementationOnce(() => {
         throw new Error('Failed to close page');
@@ -293,7 +295,8 @@ describe('BrowserDataSource', () => {
 
       // Assert
       expect(page.close).toBeCalledTimes(1);
-      expect(browser.disconnect).toBeCalledTimes(1);
+      expect(browserProvider.dispose).toBeCalledTimes(1);
+      expect(browserProvider.dispose).toBeCalledWith(browser);
     });
 
     test('should not close page and disconnect browser when browser is not set', async () => {
@@ -302,7 +305,7 @@ describe('BrowserDataSource', () => {
 
       // Assert
       expect(page.close).not.toBeCalled();
-      expect(browser.disconnect).not.toBeCalled();
+      expect(browserProvider.dispose).not.toBeCalled();
     });
   });
 });

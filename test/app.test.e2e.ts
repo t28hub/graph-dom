@@ -60,7 +60,6 @@ describe('App', () => {
   afterAll(async () => {
     const { injector } = AppModule;
     await injector.get(CacheProvider).dispose();
-    await injector.get(BrowserProvider).dispose();
   });
 
   describe('POST /graphql', () => {

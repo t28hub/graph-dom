@@ -49,8 +49,8 @@ describe('DocumentDataSource', () => {
   const browserProvider = {
     path: '/path/to/browser',
     headless: true,
-    connect: jest.fn(),
-    provideBrowser: jest.fn()
+    provide: jest.fn(),
+    dispose: jest.fn(),
   };
 
   const robotsService = {
@@ -82,7 +82,7 @@ describe('DocumentDataSource', () => {
     browser.newPage.mockReturnValue(Promise.resolve(page));
 
     const browserProvider = injector.get(BrowserProvider);
-    (browserProvider.connect as jest.Mock).mockReturnValue(browser);
+    (browserProvider.provide as jest.Mock).mockReturnValue(browser);
 
     dataSource = injector.get(DocumentDataSource);
   });
