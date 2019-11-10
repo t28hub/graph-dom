@@ -63,6 +63,8 @@ describe('App', () => {
   });
 
   describe('POST /graphql', () => {
+
+
     describe('ping', () => {
       const pingQuery = `
         query PingQuery {
@@ -126,15 +128,80 @@ describe('App', () => {
         expect(body.errors).toBeUndefined();
         expect(body).toMatchObject(expected);
       });
+
+      each([
+        'http://localhost:3000/',
+        'https://test.example.com/'
+      ]).test('should respond NOT_AVAILABLE when page is not available: URL=%s', async (url: string) => {
+        // Arrange
+        // language=graphql
+        const query = `
+          query NetworkErrorQuery {
+            page(url: "${url}") {
+              title
+            }
+          }
+        `;
+
+        // Act
+        const response = await post({ query });
+
+        // Assert
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body.data).toBeNull();
+        expect(body.errors).toBeDefined();
+        expect(body.errors).toMatchObject([
+          {
+            extensions: {
+              code: 'NOT_AVAILABLE'
+            }
+          }
+        ]);
+      });
+
+      each([
+        'https://expired.badssl.com/',
+        'https://wrong.host.badssl.com/',
+        'https://self-signed.badssl.com/',
+        'https://untrusted-root.badssl.com/',
+        'https://revoked.badssl.com/'
+      ]).test('should respond SSL_CERTIFICATE when page certificate has problem: URL=%s', async (url: string) => {
+        // Arrange
+        // language=graphql
+        const query = `
+          query NetworkErrorQuery {
+            page(url: "${url}") {
+              title
+            }
+          }
+        `;
+
+        // Act
+        const response = await post({ query });
+
+        // Assert
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body.data).toBeNull();
+        expect(body.errors).toBeDefined();
+        expect(body.errors).toMatchObject([
+          {
+            extensions: {
+              code: 'SSL_CERTIFICATE'
+            }
+          }
+        ]);
+      });
     });
 
     describe('url', () => {
       each`
       graphqlFile                               | expectedFile
-      ${'url.empty.query.graphql'}              | ${'url.empty.json'} 
-      ${'url.invalid.query.graphql'}            | ${'url.invalid.json'} 
-      ${'url.disallowedProtocol.query.graphql'} | ${'url.disallowedProtocol.json'} 
-      ${'url.missingProtocol.query.graphql'}    | ${'url.missingProtocol.json'} 
+      ${'url.empty.query.graphql'}              | ${'url.empty.json'}
+      ${'url.invalid.query.graphql'}            | ${'url.invalid.json'}
+      ${'url.disallowedProtocol.query.graphql'} | ${'url.disallowedProtocol.json'}
+      ${'url.missingProtocol.query.graphql'}    | ${'url.missingProtocol.json'}
     `.test('should respond 200 with BAD_USER_INPUT error: $graphqlFile', async ({ graphqlFile, expectedFile }: { [name: string]: string }) => {
         // Arrange
         const query = await readFixtureFile(graphqlFile);
