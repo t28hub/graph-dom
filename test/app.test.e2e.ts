@@ -282,10 +282,37 @@ describe('App', () => {
         expect(status).toBe(200);
         expect(body.data).toBeDefined();
         expect(body.errors).toBeUndefined();
-        expect(body.data.page.body.json).toBeDefined();
-        expect(body.data.page.body.json).toMatch('"Cookie": "_id=abcdefghijk; name=alice"');
+
+        const json = JSON.parse(body.data.page.body.json);
+        expect(json).toMatchObject({
+          cookies: {
+            '_id': 'abcdefghijk',
+            'name': 'alice'
+          }
+        });
       });
 
+      test('should append headers', async () => {
+        // Arrange
+        const query = await readFixtureFile('options.headers.query.graphql');
+
+        // Act
+        const response = await post({ query });
+
+        // Assert
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body.data).toBeDefined();
+        expect(body.errors).toBeUndefined();
+
+        const json = JSON.parse(body.data.page.body.json);
+        expect(json).toMatchObject({
+          headers: {
+            'X-Graph-Dom-Mode': 'development',
+            'X-Graph-Dom-Version': '1.0.0'
+          }
+        });
+      });
 
       test('should append user agent to headers', async () => {
         // Arrange
@@ -299,8 +326,31 @@ describe('App', () => {
         expect(status).toBe(200);
         expect(body.data).toBeDefined();
         expect(body.errors).toBeUndefined();
-        expect(body.data.page.body.json).toBeDefined();
-        expect(body.data.page.body.json).toMatch('"user-agent": "GraphDOM/1.0.0"');
+
+        const json = JSON.parse(body.data.page.body.json);
+        expect(json).toMatchObject({
+          'user-agent': 'GraphDOM/1.0.0'
+        });
+      });
+
+      test('should access page using HTTP Basic Auth', async () => {
+        // Arrange
+        const query = await readFixtureFile('options.credentials.query.graphql');
+
+        // Act
+        const response = await post({ query });
+
+        // Assert
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body.data).toBeDefined();
+        expect(body.errors).toBeUndefined();
+
+        const json = JSON.parse(body.data.page.body.json);
+        expect(json).toMatchObject({
+          'authenticated': true,
+          'user': 'alice'
+        });
       });
     });
 

@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-query CookiesOptionsQuery {
+query HeadersOptionsQuery {
   page(
-    url: "http://httpbin.org/cookies",
+    url: "http://httpbin.org/headers",
     options: {
-      cookies: [
-        { name: "_id", value: "abcdefghijk", domain: "httpbin.org" },
-        { name: "name", value: "alice", domain: "httpbin.org" },
+      headers : [
+        { name: "X-Graph-Dom-Mode", value : "development" },
+        { name: "X-Graph-Dom-Version", value : "1.0.0" },
       ]
     }
   ) {
