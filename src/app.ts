@@ -18,6 +18,8 @@ import { Config as ServerConfig } from 'apollo-server-core';
 import { DataSources } from 'apollo-server-core/src/graphqlOptions';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
+import depthLimit from 'graphql-depth-limit';
+import queryComplexity, { simpleEstimator } from 'graphql-query-complexity';
 import helmet from 'helmet';
 import 'reflect-metadata';
 import { AppModule } from './appModule';
@@ -51,6 +53,14 @@ const serverConfig: ServerConfig = {
     const browser = injector.get(DocumentDataSource);
     return { browser };
   },
+  validationRules: [
+    /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */
+    depthLimit(5),
+    queryComplexity({
+      maximumComplexity: 25,
+      estimators: [simpleEstimator({ defaultComplexity: 1 })],
+    }),
+  ],
   engine: undefined,
   debug: isDevelopment,
   playground: isDevelopment,
