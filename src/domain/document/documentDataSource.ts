@@ -25,6 +25,7 @@ import { Context } from '../../context';
 import { BrowserProvider } from '../../infrastructure/browserProvider';
 import { LoggerFactory } from '../../util/logging/loggerFactory';
 import { RobotsService } from '../robots/robotsService';
+import { AccessDisallowedError } from '../errors';
 
 const STATUS_CODE_OK = 200;
 const STATUS_CODE_MULTIPLE_CHOICE = 300;
@@ -46,7 +47,7 @@ export class DocumentDataSource extends BrowserDataSource<Context, Document> imp
   ): Promise<void> {
     const isAccessible = await this.robotsService.isAccessible(url, options.userAgent);
     if (!isAccessible) {
-      throw new Error(`URL is not allowed to fetch by robots.txt: URL=${format(url)}`);
+      throw new AccessDisallowedError(`URL is not allowed to fetch by robots.txt: URL=${format(url)}`);
     }
   }
 

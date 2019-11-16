@@ -63,8 +63,6 @@ describe('App', () => {
   });
 
   describe('POST /graphql', () => {
-
-
     describe('ping', () => {
       const pingQuery = `
         query PingQuery {
@@ -73,19 +71,19 @@ describe('App', () => {
       `;
 
       test('should respond 200 with "pong"', async () => {
+        // Arrange
+        const query = await readFixtureFile('ping.query.graphql');
+        const expected = await readFixtureJson('ping.json');
+
         // Act
-        const response = await post({ query: pingQuery });
+        const response = await post({ query });
 
         // Assert
         const { status, body } = response;
         expect(status).toBe(200);
         expect(body.data).toBeDefined();
         expect(body.errors).toBeUndefined();
-        expect(body).toMatchObject({
-          data: {
-            ping: 'pong'
-          }
-        });
+        expect(body).toMatchObject(expected);
       });
 
       test('should respond required headers', async () => {
@@ -110,10 +108,11 @@ describe('App', () => {
 
     describe('page', () => {
       each`
-        graphqlFile                       | expectedFile
-        ${'page.single.query.graphql'}    | ${'page.single.json'}
-        ${'page.multiple.query.graphql'}  | ${'page.multiple.json'}
-      `.test('should respond 200 with data: $graphqlFile', async ({ graphqlFile, expectedFile }: { [name: string]: string }) => {
+        graphqlFile                         | expectedFile
+        ${'page.single.query.graphql'}      | ${'page.single.json'}
+        ${'page.multiple.query.graphql'}    | ${'page.multiple.json'}
+        ${'page.redirect.query.graphql'}    | ${'page.redirect.json'}
+      `.test('should respond 200 with data: query=$graphqlFile', async ({ graphqlFile, expectedFile }: { [name: string]: string }) => {
         // Arrange
         const query = await readFixtureFile(graphqlFile);
         const expected = await readFixtureJson(expectedFile);
@@ -130,21 +129,25 @@ describe('App', () => {
       });
 
       each([
-        'http://localhost:3000/',
-        'https://test.example.com/'
-      ]).test('should respond NOT_AVAILABLE when page is not available: URL=%s', async (url: string) => {
+        ['ACCESS_DISALLOWED', 'http://httpbin.org/deny'],
+        ['BAD_USER_INPUT', ''],
+        ['BAD_USER_INPUT', 'https://user:%@example.com/'],
+        ['BAD_USER_INPUT', '//example.com'],
+        ['BAD_USER_INPUT', 'ftp://user:p@ssw0rd@example.com/path'],
+        ['NOT_AVAILABLE', 'http://localhost:3000/'],
+        ['NOT_AVAILABLE', 'https://test.example.com/'],
+        ['SSL_CERTIFICATE', 'https://expired.badssl.com/'],
+        ['SSL_CERTIFICATE', 'https://wrong.host.badssl.com/'],
+        ['SSL_CERTIFICATE', 'https://self-signed.badssl.com/'],
+        ['SSL_CERTIFICATE', 'https://untrusted-root.badssl.com/'],
+        ['SSL_CERTIFICATE', 'https://revoked.badssl.com/']
+      ]).test('should respond with error code %s: URL="%s"', async (code: string, url: string) => {
         // Arrange
-        // language=graphql
-        const query = `
-          query NetworkErrorQuery {
-            page(url: "${url}") {
-              title
-            }
-          }
-        `;
+        const query = await readFixtureFile('page.title.query.graphql');
+        const variables = { url };
 
         // Act
-        const response = await post({ query });
+        const response = await post({ query, variables });
 
         // Assert
         const { status, body } = response;
@@ -153,69 +156,9 @@ describe('App', () => {
         expect(body.errors).toBeDefined();
         expect(body.errors).toMatchObject([
           {
-            extensions: {
-              code: 'NOT_AVAILABLE'
-            }
+            extensions: { code }
           }
         ]);
-      });
-
-      each([
-        'https://expired.badssl.com/',
-        'https://wrong.host.badssl.com/',
-        'https://self-signed.badssl.com/',
-        'https://untrusted-root.badssl.com/',
-        'https://revoked.badssl.com/'
-      ]).test('should respond SSL_CERTIFICATE when page certificate has problem: URL=%s', async (url: string) => {
-        // Arrange
-        // language=graphql
-        const query = `
-          query NetworkErrorQuery {
-            page(url: "${url}") {
-              title
-            }
-          }
-        `;
-
-        // Act
-        const response = await post({ query });
-
-        // Assert
-        const { status, body } = response;
-        expect(status).toBe(200);
-        expect(body.data).toBeNull();
-        expect(body.errors).toBeDefined();
-        expect(body.errors).toMatchObject([
-          {
-            extensions: {
-              code: 'SSL_CERTIFICATE'
-            }
-          }
-        ]);
-      });
-    });
-
-    describe('url', () => {
-      each`
-      graphqlFile                               | expectedFile
-      ${'url.empty.query.graphql'}              | ${'url.empty.json'}
-      ${'url.invalid.query.graphql'}            | ${'url.invalid.json'}
-      ${'url.disallowedProtocol.query.graphql'} | ${'url.disallowedProtocol.json'}
-      ${'url.missingProtocol.query.graphql'}    | ${'url.missingProtocol.json'}
-    `.test('should respond 200 with BAD_USER_INPUT error: $graphqlFile', async ({ graphqlFile, expectedFile }: { [name: string]: string }) => {
-        // Arrange
-        const query = await readFixtureFile(graphqlFile);
-        const expected = await readFixtureJson(expectedFile);
-
-        // Act
-        const response = await post({ query });
-
-        // Assert
-        const { status, body } = response;
-        expect(status).toBe(200);
-        expect(body.data).toBeNull();
-        expect(body.errors).toBeDefined();
-        expect(body).toMatchObject(expected);
       });
     });
 
@@ -270,53 +213,41 @@ describe('App', () => {
     });
 
     describe('options', () => {
-      test('should append cookies to headers', async () => {
-        // Arrange
-        const query = await readFixtureFile('options.cookies.query.graphql');
-
-        // Act
-        const response = await post({ query });
-
-        // Assert
-        const { status, body } = response;
-        expect(status).toBe(200);
-        expect(body.data).toBeDefined();
-        expect(body.errors).toBeUndefined();
-
-        const json = JSON.parse(body.data.page.body.json);
-        expect(json).toMatchObject({
-          cookies: {
-            '_id': 'abcdefghijk',
-            'name': 'alice'
+      each([
+        [
+          'options.cookies.query.graphql',
+          {
+            cookies: {
+              '_id': 'abcdefghijk',
+              'name': 'alice'
+            }
           }
-        });
-      });
-
-      test('should append headers', async () => {
-        // Arrange
-        const query = await readFixtureFile('options.headers.query.graphql');
-
-        // Act
-        const response = await post({ query });
-
-        // Assert
-        const { status, body } = response;
-        expect(status).toBe(200);
-        expect(body.data).toBeDefined();
-        expect(body.errors).toBeUndefined();
-
-        const json = JSON.parse(body.data.page.body.json);
-        expect(json).toMatchObject({
-          headers: {
-            'X-Graph-Dom-Mode': 'development',
-            'X-Graph-Dom-Version': '1.0.0'
+        ],
+        [
+          'options.headers.query.graphql',
+          {
+            headers: {
+              'X-Graph-Dom-Mode': 'development',
+              'X-Graph-Dom-Version': '1.0.0'
+            }
           }
-        });
-      });
-
-      test('should append user agent to headers', async () => {
+        ],
+        [
+          'options.userAgent.query.graphql',
+          {
+            'user-agent': 'GraphDOM/1.0.0'
+          }
+        ],
+        [
+          'options.credentials.query.graphql',
+          {
+            'authenticated': true,
+            'user': 'alice'
+          }
+        ]
+      ]).test('should contain body %p %p', async (fixtureFile: string, expected: { [name: string]: any }) => {
         // Arrange
-        const query = await readFixtureFile('options.userAgent.query.graphql');
+        const query = await readFixtureFile(fixtureFile);
 
         // Act
         const response = await post({ query });
@@ -328,29 +259,7 @@ describe('App', () => {
         expect(body.errors).toBeUndefined();
 
         const json = JSON.parse(body.data.page.body.json);
-        expect(json).toMatchObject({
-          'user-agent': 'GraphDOM/1.0.0'
-        });
-      });
-
-      test('should access page using HTTP Basic Auth', async () => {
-        // Arrange
-        const query = await readFixtureFile('options.credentials.query.graphql');
-
-        // Act
-        const response = await post({ query });
-
-        // Assert
-        const { status, body } = response;
-        expect(status).toBe(200);
-        expect(body.data).toBeDefined();
-        expect(body.errors).toBeUndefined();
-
-        const json = JSON.parse(body.data.page.body.json);
-        expect(json).toMatchObject({
-          'authenticated': true,
-          'user': 'alice'
-        });
+        expect(json).toMatchObject(expected);
       });
     });
 

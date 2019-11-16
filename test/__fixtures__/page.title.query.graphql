@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-query UrlDisallowedProtocolQuery {
-  page(url: "ftp://user:p@ssw0rd@example.com/path") {
+query PageTitleQuery($url: String!) {
+  page(url: $url) {
     title
   }
 }

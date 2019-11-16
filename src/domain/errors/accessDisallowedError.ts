@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-export * from './accessDisallowedError';
-export * from './invalidUrlError';
-export * from './networkError';
-export * from './noResponseError';
-export * from './notAvailableError';
-export * from './requestTimeoutError';
-export * from './sslCertificateError';
+import { ApolloError } from 'apollo-server-errors';
+
+export class AccessDisallowedError extends ApolloError {
+  public constructor(message: string) {
+    super(message, 'ACCESS_DISALLOWED');
+
+    Object.defineProperty(this, 'name', { value: 'AccessDisallowedError' });
+  }
+}
