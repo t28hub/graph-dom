@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import 'reflect-metadata';
 import { Config as ServerConfig } from 'apollo-server-core';
 import { DataSources } from 'apollo-server-core/src/graphqlOptions';
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import depthLimit from 'graphql-depth-limit';
-import queryComplexity, { simpleEstimator } from 'graphql-query-complexity';
 import helmet from 'helmet';
-import 'reflect-metadata';
 import { AppModule } from './appModule';
 import { Context } from './context';
 import { DocumentDataSource } from './domain/document/documentDataSource';
 import { CacheProvider } from './infrastructure/cacheProvider';
+import { queryComplexity } from './plugins';
 
 const app = express();
 app.use(
@@ -53,13 +53,11 @@ const serverConfig: ServerConfig = {
     const browser = injector.get(DocumentDataSource);
     return { browser };
   },
+  /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */
+  plugins: [queryComplexity(schema, 25)],
   validationRules: [
     /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */
     depthLimit(5),
-    queryComplexity({
-      maximumComplexity: 25,
-      estimators: [simpleEstimator({ defaultComplexity: 1 })],
-    }),
   ],
   engine: undefined,
   debug: isDevelopment,
