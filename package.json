@@ -85,7 +85,7 @@
     "jest-each": "^24.9.0",
     "jest-junit": "^8.0.0",
     "nodemon": "^1.19.2",
-    "now": "^16.4.3",
+    "now": "^16.5.2",
     "prettier": "^1.18.2",
     "puppeteer": "^2.0.0",
     "rimraf": "^3.0.0",
