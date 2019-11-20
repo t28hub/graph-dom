@@ -1,4 +1,8 @@
-# GraphDOM [![CircleCI Build Status](https://circleci.com/gh/t28hub/graph-dom/tree/master.svg?style=shield&circle-token=af937781f52f3988d85743c0c65dac4602660765)](https://circleci.com/gh/t28hub/graph-dom/tree/master)[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=t28hub/graph-dom&identifier=202957325)](https://app.dependabot.com/accounts/t28hub/repos/202957325)
+# GraphDOM
+[![CircleCI Build Status](https://circleci.com/gh/t28hub/graph-dom/tree/master.svg?style=shield&circle-token=af937781f52f3988d85743c0c65dac4602660765)](https://circleci.com/gh/t28hub/graph-dom/tree/master)
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=t28hub/graph-dom&identifier=202957325)](https://app.dependabot.com/accounts/t28hub/repos/202957325)
+[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B14538%2Fgit%40github.com%3At28hub%2Fgraph-dom.git.svg?type=shield)](https://app.fossa.com/projects/custom%2B14538%2Fgit%40github.com%3At28hub%2Fgraph-dom.git?ref=badge_shield)    
+
 Web scraping and DOM traversing API with GraphQL.
 
 ## Environment Variables
@@ -11,6 +15,8 @@ Web scraping and DOM traversing API with GraphQL.
 | `GRAPH_DOM_BROWSER_PATH` | Path to browser executable. | \- |
 | `GRAPH_DOM_BROWSER_HEADLESS` | Whether to run browser in headless mode or not. Defaults to `true`. | `true` or `false` |
 
+## FOSSA
+[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B14538%2Fgit%40github.com%3At28hub%2Fgraph-dom.git.svg?type=large)](https://app.fossa.com/projects/custom%2B14538%2Fgit%40github.com%3At28hub%2Fgraph-dom.git?ref=badge_large)
 
 ## License
 ```

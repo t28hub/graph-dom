@@ -1,0 +1,11 @@
+version: 2
+cli:
+  server: https://app.fossa.com
+  fetcher: custom
+  project: git@github.com:t28hub/graph-dom.git
+analyze:
+  modules:
+  - name: graph-dom
+    type: nodejs
+    target: .
+    path: .
