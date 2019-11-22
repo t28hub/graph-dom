@@ -26,6 +26,20 @@ jobs:
           name: Check code format & run lint
           command: yarn lint
 
+  license:
+    docker:
+      - image: circleci/node:12
+    working_directory: ~/graph-dom
+    steps:
+      - checkout
+      - run:
+          name: Install fossa-cli
+          command: |
+            curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash
+      - run:
+          name: Check yarn dependency licenses
+          command: fossa test -c .fossa/config.yml
+
   test:
     docker:
       - image: circleci/node:12-browsers
@@ -105,7 +119,16 @@ workflows:
             branches:
               ignore:
                 - master
-      - test
+      - license:
+          requires:
+            - lint
+          filters:
+            branches:
+              only:
+                - master
+      - test:
+          requires:
+            - lint
       - build:
           requires:
             - lint
