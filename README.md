@@ -3,7 +3,8 @@
 [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=t28hub/graph-dom&identifier=202957325)](https://app.dependabot.com/accounts/t28hub/repos/202957325)
 [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B14538%2Fgit%40github.com%3At28hub%2Fgraph-dom.git.svg?type=shield)](https://app.fossa.com/projects/custom%2B14538%2Fgit%40github.com%3At28hub%2Fgraph-dom.git?ref=badge_shield)    
 
-Web scraping and DOM traversing API with GraphQL.
+Extract web data by GraphQL and DOM API.
+![GraphDOM Logo](logo.png)
 
 ## Environment Variables
 | Name | Description | Value |
