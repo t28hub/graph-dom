@@ -56,7 +56,7 @@
     "puppeteer-core": "^2.0.0",
     "reflect-metadata": "^0.1.13",
     "robots-parser": "^2.1.1",
-    "source-map-support": "^0.5.13"
+    "source-map-support": "^0.5.16"
   },
   "devDependencies": {
     "@stryker-mutator/core": "^2.1.0",
