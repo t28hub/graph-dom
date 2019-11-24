@@ -15,10 +15,12 @@
  */
 
 import 'reflect-metadata';
-import puppeteer, { Browser, ElementHandle, Page } from 'puppeteer';
+import { ElementHandle, JSHandle, Page, SerializableOrJSHandle } from 'puppeteer';
+import { browser, element, page } from '../../../src/__mocks__/puppeteer-core';
 import { NodeImpl, NodeType, SerializableNode } from '../../../src/domain';
+import { Optional } from '../../../src/util';
 
-jest.unmock('puppeteer');
+jest.unmock('puppeteer-core');
 
 class Node extends NodeImpl<SerializableNode> {
   public constructor(page: Page, element: ElementHandle, properties: SerializableNode) {
@@ -26,66 +28,24 @@ class Node extends NodeImpl<SerializableNode> {
   }
 }
 
-// language=html
-const html = `
-  <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Test HTML</title>
-  </head>
-  <body>
-  <div>
-    <h1>Title</h1>
-    <p>1st paragraph
-      This is 1st paragraph.</p>
-    <p><a href="http://www.example.com">Example domain</a></p>
-  </div>
-  </body>
-  </html>
-`;
-
-async function findElement(page: Page, selector: string): Promise<ElementHandle> {
-  const element = await page.$(selector);
-  if (element === null) {
-    throw new Error('Could not convert JavaScript Object as an ElementImpl');
-  }
-  return element;
-}
-
-async function createNode(page: Page, selector: string): Promise<NodeImpl<SerializableNode>> {
-  const element = await findElement(page, selector);
-  const properties: SerializableNode = await page.evaluate((element: HTMLElement): SerializableNode => {
-    const { nodeName, nodeType, nodeValue } = element;
-    return { nodeName, nodeType, nodeValue };
-  }, element);
-  return new Node(page, element, properties);
+async function createNode(properties: SerializableNode): Promise<NodeImpl<SerializableNode>> {
+  const created = await browser.newPage();
+  const found = await created.$('#root');
+  return new Node(created, found, properties);
 }
 
 describe('NodeImpl', () => {
-  let browser: Browser;
-  let page: Page;
-  beforeAll(async () => {
-    browser = await puppeteer.launch({
-      executablePath: puppeteer.executablePath(),
-      headless: true,
-      args: ['--no-sandbox', '--disable-gpu', '--headless']
-    });
+  let node!: NodeImpl<SerializableNode>;
+  beforeEach(async () => {
+    jest.clearAllMocks();
 
-    page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'load' });
-  });
+    page.$.mockReturnValue(Promise.resolve(element));
+    browser.newPage.mockReturnValue(Promise.resolve(page));
 
-  afterAll(async () => {
-    await page.close();
-    await browser.close();
+    node = await createNode({ nodeName: 'P', nodeType: NodeType.ELEMENT_NODE, nodeValue: null });
   });
 
   describe('properties', () => {
-    let node: Node;
-    beforeAll(async () => {
-      node = await createNode(page, 'p');
-    });
-
     test('should return node name', async () => {
       // Act
       const actual = node.nodeName;
@@ -113,182 +73,250 @@ describe('NodeImpl', () => {
 
   describe('textContent', () => {
     test('should return text content ', async () => {
+      // Arrange
+      page.evaluate.mockReturnValue(Promise.resolve('This is a text content'));
+
       // Act
-      const node = await createNode(page, 'p');
       const actual = await node.textContent();
 
       // Assert
-      expect(actual).toEqual(`1st paragraph\n      This is 1st paragraph.`);
+      expect(page.evaluate).toBeCalledTimes(1);
+      expect(actual).toEqual('This is a text content');
     });
   });
 
   describe('innerText', () => {
     test('should return rendered text content ', async () => {
+      // Arrange
+      page.evaluate.mockReturnValue(Promise.resolve('This is an inner text'));
+
       // Act
-      const node = await createNode(page, 'p');
       const actual = await node.innerText();
 
       // Assert
-      expect(actual).toEqual('1st paragraph This is 1st paragraph.');
+      expect(page.evaluate).toBeCalledTimes(1);
+      expect(actual).toEqual('This is an inner text');
     });
   });
 
   describe('children', () => {
     test('should return children nodes', async () => {
+      // Arrange
+      const node1st = await createNode({ nodeName: 'H1', nodeType: NodeType.ELEMENT_NODE, nodeValue: null });
+      const node2nd = await createNode({ nodeName: 'H2', nodeType: NodeType.ELEMENT_NODE, nodeValue: null });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        getProperties: () => [
+          { asElement: () => node1st },
+          { asElement: () => node2nd }
+        ]
+      }));
+
       // Act
-      const node = await createNode(page, 'div');
       const actual = await node.children();
 
       // Assert
-      expect(actual).toHaveLength(3);
-      expect(actual[0].nodeName).toEqual('H1');
-      expect(actual[1].nodeName).toEqual('P');
-      expect(actual[2].nodeName).toEqual('P');
+      expect(page.evaluateHandle).toBeCalledTimes(1);
+      expect(actual).toHaveLength(2);
     });
   });
 
   describe('childNodes', () => {
     test('should return child nodes', async () => {
+      // Arrange
+      const node1st = await createNode({ nodeName: '#text', nodeType: NodeType.TEXT_NODE, nodeValue: null });
+      const node2nd = await createNode({ nodeName: 'H1', nodeType: NodeType.ELEMENT_NODE, nodeValue: null });
+      const node3rd = await createNode({ nodeName: '#text', nodeType: NodeType.TEXT_NODE, nodeValue: null });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        getProperties: () => [
+          { asElement: () => node1st },
+          { asElement: () => node2nd },
+          { asElement: () => node3rd }
+        ]
+      }));
+
       // Act
-      const node = await createNode(page, 'div');
       const actual = await node.childNodes();
 
       // Assert
-      expect(actual).toHaveLength(7);
-      expect(actual[0].nodeName).toEqual('#text');
-      expect(actual[1].nodeName).toEqual('H1');
-      expect(actual[2].nodeName).toEqual('#text');
-      expect(actual[3].nodeName).toEqual('P');
-      expect(actual[4].nodeName).toEqual('#text');
-      expect(actual[5].nodeName).toEqual('P');
-      expect(actual[6].nodeName).toEqual('#text');
-
+      expect(page.evaluateHandle).toBeCalledTimes(1);
+      expect(actual).toHaveLength(3);
     });
   });
 
   describe('firstChild', () => {
     test('should return first child node', async () => {
+      // Arrange
+      const childNode = await createNode({ nodeName: '#text', nodeType: NodeType.TEXT_NODE, nodeValue: null });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        asElement: () => childNode
+      }));
+
       // Act
-      const node = await createNode(page, 'div');
       const actual = await node.firstChild();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('#text');
     });
 
     test('should return empty when child node does not exist', async () => {
+      // Arrange
+      page.evaluateHandle.mockReturnValue(Promise.resolve(null));
+
       // Act
-      const node = await createNode(page, 'meta');
       const actual = await node.firstChild();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeFalsy();
     });
   });
 
   describe('lastChild', () => {
     test('should return last child node', async () => {
+      // Arrange
+      const childNode = await createNode({ nodeName: '#text', nodeType: NodeType.TEXT_NODE, nodeValue: null });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        asElement: () => childNode
+      }));
+
       // Act
-      const node = await createNode(page, 'div');
       const actual = await node.lastChild();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('#text');
     });
 
     test('should return empty when child node does not exist', async () => {
+      // Arrange
+      page.evaluateHandle.mockReturnValue(Promise.resolve(null));
+
       // Act
-      const node = await createNode(page, 'meta');
       const actual = await node.lastChild();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeFalsy();
     });
   });
 
   describe('nextSibling', () => {
     test('should return next node of the node in parent node', async () => {
+      // Arrange
+      const nextNode = await createNode({ nodeName: '#text', nodeType: NodeType.TEXT_NODE, nodeValue: null });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        asElement: () => nextNode
+      }));
+
       // Act
-      const node = await createNode(page, 'h1');
       const actual = await node.nextSibling();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('#text');
     });
 
     test('should return empty when the node is last node', async () => {
+      // Arrange
+      page.evaluateHandle.mockReturnValue(Promise.resolve(null));
+
       // Act
-      const node = await createNode(page, 'html');
       const actual = await node.nextSibling();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeFalsy();
     });
   });
 
   describe('previousSibling', () => {
     test('should return previous node of the node in parent node', async () => {
+      // Arrange
+      const previousNode = await createNode({ nodeName: '#text', nodeType: NodeType.TEXT_NODE, nodeValue: null });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        asElement: () => previousNode
+      }));
+
       // Act
-      const node = await createNode(page, 'h1');
       const actual = await node.previousSibling();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('#text');
     });
 
     test('should return empty when the node is first node', async () => {
+      // Arrange
+      page.evaluateHandle.mockReturnValue(Promise.resolve(null));
+
       // Act
-      const node = await createNode(page, 'a');
       const actual = await node.previousSibling();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeFalsy();
     });
   });
 
   describe('parentElement', () => {
     test('should return parent element', async () => {
+      // Arrange
+      const parentElement = await createNode({ nodeName: 'DIV', nodeType: NodeType.ELEMENT_NODE, nodeValue: null });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        asElement: () => parentElement
+      }));
+      const parentNode = await createNode({ nodeName: 'DIV', nodeType: NodeType.ELEMENT_NODE, nodeValue: null });
+      jest.spyOn(node as any, 'toNode').mockReturnValue(Promise.resolve(
+        Optional.of(parentNode)
+      ));
+
       // Act
-      const node = await createNode(page, 'h1');
       const actual = await node.parentElement();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('DIV');
     });
 
     test('should return empty when node does not have parent element', async () => {
+      // Arrange
+      page.evaluateHandle.mockReturnValue(Promise.resolve(null));
+
       // Act
-      const node = await createNode(page, 'html');
       const actual = await node.parentElement();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeFalsy();
     });
   });
 
   describe('parentNode', () => {
     test('should return parent node', async () => {
+      // Arrange
+      const parentNode = await createNode({ nodeName: 'DIV', nodeType: NodeType.TEXT_NODE, nodeValue: null });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        asElement: () => parentNode
+      }));
+
       // Act
-      const node = await createNode(page, 'html');
       const actual = await node.parentNode();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('#document');
     });
 
     test('should return empty when node does not have parent node', async () => {
+      // Arrange
+      page.evaluateHandle.mockReturnValue(Promise.resolve(null));
+
       // Act
-      const node = await createNode(page, 'html');
-      const document = (await node.parentNode()).get();
-      const actual = await document.parentNode();
+      const actual = await node.parentNode();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeFalsy();
     });
   });

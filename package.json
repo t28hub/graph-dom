@@ -21,7 +21,7 @@
     "lint:eslint": "npx eslint 'src/**/*.ts'",
     "lint:prettier": "npx prettier --check '*.{js,ts}'",
     "test": "yarn test:unit && yarn test:mutation && yarn test:e2e",
-    "test:unit": "npx jest --config jest.config.js --runInBand",
+    "test:unit": "npx jest --config jest.config.js",
     "test:e2e": "npx jest --config jest.e2e.config.js --runInBand",
     "test:mutation": "npx stryker run",
     "clean": "npx rimraf dist reports yarn-error.log .stryker",

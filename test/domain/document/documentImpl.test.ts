@@ -15,51 +15,39 @@
  */
 
 import 'reflect-metadata';
-import puppeteer, { Browser, Page } from 'puppeteer';
-import { Document, DocumentImpl } from '../../../src/domain';
+import { browser, element, page } from '../../../src/__mocks__/puppeteer-core';
+import { DocumentImpl, ElementImpl, NodeType, SerializableDocument, SerializableElement } from '../../../src/domain';
 import { create } from '../../../src/domain/document';
+import { Optional } from '../../../src/util';
 
-jest.unmock('puppeteer');
+jest.unmock('puppeteer-core');
 
-// language=html
-const html = `
-  <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>This is title</title>
-  </head>
-  <body>
-  <div id="content">
-    <p class="paragraph">This is 1st paragraph</p>
-    <p class="paragraph">This is 2nd paragraph</p>
-    <p><a href="https://example.com">Example domain</a></p>
-  </div>
-  </body>
-  </html>
-`;
+async function createDocument(properties: SerializableDocument): Promise<DocumentImpl> {
+  const created = await browser.newPage();
+  const found = await created.$('#document');
+  return new DocumentImpl(created, found, properties);
+}
+
+async function createElement(properties: SerializableElement): Promise<ElementImpl> {
+  const created = await browser.newPage();
+  const found = await created.$('#element');
+  return new ElementImpl(created, found, properties);
+}
 
 describe('DocumentImpl', () => {
-  let browser: Browser;
-  let page: Page;
-  beforeAll(async () => {
-    browser = await puppeteer.launch({
-      executablePath: puppeteer.executablePath(),
-      headless: true,
-      args: ['--no-sandbox', '--disable-gpu', '--headless']
+  let document!: DocumentImpl;
+  beforeEach(async () => {
+    jest.clearAllMocks();
+
+    page.$.mockReturnValue(Promise.resolve(element));
+    browser.newPage.mockReturnValue(Promise.resolve(page));
+
+    document = await createDocument({
+      title: 'This is title',
+      nodeName: '#document',
+      nodeType: NodeType.DOCUMENT_NODE,
+      nodeValue: null
     });
-
-    page = await browser.newPage();
-  });
-
-  let document: Document;
-  beforeEach(async ()=> {
-    await page.setContent(html, { waitUntil: 'load' });
-    document = await create(page);
-  });
-
-  afterAll(async () => {
-    await page.close();
-    await browser.close();
   });
 
   describe('title', () => {
@@ -70,174 +58,370 @@ describe('DocumentImpl', () => {
       // Assert
       expect(actual).toEqual('This is title');
     });
-
-    test('should return empty string when title is missing', async () => {
-      // Arrange
-      // noinspection HtmlRequiredTitleElement
-      await page.setContent(
-        // language=html
-          `
-            <html lang="en">
-            <head>
-            </head>
-            </html>
-        `,
-        { waitUntil: 'load' }
-      );
-      const document = await create(page);
-
-      // Act
-      const actual = document.title;
-
-      // Assert
-      expect(actual).toEqual('');
-    });
   });
 
   describe('head', () => {
     test('should return "head" element of document', async () => {
-      // Act
-      const actual = await document.head();
-
-      // Assert
-      expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('HEAD');
-    });
-
-    test('should return "head" element when "head" element is missing', async () => {
       // Arrange
-      await page.setContent('', { waitUntil: 'load' });
-      const document = await create(page);
+      const head = createElement({
+        id: '',
+        className: '',
+        classList: [],
+        nodeName: 'HEAD',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        getProperties: () => [
+          { asElement: () => head }
+        ]
+      }));
+      jest.spyOn(document as any, 'toElement').mockImplementation(() => {
+        const value: Pick<ElementImpl, 'nodeType' | 'nodeName'> = {
+          nodeName: 'HEAD',
+          nodeType: NodeType.ELEMENT_NODE
+        };
+        return Promise.resolve(Optional.of(value));
+      });
 
       // Act
       const actual = await document.head();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('HEAD');
+      expect(actual.get()).toMatchObject({
+        nodeName: 'HEAD',
+        nodeType: NodeType.ELEMENT_NODE
+      });
     });
   });
 
   describe('body', () => {
-    test('should return <body> element of document', async () => {
-      // Act
-      const actual = await document.body();
-
-      // Assert
-      expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('BODY');
-    });
-
-    test('should return <body> element when <body> element is missing', async () => {
+    test('should return "body" element of document', async () => {
       // Arrange
-      await page.setContent('', { waitUntil: 'load' });
-      const document = await create(page);
+      const body = createElement({
+        id: '',
+        className: '',
+        classList: [],
+        nodeName: 'BODY',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        getProperties: () => [
+          { asElement: () => body }
+        ]
+      }));
+      jest.spyOn(document as any, 'toElement').mockImplementation(() => {
+        const value: Pick<ElementImpl, 'nodeType' | 'nodeName'> = {
+          nodeName: 'BODY',
+          nodeType: NodeType.ELEMENT_NODE
+        };
+        return Promise.resolve(Optional.of(value));
+      });
 
       // Act
       const actual = await document.body();
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('BODY');
+      expect(actual.get()).toMatchObject({
+        nodeName: 'BODY',
+        nodeType: NodeType.ELEMENT_NODE
+      });
     });
   });
 
   describe('getElementById', () => {
     test('should return element matching specified ID', async () => {
+      // Arrange
+      const content = createElement({
+        id: 'content',
+        className: '',
+        classList: [],
+        nodeName: 'DIV',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        getProperties: () => [
+          { asElement: () => content }
+        ]
+      }));
+      jest.spyOn(document as any, 'toElement').mockImplementation(() => {
+        const value: Pick<ElementImpl, 'id' | 'nodeType' | 'nodeName'> = {
+          id: 'content',
+          nodeName: 'DIV',
+          nodeType: NodeType.ELEMENT_NODE
+        };
+        return Promise.resolve(Optional.of(value));
+      });
+
       // Act
       const actual = await document.getElementById('content');
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
-      expect(actual.get().nodeName).toEqual('DIV');
+      expect(actual.get()).toMatchObject({
+        id: 'content',
+        nodeName: 'DIV',
+        nodeType: NodeType.ELEMENT_NODE
+      });
     });
 
     test('should return empty when id does not match any element', async () => {
+      // Arrange
+      page.evaluateHandle.mockReturnValue(Promise.resolve(null));
+
       // Act
-      const actual = await document.getElementById('wrapper');
+      const actual = await document.getElementById('content');
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeFalsy();
     });
   });
 
   describe('getElementsByClassName', () => {
     test('should return elements matching specified class name', async () => {
+      // Arrange
+      const paragraph1st = await createElement({
+        id: '',
+        className: 'paragraph',
+        classList: ['paragraph'],
+        nodeName: 'P',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      const paragraph2nd = await createElement({
+        id: '',
+        className: 'paragraph',
+        classList: ['paragraph'],
+        nodeName: 'P',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        getProperties: () => [
+          { asElement: () => paragraph1st },
+          { asElement: () => paragraph2nd }
+        ]
+      }));
+      jest.spyOn(document as any, 'toElement').mockImplementation(() => {
+        const value: Pick<ElementImpl, 'className' | 'classList' | 'nodeType' | 'nodeName'> = {
+          className: 'paragraph',
+          classList: ['paragraph'],
+          nodeName: 'P',
+          nodeType: NodeType.ELEMENT_NODE
+        };
+        return Promise.resolve(Optional.of(value));
+      });
+
       // Act
       const actual = await document.getElementsByClassName('paragraph');
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual).toHaveLength(2);
-      expect(actual[0].nodeName).toEqual('P');
-      expect(actual[1].nodeName).toEqual('P');
+      expect(actual[0]).toMatchObject({
+        className: 'paragraph',
+        classList: ['paragraph'],
+        nodeName: 'P',
+        nodeType: NodeType.ELEMENT_NODE
+      });
+      expect(actual[1]).toMatchObject({
+        className: 'paragraph',
+        classList: ['paragraph'],
+        nodeName: 'P',
+        nodeType: NodeType.ELEMENT_NODE
+      });
     });
 
     test('should return empty array when class name does not match any element', async () => {
+      // Arrange
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        getProperties: () => []
+      }));
+
       // Act
-      const actual = await document.getElementsByClassName('header');
+      const actual = await document.getElementsByClassName('paragraph');
 
       // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual).toHaveLength(0);
     });
   });
 
   describe('getElementsByTagName', () => {
     test('should return elements matching specified tag name', async () => {
-      // Act
-      const actual = await document.getElementsByTagName('p');
+      // Arrange
+      const image1st = await createElement({
+        id: '',
+        className: '',
+        classList: [],
+        nodeName: 'IMG',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      const image2nd = await createElement({
+        id: '',
+        className: '',
+        classList: [],
+        nodeName: 'IMG',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        getProperties: () => [
+          { asElement: () => image1st },
+          { asElement: () => image2nd }
+        ]
+      }));
+      jest.spyOn(document as any, 'toElement').mockImplementation(() => {
+        const value: Pick<ElementImpl, 'nodeType' | 'nodeName'> = {
+          nodeName: 'IMG',
+          nodeType: NodeType.ELEMENT_NODE
+        };
+        return Promise.resolve(Optional.of(value));
+      });
 
-      // Assert
-      expect(actual).toHaveLength(3);
-      expect(actual[0].nodeName).toEqual('P');
-      expect(actual[1].nodeName).toEqual('P');
-      expect(actual[2].nodeName).toEqual('P');
-    });
-
-    test('should return empty array when tag name does not match any element', async () => {
       // Act
       const actual = await document.getElementsByTagName('img');
 
       // Assert
+      expect(actual).toHaveLength(2);
+      expect(actual[0]).toMatchObject({
+        nodeName: 'IMG',
+        nodeType: NodeType.ELEMENT_NODE
+      });
+      expect(actual[1]).toMatchObject({
+        nodeName: 'IMG',
+        nodeType: NodeType.ELEMENT_NODE
+      });
+    });
+
+    test('should return empty array when tag name does not match any element', async () => {
+      // Arrange
+      page.evaluateHandle.mockReturnValue(Promise.resolve({
+        getProperties: () => []
+      }));
+
+      // Act
+      const actual = await document.getElementsByTagName('img');
+
+      // Assert
+      expect(page.evaluateHandle).toBeCalledTimes(1);
       expect(actual).toHaveLength(0);
     });
   });
 
   describe('querySelector', () => {
     test('should return element matching specified selector', async () => {
+      // Arrange
+      const paragraph = await createElement({
+        id: '',
+        className: 'new',
+        classList: ['new'],
+        nodeName: 'P',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      element.$.mockReturnValue(Promise.resolve(paragraph));
+      jest.spyOn(document as any, 'toElement').mockImplementation(() => {
+        const value: Pick<ElementImpl, 'className' | 'classList' | 'nodeType' | 'nodeName'> = {
+          className: 'new',
+          classList: ['new'],
+          nodeName: 'P',
+          nodeType: NodeType.ELEMENT_NODE
+        };
+        return Promise.resolve(Optional.of(value));
+      });
+
       // Act
-      const actual = await document.querySelector('div#content > *');
+      const actual = await document.querySelector('p.new');
 
       // Assert
+      expect(element.$).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeTruthy();
       expect(actual.get().nodeName).toEqual('P');
+      expect(actual.get().classList).toContain('new');
     });
 
     test('should return empty when selector does not match any element', async () => {
+      // Arrange
+      element.$.mockReturnValue(Promise.resolve(null));
+
       // Act
-      const actual = await document.querySelector('div#content > a');
+      const actual = await document.querySelector('p.new');
 
       // Assert
+      expect(element.$).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeFalsy();
     });
   });
 
   describe('querySelectorAll', () => {
     test('should return elements matching specified selector', async () => {
+      // Arrange
+      const paragraph1st = await createElement({
+        id: '',
+        className: 'new',
+        classList: ['new'],
+        nodeName: 'P',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      const paragraph2nd = await createElement({
+        id: '',
+        className: 'new',
+        classList: ['new'],
+        nodeName: 'P',
+        nodeType: NodeType.ELEMENT_NODE,
+        nodeValue: null
+      });
+      element.$$.mockReturnValue(Promise.resolve([paragraph1st, paragraph2nd]));
+      jest.spyOn(document as any, 'toElement').mockImplementation(() => {
+        const value: Pick<ElementImpl, 'className' | 'classList' | 'nodeType' | 'nodeName'> = {
+          className: 'new',
+          classList: ['new'],
+          nodeName: 'P',
+          nodeType: NodeType.ELEMENT_NODE
+        };
+        return Promise.resolve(Optional.of(value));
+      });
+
       // Act
-      const actual = await document.querySelectorAll('div#content > *');
+      const actual = await document.querySelectorAll('p.new');
 
       // Assert
-      expect(actual).toHaveLength(3);
-      expect(actual[0].nodeName).toEqual('P');
-      expect(actual[1].nodeName).toEqual('P');
-      expect(actual[2].nodeName).toEqual('P');
+      expect(element.$$).toBeCalledTimes(1);
+      expect(actual).toHaveLength(2);
+      expect(actual[0]).toMatchObject({
+        className: 'new',
+        classList: ['new'],
+        nodeName: 'P',
+        nodeType: NodeType.ELEMENT_NODE
+      });
+      expect(actual[1]).toMatchObject({
+        className: 'new',
+        classList: ['new'],
+        nodeName: 'P',
+        nodeType: NodeType.ELEMENT_NODE
+      });
     });
 
     test('should return empty array when selector does not match any element', async () => {
+      // Arrange
+      element.$$.mockReturnValue(Promise.resolve([]));
+
       // Act
-      const actual = await document.querySelectorAll('div#content > a');
+      const actual = await document.querySelectorAll('p.new');
 
       // Assert
+      expect(element.$$).toBeCalledTimes(1);
       expect(actual).toHaveLength(0);
     });
   });

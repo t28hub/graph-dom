@@ -180,15 +180,12 @@ export abstract class NodeImpl<T extends SerializableNode> implements Node {
   }
 
   protected async querySelectorAll(selector: string): Promise<Array<Element>> {
-    const { page, element } = this;
+    const { element } = this;
     const found: ElementHandle<HTMLElement>[] = await element.$$(selector);
     const promises: Promise<Element>[] = found.map(
       async (element: ElementHandle): Promise<Element> => {
-        const node = await create(page, element);
-        if (isElement(node)) {
-          return node;
-        }
-        throw new Error();
+        const converted = await this.toElement(element);
+        return converted.orElseThrow(() => new TypeError('Could not convert ElementHandle to Element'));
       }
     );
     return Promise.all(promises);

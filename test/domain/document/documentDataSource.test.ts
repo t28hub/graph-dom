@@ -20,7 +20,7 @@ import { DataSourceConfig } from 'apollo-datasource';
 import log4js from 'log4js';
 import { parse } from 'url';
 import { logger } from '../../../src/__mocks__/log4js';
-import puppeteer, { browser, context as browserContext, page, response } from '../../../src/__mocks__/puppeteer-core';
+import puppeteer, { browser, page, response } from '../../../src/__mocks__/puppeteer-core';
 import { NodeType } from '../../../src/domain';
 import { Context } from '../../../src/context';
 import { DocumentDataSource } from '../../../src/domain/document/documentDataSource';

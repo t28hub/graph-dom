@@ -20,7 +20,7 @@ import { DataSourceConfig } from 'apollo-datasource';
 import each from 'jest-each';
 import { NavigationOptions, Page, Response } from 'puppeteer';
 import { parse, Url } from 'url';
-import puppeteer, { browser, context, page, response } from '../../src/__mocks__/puppeteer-core';
+import puppeteer, { browser, page, response } from '../../src/__mocks__/puppeteer-core';
 import { BrowserDataSource, Options, LoadEvent } from '../../src/domain/browserDataSource';
 import {
   InvalidUrlError, NetworkError,

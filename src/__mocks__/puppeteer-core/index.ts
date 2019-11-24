@@ -47,8 +47,9 @@ export const response = {
   text: jest.fn(),
 };
 
-export const context = {
-  newPage: jest.fn(),
+export const element = {
+  $: jest.fn(),
+  $$: jest.fn(),
 };
 
 export default {
