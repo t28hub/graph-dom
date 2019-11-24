@@ -401,7 +401,7 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@stryker-mutator/api@^2.1.0", "@stryker-mutator/api@^2.4.0":
+"@stryker-mutator/api@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@stryker-mutator/api/-/api-2.4.0.tgz#9e710b6dde7f889d5c6d573f349bb622c57b9a57"
   integrity sha512-VV12SWtoHKM8G2CSUHD7b8O6zJSygHjAju+e9qOjmrTaEgy8KUVO7OWuUNcRLpcRDVAlB2osuo3qndMstpPExg==
@@ -437,13 +437,13 @@
     typed-inject "~2.1.1"
     typed-rest-client "~1.5.0"
 
-"@stryker-mutator/html-reporter@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@stryker-mutator/html-reporter/-/html-reporter-2.1.0.tgz#3031724ced4d7bffe0616eadf9aa37007b512a38"
-  integrity sha512-yCHhBVlGbm3CwK+8hsWPI0RI78mGlas1TntnT3z4VIWUS+RAoZj3ZMf42tB7D9SMp1l2nq5Fe0QKuIf9FfFHDw==
+"@stryker-mutator/html-reporter@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@stryker-mutator/html-reporter/-/html-reporter-2.4.0.tgz#2d7d4370841604afbf6d6f3f7e2faaf174c16393"
+  integrity sha512-k8KD0GqensSxxWabdMPr3y56sWedTCU9khYm/GoGGC/zq43Sptm7NhqENQVBA9TXaHOhQgTQRF+YIPWopSKaPQ==
   dependencies:
-    "@stryker-mutator/api" "^2.1.0"
-    "@stryker-mutator/util" "^2.1.0"
+    "@stryker-mutator/api" "^2.4.0"
+    "@stryker-mutator/util" "^2.4.0"
     file-url "~3.0.0"
     mkdirp "~0.5.1"
     mutation-testing-elements "^1.0.2"
@@ -468,7 +468,7 @@
     semver "~6.3.0"
     tslib "~1.10.0"
 
-"@stryker-mutator/util@^2.1.0", "@stryker-mutator/util@^2.4.0":
+"@stryker-mutator/util@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@stryker-mutator/util/-/util-2.4.0.tgz#20e1e2f2388ae4e91f67f442224d479a539edf27"
   integrity sha512-+pKsudzHy7r51S39bpo/2N4lmdnFb9qhF34My3Y5BtXWZEcKm+FELWkCAC4H8CmO/j0RgTLyfnQDoaw4MjdLgg==
