@@ -401,12 +401,12 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@stryker-mutator/api@^2.1.0", "@stryker-mutator/api@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@stryker-mutator/api/-/api-2.3.0.tgz#8f4010471f8cd22ceec8efe78429d39e7af12ccc"
-  integrity sha512-N+XlEZAxMq4GKWt8OOn7R+124ieCiicLG3heiX2JQXNjn7uTVDfI5rSGn0oPvpwYtgeV9x6F//vzniRGhsOWIQ==
+"@stryker-mutator/api@^2.1.0", "@stryker-mutator/api@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@stryker-mutator/api/-/api-2.4.0.tgz#9e710b6dde7f889d5c6d573f349bb622c57b9a57"
+  integrity sha512-VV12SWtoHKM8G2CSUHD7b8O6zJSygHjAju+e9qOjmrTaEgy8KUVO7OWuUNcRLpcRDVAlB2osuo3qndMstpPExg==
   dependencies:
-    mutation-testing-report-schema "^1.0.0"
+    mutation-testing-report-schema "^1.1.0"
     tslib "~1.10.0"
 
 "@stryker-mutator/core@^2.1.0":
@@ -448,12 +448,12 @@
     mutation-testing-elements "^1.0.2"
     rimraf "~3.0.0"
 
-"@stryker-mutator/jest-runner@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@stryker-mutator/jest-runner/-/jest-runner-2.3.0.tgz#4b7724745fa31ffb9f800bc8b1f2a50f49814414"
-  integrity sha512-d3b5aEsGBm7UNSXbapmibHzvIDFzmq8CUxHHTJn9sK89XbG6F+h8SYnMf//9ln/QFtbGPmjxvS5oP9ufHnHzJg==
+"@stryker-mutator/jest-runner@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@stryker-mutator/jest-runner/-/jest-runner-2.4.0.tgz#e8c16d3fb7a50db23d2395853b2e3b5b20a22ce8"
+  integrity sha512-mJNgIrUfY7lfnl+LedrTvGV82tMFrLlm+hJLjtaG6sZMCn/+b63rMF+zAPzZlANRtemx5gUOzZPSvdGeA0XsHQ==
   dependencies:
-    "@stryker-mutator/api" "^2.3.0"
+    "@stryker-mutator/api" "^2.4.0"
     semver "~6.3.0"
 
 "@stryker-mutator/typescript@^2.1.0":
@@ -4716,7 +4716,7 @@ mutation-testing-metrics@^1.1.1:
     lodash.groupby "^4.6.0"
     mutation-testing-report-schema "^1.2.0"
 
-mutation-testing-report-schema@^1.0.0, mutation-testing-report-schema@^1.2.0:
+mutation-testing-report-schema@^1.1.0, mutation-testing-report-schema@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/mutation-testing-report-schema/-/mutation-testing-report-schema-1.2.0.tgz#ed89cde7302833108b75703d4ef62085b1bb490e"
   integrity sha512-4LdCuO33sH8R2YJ1idP+GUTjPR/VeSEml1tboQX0+5dSwH2YccUrw73rzAEOzkbeD+IyzBDHLzQKmanScV4smA==
