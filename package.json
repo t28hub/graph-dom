@@ -99,7 +99,7 @@
     "typescript": "^3.5.3"
   },
   "optionalDependencies": {
-    "iltorb": "^2.4.3"
+    "iltorb": "^2.4.4"
   },
   "resolutions": {
     "graphql-toolkit": "0.5.18"
