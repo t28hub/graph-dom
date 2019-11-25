@@ -59,7 +59,12 @@ const serverConfig: ServerConfig = {
     /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */
     depthLimit(5),
   ],
-  engine: undefined,
+  engine: process.env.GRAPH_DOM_APOLLO_API_KEY
+    ? {
+        apiKey: process.env.GRAPH_DOM_APOLLO_API_KEY,
+        schemaTag: process.env.GRAPH_DOM_APOLLO_SCHEMA_TAG,
+      }
+    : false,
   debug: isDevelopment,
   playground: isDevelopment,
   tracing: isDevelopment,

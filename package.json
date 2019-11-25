@@ -26,7 +26,8 @@
     "test:mutation": "npx stryker run",
     "clean": "npx rimraf dist reports yarn-error.log .stryker",
     "build": "npx tsc && npx copyfiles -u 1 src/graphql/typeDefs/*.graphql dist/src",
-    "deploy": "npx now"
+    "deploy": "npx now",
+    "apollo:publish": "npx apollo schema:publish"
   },
   "husky": {
     "hooks": {
@@ -75,6 +76,7 @@
     "@types/supertest": "^2.0.8",
     "@typescript-eslint/eslint-plugin": "^2.1.0",
     "@typescript-eslint/parser": "^2.8.0",
+    "apollo": "^2.21.1",
     "copyfiles": "^2.1.1",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.7.0",
@@ -85,7 +87,7 @@
     "jest-each": "^24.9.0",
     "jest-junit": "^8.0.0",
     "nodemon": "^1.19.2",
-    "now": "^16.5.2",
+    "now": "^16.6.0",
     "prettier": "^1.18.2",
     "puppeteer": "^2.0.0",
     "rimraf": "^3.0.0",

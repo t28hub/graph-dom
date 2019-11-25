@@ -109,6 +109,9 @@ jobs:
       - deploy:
           name: Deploy to ZEIT
           command: yarn deploy --token $ZEIT_TOKEN
+      - run:
+          name: Publish schema to Apollo
+          command: yarn apollo:publish --endpoint=https://graph-dom.t28.now.sh/graphql --tag=production
 
 workflows:
   version: 2
