@@ -52,7 +52,7 @@
     "graphql-import": "^0.7.1",
     "graphql-query-complexity": "^0.4.1",
     "graphql-toolkit": "0.5.18",
-    "helmet": "^3.21.0",
+    "helmet": "^3.21.2",
     "log4js": "^5.1.0",
     "puppeteer-core": "^2.0.0",
     "reflect-metadata": "^0.1.13",
