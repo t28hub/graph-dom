@@ -1,0 +1,36 @@
+### IntelliJ IDEA
+.idea/
+.idea_modules/
+out/
+*.iml
+*.ipr
+*.iws
+
+### Node
+logs
+yarn-debug.log*
+coverage
+*.lcov
+build/Release
+node_modules/
+.eslintcache
+.eslintignore
+.eslintrc.json
+.env*
+.cache
+jest.*.js
+
+### Docker
+.dockerignore
+docker-compose.yml
+Dockerfile
+
+### Project Files
+.circleci/
+.dependabot/
+.fossa/
+examples/
+test/
+LICENSE.txt
+README.md
+*.png

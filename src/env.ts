@@ -16,21 +16,8 @@
 
 import dotenv from 'dotenv';
 
-/**
- * When application is running on the ZEIT Now, loading `.env` file is skipped.
- * Environment variable `NOW_REGION` is set, application is running on the ZEIT Now.
- * The ZEIT Now uses env properties declared in `now.json` for could development.
- * And it uses `.env` for local development.
- * https://zeit.co/docs/v2/environment-variables-and-secrets/
- */
-if (process.env.NOW_REGION === undefined && process.env.CI === undefined) {
-  const path = `.env.${process.env.NODE_ENV || 'development'}`;
-  const { error } = dotenv.config({
-    path,
-    encoding: 'utf8',
-  });
-
-  if (error) {
-    throw new Error(`Failed to load '${path}': ${error.message}`);
-  }
-}
+const path = `.env.${process.env.NODE_ENV || 'development'}`;
+dotenv.config({
+  path,
+  encoding: 'utf8',
+});

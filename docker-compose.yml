@@ -1,0 +1,18 @@
+version: '3'
+services:
+  graphdom:
+    build: .
+    environment:
+      - NODE_ENV=development
+      - GRAPH_DOM_REDIS_HOST=redis
+      - GRAPH_DOM_REDIS_PORT=6379
+    ports:
+      - 8080:8080
+    links:
+      - redis
+
+  redis:
+    image: redis:5.0.7
+    restart: unless-stopped
+    ports:
+      - 6379:6379
