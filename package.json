@@ -40,7 +40,7 @@
     "apollo-datasource": "^0.6.3",
     "apollo-server-cache-redis": "^1.1.4",
     "apollo-server-caching": "^0.5.0",
-    "apollo-server-errors": "^2.3.3",
+    "apollo-server-errors": "^2.3.4",
     "apollo-server-express": "^2.9.12",
     "apollo-server-plugin-base": "^0.6.8",
     "axios": "^0.19.0",
