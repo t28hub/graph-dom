@@ -22,6 +22,7 @@ import express from 'express';
 import depthLimit from 'graphql-depth-limit';
 import helmet from 'helmet';
 import { AppModule } from './appModule';
+import { getConfig } from './config';
 import { Context } from './context';
 import { DocumentDataSource } from './domain/document/documentDataSource';
 import { CacheProvider } from './infrastructure/cacheProvider';
@@ -43,7 +44,8 @@ app.use(
 const { schema, injector, context } = AppModule;
 const cache = injector.get(CacheProvider).provideCache();
 
-const isDevelopment = process.env.NODE_ENV === 'development';
+const config = getConfig();
+const { apollo, mode } = config;
 const serverConfig: ServerConfig = {
   schema,
   cache,
@@ -59,15 +61,10 @@ const serverConfig: ServerConfig = {
     /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */
     depthLimit(5),
   ],
-  engine: process.env.GRAPH_DOM_APOLLO_API_KEY
-    ? {
-        apiKey: process.env.GRAPH_DOM_APOLLO_API_KEY,
-        schemaTag: process.env.GRAPH_DOM_APOLLO_SCHEMA_TAG,
-      }
-    : false,
-  debug: isDevelopment,
-  playground: isDevelopment,
-  tracing: isDevelopment,
+  engine: apollo ? apollo : false,
+  debug: mode.debug,
+  playground: mode.playground,
+  tracing: mode.tracing,
 };
 
 export const server = new ApolloServer(serverConfig);

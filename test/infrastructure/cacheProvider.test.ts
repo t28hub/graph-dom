@@ -42,7 +42,7 @@ describe('CacheProvider', () => {
 
     test('should instantiate RedisCache', () => {
       // Act
-      const provider = new CacheProvider('127.0.0.1', 6379, 'p@ssw0rd');
+      const provider = new CacheProvider('127.0.0.1', 6379, undefined, 'p@ssw0rd');
       provider.onInit(TestModule);
 
       // Assert
@@ -50,6 +50,7 @@ describe('CacheProvider', () => {
       expect(RedisCache).toBeCalledWith({
         host: '127.0.0.1',
         port: 6379,
+        path: undefined,
         password: 'p@ssw0rd'
       });
       expect(InMemoryLRUCache).not.toBeCalled();

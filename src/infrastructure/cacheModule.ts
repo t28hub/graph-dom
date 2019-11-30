@@ -15,12 +15,13 @@
  */
 
 import { GraphQLModule } from '@graphql-modules/core';
-import { CacheProvider } from './cacheProvider';
 import { Provider } from '@graphql-modules/di';
+import { CacheProvider } from './cacheProvider';
 
 export interface Config {
   readonly host?: string;
   readonly port?: number;
+  readonly path?: string;
   readonly password?: string;
 }
 
@@ -33,6 +34,10 @@ export const CacheModule = new GraphQLModule<Config>({
     {
       provide: 'RedisPort',
       useValue: config.port,
+    },
+    {
+      provide: 'RedisPath',
+      useValue: config.path,
     },
     {
       provide: 'RedisPassword',

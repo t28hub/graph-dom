@@ -19,22 +19,10 @@ import { AxiosProvider } from './axiosProvider';
 import { BrowserModule } from './browserModule';
 import { CacheModule } from './cacheModule';
 import { TextFetcher } from './textFetcher';
+import { getConfig } from '../config';
 
-function parseInt(value: string | undefined): number | undefined {
-  return value !== undefined ? Number.parseInt(value) : undefined;
-}
-
+const config = getConfig();
 export const InfrastructureModule = new GraphQLModule({
-  imports: [
-    BrowserModule.forRoot({
-      path: process.env.GRAPH_DOM_BROWSER_PATH,
-      headless: process.env.GRAPH_DOM_BROWSER_HEADLESS !== 'false',
-    }),
-    CacheModule.forRoot({
-      host: process.env.GRAPH_DOM_REDIS_HOST,
-      port: parseInt(process.env.GRAPH_DOM_REDIS_PORT),
-      password: process.env.GRAPH_DOM_REDIS_PASSWORD,
-    }),
-  ],
+  imports: [BrowserModule.forRoot({ ...config.browser }), CacheModule.forRoot({ ...config.redis })],
   providers: [AxiosProvider, TextFetcher],
 });

@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-import './env'; // Load environment variables at first
-import { install } from 'source-map-support';
-import app from './app';
-import { LoggerFactory } from './util/logging/loggerFactory';
-import { parseLevel } from './util/logging/logger';
+// Load .env file before all
+import dotenv from 'dotenv';
+dotenv.config();
 
+import { install } from 'source-map-support';
 install();
 
-const mode = `${process.env.NODE_ENV}`;
-const port = parseInt(process.env.GRAPH_DOM_SERVER_PORT || '8080');
+import app from './app';
+import { getConfig } from './config';
+import { LoggerFactory } from './util/logging/loggerFactory';
 
-LoggerFactory.configure({
-  level: parseLevel(process.env.GRAPH_DOM_LOGGING_LEVEL || 'INFO'),
-  pattern: process.env.GRAPH_DOM_LOGGING_PATTERN,
-});
+const config = getConfig();
+LoggerFactory.configure({ level: config.logLevel });
 
+const { mode, port } = config;
 app.listen(port, () => {
   const logger = LoggerFactory.getLogger();
-  logger.info('Application is running at http://localhost:%d in %s mode', port, mode);
+  logger.info('Application is running on port %d in %s mode', port, mode.name);
 });

@@ -27,8 +27,7 @@ describe('LoggerFactory', () => {
     test('should configure log4js', () => {
       // Act
       LoggerFactory.configure({
-        level: Level.DEBUG,
-        pattern: '[%r] [%p] TEST - %m'
+        level: Level.DEBUG
       });
 
       // Assert

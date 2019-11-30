@@ -20,30 +20,26 @@ import { Log4jsLogger } from './log4jsLogger';
 
 export interface Config {
   readonly level: Level;
-  readonly pattern: string;
 }
 
-const DEFAULT_LEVEL = Level.INFO;
-const DEFAULT_PATTERN = '[%r] [%p] %c - %m';
 const DEFAULT_LOGGER_NAME = 'GraphDOM';
 
 export class LoggerFactory {
-  public static configure(config: Partial<Config>): void {
-    const { level, pattern } = config;
+  public static configure(config: Config): void {
+    const { level } = config;
     const configuration: Configuration = {
       appenders: {
         default: {
-          type: 'console',
+          type: 'stdout',
           layout: {
-            type: 'pattern',
-            pattern: pattern || DEFAULT_PATTERN,
+            type: 'colored',
           },
         },
       },
       categories: {
         default: {
           appenders: ['default'],
-          level: Level[level || DEFAULT_LEVEL].toLowerCase(),
+          level: Level[level].toLowerCase(),
           enableCallStack: true,
         },
       },
