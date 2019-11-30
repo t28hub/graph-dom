@@ -16,7 +16,7 @@
 
 import { Injectable, ProviderScope } from '@graphql-modules/di';
 import { KeyValueCache, PrefixingKeyValueCache } from 'apollo-server-caching';
-import { format, Url } from 'url';
+import { format, Url, UrlObject } from 'url';
 import { RobotsTxtTranslator } from './translator/robotsTxtTranslator';
 import { Logger } from '../../util/logging/logger';
 import { LoggerFactory } from '../../util/logging/loggerFactory';
@@ -51,7 +51,7 @@ export class RobotsService {
     return robotsTxt.isAllowed(url, userAgent);
   }
 
-  private async fetchText(url: Url, timeout: number, headers: Headers = {}): Promise<string> {
+  private async fetchText(url: UrlObject, timeout: number, headers: Headers = {}): Promise<string> {
     const urlString = format(url);
     const cached = await this.cache.get(urlString);
     if (cached) {
@@ -71,12 +71,8 @@ export class RobotsService {
     }
   }
 
-  private static buildRobotsTxtUrl(url: Url): Url {
+  private static buildRobotsTxtUrl(url: Url): UrlObject {
     const { protocol, host } = url;
-    return {
-      protocol,
-      host,
-      pathname: '/robots.txt',
-    };
+    return { protocol, host, pathname: '/robots.txt' };
   }
 }

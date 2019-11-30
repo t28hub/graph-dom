@@ -15,13 +15,13 @@
  */
 
 import parse from 'robots-parser';
-import { format, Url } from 'url';
+import { format, UrlObject } from 'url';
 import { RobotsTxt } from '../robotsTxt';
 import { Translator } from '../../translator';
 import { RobotsTxtImpl } from '../robotsTxtImpl';
 
 export type Input = {
-  url: Url;
+  url: UrlObject;
   content: string;
 };
 

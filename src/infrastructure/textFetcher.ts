@@ -16,7 +16,7 @@
 
 import { Injectable, ProviderScope } from '@graphql-modules/di';
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { format, Url } from 'url';
+import { format, UrlObject } from 'url';
 import { AxiosProvider } from './axiosProvider';
 import { Logger } from '../util/logging/logger';
 import { NetworkError } from '../domain/errors';
@@ -44,7 +44,7 @@ export class TextFetcher {
     this.logger = LoggerFactory.getLogger(TextFetcher.name);
   }
 
-  public async fetch(url: Url, timeout: number, headers: Headers = {}): Promise<string> {
+  public async fetch(url: UrlObject, timeout: number, headers: Headers = {}): Promise<string> {
     check(timeout >= 0, `Timeout must be positive: timeout=${timeout}`, TypeError);
 
     const urlString = format(url);

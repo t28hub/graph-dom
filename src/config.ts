@@ -97,10 +97,12 @@ export const parseRedisConfig = (url: string | undefined): RedisConfig | undefin
     return undefined;
   }
 
-  const { hostname: host, port, path, auth } = parse(url);
-  const portNumber = port ? Number.parseInt(port) : undefined;
-  const password = auth ? auth.split(':').pop() : undefined;
-  return { host, port: portNumber, path, password };
+  const parsed = parse(url);
+  const host = parsed.hostname !== null ? parsed.hostname : undefined;
+  const port = parsed.port !== null ? Number.parseInt(parsed.port) : undefined;
+  const path = parsed.path !== null ? parsed.path : undefined;
+  const password = parsed.auth !== null ? parsed.auth.split(':').pop() : undefined;
+  return { host, port, path, password };
 };
 
 const DEFAULT_NODE_ENV = 'development';

@@ -36,7 +36,7 @@
     }
   },
   "dependencies": {
-    "@graphql-modules/core": "^0.7.12",
+    "@graphql-modules/core": "^0.7.13",
     "apollo-datasource": "^0.6.3",
     "apollo-server-cache-redis": "^1.1.4",
     "apollo-server-caching": "^0.5.0",
@@ -51,9 +51,9 @@
     "graphql-depth-limit": "^1.1.0",
     "graphql-import": "^0.7.1",
     "graphql-query-complexity": "^0.4.1",
-    "graphql-toolkit": "0.5.18",
+    "graphql-toolkit": "0.7.4",
     "helmet": "^3.21.2",
-    "log4js": "^5.1.0",
+    "log4js": "^6.1.0",
     "puppeteer-core": "^2.0.0",
     "reflect-metadata": "^0.1.13",
     "robots-parser": "^2.1.1",
@@ -67,10 +67,11 @@
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.2",
     "@types/graphql-depth-limit": "^1.1.2",
-    "@types/helmet": "^0.0.44",
-    "@types/ioredis": "^4.0.17",
+    "@types/helmet": "^0.0.45",
+    "@types/ioredis": "^4.0.20",
     "@types/jest": "^24.0.23",
-    "@types/node": "^12.7.2",
+    "@types/node": "^12.12.14",
+    "@types/node-fetch": "^2.5.4",
     "@types/puppeteer-core": "^2.0.0",
     "@types/source-map-support": "^0.5.0",
     "@types/supertest": "^2.0.8",
@@ -85,8 +86,8 @@
     "husky": "^3.1.0",
     "jest": "^24.9.0",
     "jest-each": "^24.9.0",
-    "jest-junit": "^8.0.0",
-    "nodemon": "^1.19.2",
+    "jest-junit": "^9.0.0",
+    "nodemon": "^2.0.1",
     "now": "^16.6.0",
     "prettier": "^1.19.1",
     "puppeteer": "^2.0.0",
@@ -96,12 +97,9 @@
     "ts-jest": "^24.2.0",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.5.4",
-    "typescript": "^3.5.3"
+    "typescript": "^3.7.2"
   },
   "optionalDependencies": {
     "iltorb": "^2.4.4"
-  },
-  "resolutions": {
-    "graphql-toolkit": "0.5.18"
   }
 }

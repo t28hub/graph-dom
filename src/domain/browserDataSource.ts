@@ -28,7 +28,7 @@ import {
   Page,
   Request,
   Response,
-  SameSiteSetting,
+  SameSiteSetting as SameSiteOptions,
   SetCookie,
   Viewport,
 } from 'puppeteer';
@@ -59,7 +59,7 @@ export interface Headers {
 export type AuthSetting = AuthOptions;
 export type CookieSetting = SetCookie;
 export type GeoSetting = GeoOptions;
-export type SameSiteSetting = SameSiteSetting;
+export type SameSiteSetting = SameSiteOptions;
 export type ViewportSetting = Viewport;
 
 export interface Options {
