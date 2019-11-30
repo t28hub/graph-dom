@@ -70,6 +70,7 @@ export interface Options {
   readonly geolocation?: GeoSetting;
   readonly credentials?: AuthOptions;
   readonly javaScriptEnabled?: boolean;
+  readonly ignoreRobotsTxt?: boolean;
 }
 
 const DEFAULT_TIMEOUT = 10000;

@@ -45,6 +45,11 @@ export class DocumentDataSource extends BrowserDataSource<Context, Document> imp
     waitUntil: LoadEvent = LoadEvent.LOAD,
     options: Options = {}
   ): Promise<void> {
+    if (options.ignoreRobotsTxt) {
+      this.logger.info('Checking robots.txt is ignored by options');
+      return;
+    }
+
     const isAccessible = await this.robotsService.isAccessible(url, options.userAgent);
     if (!isAccessible) {
       throw new AccessDisallowedError(`URL is not allowed to fetch by robots.txt: URL=${format(url)}`);

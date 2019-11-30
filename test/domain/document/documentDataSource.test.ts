@@ -16,19 +16,15 @@
 
 import 'reflect-metadata';
 import { GraphQLModule } from '@graphql-modules/core';
-import { DataSourceConfig } from 'apollo-datasource';
 import log4js from 'log4js';
 import { parse } from 'url';
 import { logger } from '../../../src/__mocks__/log4js';
 import puppeteer, { browser, page, response } from '../../../src/__mocks__/puppeteer-core';
 import { NodeType } from '../../../src/domain';
-import { Context } from '../../../src/context';
 import { DocumentDataSource } from '../../../src/domain/document/documentDataSource';
 import { BrowserProvider } from '../../../src/infrastructure/browserProvider';
-import { TextFetcher } from '../../../src/infrastructure/textFetcher';
 import { RobotsService } from '../../../src/domain/robots/robotsService';
-import { CacheProvider } from '../../../src/infrastructure/cacheProvider';
-import { RobotsTxtTranslator } from '../../../src/domain/robots/translator/robotsTxtTranslator';
+import { LoadEvent } from '../../../src/domain/browserDataSource';
 
 jest.mock('log4js');
 jest.mock('chrome-aws-lambda', () => {
@@ -124,6 +120,17 @@ describe('DocumentDataSource', () => {
         nodeType: NodeType.DOCUMENT_NODE,
         nodeValue: null,
       });
+    });
+
+    test('should not call isAccessible when ignoreRobotsTxt is true', async () => {
+      // Arrange
+      response.status.mockReturnValue(200);
+
+      // Act
+      const actual = await dataSource.request(url, 1000, LoadEvent.LOAD, { ignoreRobotsTxt: true });
+
+      // Assert
+      expect(robotsService.isAccessible).not.toBeCalled();
     });
 
     test('should throw an Error when URL is not allowed to fetch', async () => {

@@ -28,4 +28,5 @@ export interface Options {
   readonly userAgent?: string;
   readonly credentials?: Credentials;
   readonly javaScriptEnabled?: boolean;
+  readonly ignoreRobotsTxt?: boolean;
 }

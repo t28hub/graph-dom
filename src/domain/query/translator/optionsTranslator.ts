@@ -44,6 +44,7 @@ export class OptionsTranslator implements Translator<Options, RequestOptions> {
       geolocation: OptionsTranslator.translateLocation(input.location),
       credentials: OptionsTranslator.translateCredentials(input.credentials),
       javaScriptEnabled: input.javaScriptEnabled !== false,
+      ignoreRobotsTxt: input.ignoreRobotsTxt === true,
     };
   }
 

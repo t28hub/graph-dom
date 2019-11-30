@@ -40,6 +40,9 @@ input Options {
   "User credentials"
   credentials: Credentials
 
-  "Whether JavaScript enabled or not"
+  "Whether JavaScript to be enabled or not"
   javaScriptEnabled: Boolean
+
+  "Whether robots.txt to be ignored or not"
+  ignoreRobotsTxt: Boolean
 }
