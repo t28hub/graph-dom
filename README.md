@@ -6,8 +6,41 @@
 Extract web data by GraphQL and DOM API.
 ![GraphDOM Logo](logo.png)
 
-## Features
-### Emulate device
+## :warning:WARNING:warning:
+This application is a proof of concept and might not be suitable for production.
+
+## Key Features
+* Support APIs like DOM API
+* Custom HTTP Headers and HTTP Cookies
+* Emulate devices and User-Agent
+* Render JavaScript
+* Support robots.txt
+* Protect your privacy using incognito mode
+
+## Example
+```graphql
+{
+  page(url: "https://speakerdeck.com/p/featured") {
+    decks: querySelectorAll(selector: "div.container div.mb-5") {
+      title: querySelector(selector: "a") {
+        text: getAttribute(name: "title")
+      }
+      link: querySelector(selector: "a") {
+        href: getAttribute(name: "href")
+      }
+      image: querySelector(selector: "div.deck-preview") {
+        thumbnail: getAttribute(name: "data-cover-image")
+      }
+      meta: querySelectorAll(selector: "div.deck-preview-meta > div.py-3") {
+        value: innerText
+      }
+    }
+  }
+}
+```
+See [examples](./examples) for more detailed examples.
+
+### Device emulation
 If you would like to emulate device, simply set `options.device`.  
 ```graphql
 {
@@ -51,7 +84,7 @@ Environment variables are the follows and every variable is optional.
 * `BROWSER_HEADLESS`: Whether to launch browser in headless mode.(Defaults to `true`) 
 * `REDIS_URL`: URL used to connect to Redis. If the environment variable is not set, the GraphDOM uses in-memory as a cache.
 
-See [.env.example](./.env.example).
+See [.env.example](./.env.example) for more detailed variables.
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ft28hub%2Fgraph-dom.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ft28hub%2Fgraph-dom?ref=badge_large)
