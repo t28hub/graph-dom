@@ -95,6 +95,52 @@ describe('OptionsTranslator', () => {
       });
     });
 
+    describe('device', () => {
+      test('should set UserAgent and Viewport', () => {
+        // Act
+        const actual = translator.translate({ device: 'iPhone XR' });
+
+        // Assert
+        expect(actual.userAgent).toMatch(/iPhone OS 12_0/);
+        expect(actual.viewport).toMatchObject({
+          width: 414,
+          height: 896,
+          deviceScaleFactor: 3,
+          isLandscape: false,
+          isMobile: true,
+          hasTouch: true
+        });
+      });
+
+      test('should override UserAgent and Viewport', () => {
+        // Act
+        const actual = translator.translate({
+          userAgent: 'GraphDOM/1.0.0',
+          viewport: {
+            width: 900,
+            height: 1600
+          },
+          device: 'iPhone XR'
+        });
+
+        // Assert
+        expect(actual.userAgent).not.toEqual('GraphDOM/1.0.0');
+        expect(actual.viewport).not.toMatchObject({
+          width: 900,
+          height: 1600
+        });
+      });
+
+      test('should not set UserAgent and Viewport when name is not found', () => {
+        // Act
+        const actual = translator.translate({ device: 'unknown device' });
+
+        // Assert
+        expect(actual.userAgent).toBeFalsy();
+        expect(actual.viewport).toBeFalsy();
+      });
+    });
+
     describe('viewport', () => {
       each([
         [

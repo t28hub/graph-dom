@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-import { Cookie } from './cookie';
-import { Header } from './header';
-import { Location } from './location';
-import { Viewport } from './viewport';
-import { Credentials } from './credentials';
+import { Device } from './device';
+import { Optional } from '../../util';
+import { puppeteer } from 'chrome-aws-lambda';
 
-export interface Options {
-  readonly cookies?: Cookie[];
-  readonly headers?: Header[];
-  readonly device?: string;
-  readonly location?: Location;
-  readonly viewport?: Viewport;
-  readonly userAgent?: string;
-  readonly credentials?: Credentials;
-  readonly javaScriptEnabled?: boolean;
-  readonly ignoreRobotsTxt?: boolean;
-}
+export const findDeviceByName = (name: string): Optional<Device> => {
+  const found = puppeteer.devices[name];
+  if (!found) {
+    return Optional.empty();
+  }
+
+  const { userAgent, viewport } = found;
+  return Optional.of({ name, userAgent, viewport });
+};

@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-import { Cookie } from './cookie';
-import { Header } from './header';
-import { Location } from './location';
-import { Viewport } from './viewport';
-import { Credentials } from './credentials';
+import { Viewport } from '../query/options';
 
-export interface Options {
-  readonly cookies?: Cookie[];
-  readonly headers?: Header[];
-  readonly device?: string;
-  readonly location?: Location;
-  readonly viewport?: Viewport;
-  readonly userAgent?: string;
-  readonly credentials?: Credentials;
-  readonly javaScriptEnabled?: boolean;
-  readonly ignoreRobotsTxt?: boolean;
+export interface Device {
+  readonly name: string;
+  readonly userAgent: string;
+  readonly viewport: Viewport;
 }

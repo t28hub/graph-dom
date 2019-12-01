@@ -27,6 +27,8 @@ import {
 } from '../../browserDataSource';
 import { check } from '../../../util';
 import { Credentials } from '../options/credentials';
+import { Device } from '../../device/device';
+import { findDeviceByName } from '../../device';
 
 const MIN_LATITUDE = -90;
 const MAX_LATITUDE = 90;
@@ -36,7 +38,7 @@ const DEFAULT_SCALE = 1;
 
 export class OptionsTranslator implements Translator<Options, RequestOptions> {
   public translate(input: Options): RequestOptions {
-    return {
+    const options = {
       cookies: OptionsTranslator.translateCookies(input.cookies),
       headers: OptionsTranslator.translateHeaders(input.headers),
       viewport: OptionsTranslator.translateViewport(input.viewport),
@@ -46,6 +48,9 @@ export class OptionsTranslator implements Translator<Options, RequestOptions> {
       javaScriptEnabled: input.javaScriptEnabled !== false,
       ignoreRobotsTxt: input.ignoreRobotsTxt === true,
     };
+
+    const device = OptionsTranslator.translateDevice(input.device);
+    return device ? { ...options, ...device } : options;
   }
 
   private static translateSameSite(input?: SameSite): SameSiteSetting | undefined {
@@ -78,6 +83,10 @@ export class OptionsTranslator implements Translator<Options, RequestOptions> {
       previous[name] = value;
       return previous;
     }, {});
+  }
+
+  private static translateDevice(input?: string): Device | null {
+    return input ? findDeviceByName(input).orElse(null) : null;
   }
 
   private static translateViewport(input?: Viewport): ViewportSetting | undefined {

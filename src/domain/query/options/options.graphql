@@ -28,6 +28,9 @@ input Options {
   "HTTP headers"
   headers: [Header]
 
+  "Device name"
+  device: String
+
   "Viewport"
   viewport: Viewport
 

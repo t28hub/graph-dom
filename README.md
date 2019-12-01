@@ -6,6 +6,40 @@
 Extract web data by GraphQL and DOM API.
 ![GraphDOM Logo](logo.png)
 
+## Features
+### Emulate device
+If you would like to emulate device, simply set `options.device`.  
+```graphql
+{
+  page(
+    url: "https://example.com"
+    options: { device: "iPhone XR" }
+  ) {
+    title
+  }
+}
+```
+Available devices are declared in [puppeteer/DeviceDescriptors.js](https://github.com/puppeteer/puppeteer/blob/v2.0.0/lib/DeviceDescriptors.js).  
+If a device is not declared in [puppeteer/DeviceDescriptors.js](https://github.com/puppeteer/puppeteer/blob/v2.0.0/lib/DeviceDescriptors.js), use `options.userAgent` and `options.viewport`.
+```graphql
+{
+  page(
+    url: "https://example.com"
+    options: { 
+      userAgent: "iPhone XR"
+      viewport: {
+        width: 375
+        height: 812
+        scaleFactor: 3.0
+        orientation: PORTRAIT
+      }
+    }
+  ) {
+    title
+  }
+}
+```
+
 ## Environment Variables
 Environment variables are the follows and every variable is optional.
 * `NODE_ENV`: `development` or `production`.(Defaults to `development`)
