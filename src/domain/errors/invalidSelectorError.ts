@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-export * from './accessDisallowedError';
-export * from './invalidSelectorError';
-export * from './invalidUrlError';
-export * from './networkError';
-export * from './noResponseError';
-export * from './notAvailableError';
-export * from './requestTimeoutError';
-export * from './sslCertificateError';
+import { ApolloError } from 'apollo-server-errors';
+
+export class InvalidSelectorError extends ApolloError {
+  public constructor(message: string) {
+    super(message, 'INVALID_SELECTOR');
+
+    Object.defineProperty(this, 'name', { value: 'InvalidSelectorError' });
+  }
+}

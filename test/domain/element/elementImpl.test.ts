@@ -18,6 +18,7 @@ import 'reflect-metadata';
 import { browser, element as mockElement, page } from '../../../src/__mocks__/puppeteer-core';
 import { ElementImpl, NodeType, SerializableElement } from '../../../src/domain';
 import { Optional } from '../../../src/util';
+import { InvalidSelectorError } from '../../../src/domain/errors';
 
 jest.unmock('puppeteer-core');
 
@@ -374,6 +375,18 @@ describe('ElementImpl', () => {
       expect(page.$).toBeCalledTimes(1);
       expect(actual.isPresent()).toBeFalsy();
     });
+
+    test('should throw InvalidSelectorError when selector is invalid', async () => {
+      // Arrange
+      mockElement.$.mockRejectedValue(new Error("Failed to execute 'querySelector' on 'Element': 'S3%$' is not a valid selector."));
+
+      // Act
+      const actual = element.querySelector('S3%$');
+
+      // Assert
+      expect(mockElement.$).toBeCalledTimes(1);
+      await expect(actual).rejects.toThrowError(InvalidSelectorError);
+    });
   });
 
   describe('querySelectorAll', () => {
@@ -425,6 +438,18 @@ describe('ElementImpl', () => {
       // Assert
       expect(mockElement.$$).toBeCalledTimes(1);
       expect(actual).toHaveLength(0);
+    });
+
+    test('should throw InvalidSelectorError when selector is invalid', async () => {
+      // Arrange
+      mockElement.$$.mockRejectedValue(new Error("Failed to execute 'querySelectorAll' on 'Element': '.S3%$' is not a valid selector."));
+
+      // Act
+      const actual = element.querySelectorAll('.S3%$');
+
+      // Assert
+      expect(mockElement.$$).toBeCalledTimes(1);
+      await expect(actual).rejects.toThrowError(InvalidSelectorError);
     });
   });
 });

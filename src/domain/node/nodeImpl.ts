@@ -19,6 +19,7 @@ import { create } from '.';
 import { HTMLNode } from './htmlNode';
 import { Element, Node, NodeType, SerializableNode } from '..';
 import { Optional } from '../../util';
+import { InvalidSelectorError } from '../errors';
 
 function isElement(node: Node): node is Element {
   return node.nodeType === NodeType.ELEMENT_NODE;
@@ -175,20 +176,28 @@ export abstract class NodeImpl<T extends SerializableNode> implements Node {
 
   protected async querySelector(selector: string): Promise<Optional<Element>> {
     const { element } = this;
-    const found = await element.$(selector);
-    return this.toElement(found);
+    try {
+      const found = await element.$(selector);
+      return this.toElement(found);
+    } catch (e) {
+      throw new InvalidSelectorError(`Failed to execute 'querySelector': '${selector}' is not a valid selector`);
+    }
   }
 
   protected async querySelectorAll(selector: string): Promise<Array<Element>> {
     const { element } = this;
-    const found: ElementHandle<HTMLElement>[] = await element.$$(selector);
-    const promises: Promise<Element>[] = found.map(
-      async (element: ElementHandle): Promise<Element> => {
-        const converted = await this.toElement(element);
-        return converted.orElseThrow(() => new TypeError('Could not convert ElementHandle to Element'));
-      }
-    );
-    return Promise.all(promises);
+    try {
+      const found: ElementHandle<HTMLElement>[] = await element.$$(selector);
+      const promises: Promise<Element>[] = found.map(
+        async (element: ElementHandle): Promise<Element> => {
+          const converted = await this.toElement(element);
+          return converted.orElseThrow(() => new TypeError('Could not convert ElementHandle to Element'));
+        }
+      );
+      return await Promise.all(promises);
+    } catch (e) {
+      throw new InvalidSelectorError(`Failed to execute 'querySelectorAll': '${selector}' is not a valid selector`);
+    }
   }
 
   protected async toNode(handle: JSHandle | null): Promise<Optional<Node>> {
