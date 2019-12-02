@@ -53,7 +53,7 @@ export interface Config {
 }
 
 const DEFAULT_NODE_ENV = 'development';
-export const parseMode = (nodeEnv: string | undefined): Mode => {
+const parseMode = (nodeEnv: string | undefined): Mode => {
   const name = nodeEnv || DEFAULT_NODE_ENV;
   return {
     name,
@@ -64,13 +64,13 @@ export const parseMode = (nodeEnv: string | undefined): Mode => {
 };
 
 const DEFAULT_SERVER_PORT = 8080;
-export const parsePort = (serverPort: string | undefined): number => {
+const parsePort = (serverPort: string | undefined): number => {
   return serverPort ? parseInt(serverPort) : DEFAULT_SERVER_PORT;
 };
 
 const DEFAULT_COMPLEXITY_LIMIT = 15;
 const DEFAULT_DEPTH_LIMIT = 5;
-export const parseApolloConfig = (env: typeof process.env = process.env): ApolloConfig => {
+const parseApolloConfig = (env: typeof process.env): ApolloConfig => {
   const queryConfig: ApolloConfig = {
     queryComplexityLimit: env.QUERY_COMPLEXITY_LIMIT ? parseInt(env.QUERY_COMPLEXITY_LIMIT) : DEFAULT_COMPLEXITY_LIMIT,
     queryDepthLimit: env.QUERY_DEPTH_LIMIT ? parseInt(env.QUERY_DEPTH_LIMIT) : DEFAULT_DEPTH_LIMIT,
@@ -87,27 +87,27 @@ export const parseApolloConfig = (env: typeof process.env = process.env): Apollo
   return { ...engineConfig, ...queryConfig };
 };
 
-export const parseBrowserConfig = (env: typeof process.env = process.env): BrowserConfig => {
+const parseBrowserConfig = (env: typeof process.env): BrowserConfig => {
   return {
     path: env.BROWSER_PATH,
     headless: env.BROWSER_HEADLESS !== 'false',
   };
 };
 
-export const parseRedisConfig = (url: string | undefined): RedisConfig | undefined => {
+const parseRedisConfig = (url: string | undefined): RedisConfig | undefined => {
   if (!url) {
     return undefined;
   }
 
   const parsed = parse(url);
   const host = parsed.hostname !== null ? parsed.hostname : undefined;
-  const port = parsed.port !== null ? Number.parseInt(parsed.port) : undefined;
+  const port = parsed.port !== null ? parseInt(parsed.port) : undefined;
   const path = parsed.path !== null ? parsed.path : undefined;
   const password = parsed.auth !== null ? parsed.auth.split(':').pop() : undefined;
   return { host, port, path, password };
 };
 
-const DEFAULT_LOG_LEVEL = 'debug';
+const DEFAULT_LOG_LEVEL = 'info';
 export const getConfig = (env: typeof process.env = process.env): Config => {
   return {
     mode: parseMode(env.NODE_ENV),
