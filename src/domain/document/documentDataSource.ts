@@ -29,7 +29,9 @@ import { AccessDisallowedError } from '../errors';
 
 const STATUS_CODE_OK = 200;
 const STATUS_CODE_MULTIPLE_CHOICE = 300;
-const IGNORED_RESOURCE_TYPES: ResourceType[] = ['font', 'image', 'media', 'stylesheet'];
+
+// https://events.google.com/io2018/schedule/?section=may-9&sid=59f86c0c-a0be-4ca3-9b8c-e97e79b6610b
+const ALLOWED_RESOURCE_TYPES: ResourceType[] = ['document', 'script', 'xhr', 'fetch'];
 
 @Injectable({
   scope: ProviderScope.Session,
@@ -68,19 +70,14 @@ export class DocumentDataSource extends BrowserDataSource<Context, Document> imp
   }
 
   protected interceptRequest(request: Request): void {
-    if (!this.headless) {
-      // noinspection JSIgnoredPromiseFromCall
-      request.continue();
-      return;
-    }
-
-    if (IGNORED_RESOURCE_TYPES.includes(request.resourceType())) {
+    // Abort non-DOM requests when puppeteer is launched in headless mode
+    if (this.headless && !ALLOWED_RESOURCE_TYPES.includes(request.resourceType())) {
       // noinspection JSIgnoredPromiseFromCall
       request.abort('aborted');
-    } else {
-      // noinspection JSIgnoredPromiseFromCall
-      request.continue();
+      return;
     }
+    // noinspection JSIgnoredPromiseFromCall
+    request.continue();
   }
 
   public async onResponse(): Promise<void> {
