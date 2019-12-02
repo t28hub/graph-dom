@@ -82,6 +82,8 @@ Environment variables are the follows and every variable is optional.
 * `APOLLO_SCHEMA_TAG`: Tag name of a GraphQL schema.
 * `BROWSER_PATH`: Path to a browser.(Defaults to detect automatically)
 * `BROWSER_HEADLESS`: Whether to launch browser in headless mode.(Defaults to `true`) 
+* `QUERY_COMPLEXITY_LIMIT`: Maximum allowed complexity for query.(Defaults to `15`)
+* `QUERY_DEPTH_LIMIT`: Maximum allowed depth for query.(Defaults to `5`)
 * `REDIS_URL`: URL used to connect to Redis. If the environment variable is not set, the GraphDOM uses in-memory as a cache.
 
 See [.env.example](./.env.example) for more detailed variables.

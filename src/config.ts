@@ -25,8 +25,10 @@ export interface Mode {
 }
 
 export interface ApolloConfig {
-  readonly apiKey: string;
-  readonly schemaTag: string;
+  readonly engineApiKey?: string;
+  readonly engineSchemaTag?: string;
+  readonly queryDepthLimit: number;
+  readonly queryComplexityLimit: number;
 }
 
 export interface BrowserConfig {
@@ -45,44 +47,44 @@ export interface Config {
   readonly mode: Mode;
   readonly port: number;
   readonly logLevel: Level;
-  readonly apollo?: ApolloConfig;
+  readonly apollo: ApolloConfig;
   readonly browser: BrowserConfig;
   readonly redis?: RedisConfig;
 }
 
-const NAME_DEVELOPMENT = 'development';
-export const parseMode = (value: string): Mode => {
-  const name = value || NAME_DEVELOPMENT;
-  if (name === NAME_DEVELOPMENT) {
-    return {
-      name,
-      debug: true,
-      tracing: true,
-      playground: true,
-    };
-  }
-
+const DEFAULT_NODE_ENV = 'development';
+export const parseMode = (nodeEnv: string | undefined): Mode => {
+  const name = nodeEnv || DEFAULT_NODE_ENV;
   return {
     name,
-    debug: false,
-    tracing: false,
-    playground: false,
+    debug: name === DEFAULT_NODE_ENV,
+    tracing: name === DEFAULT_NODE_ENV,
+    playground: name === DEFAULT_NODE_ENV,
   };
 };
 
-export const parsePort = (value: string | undefined, defaultPort: number): number => {
-  return value ? Number.parseInt(value) : defaultPort;
+const DEFAULT_SERVER_PORT = 8080;
+export const parsePort = (serverPort: string | undefined): number => {
+  return serverPort ? parseInt(serverPort) : DEFAULT_SERVER_PORT;
 };
 
-export const parseApolloConfig = (env: typeof process.env = process.env): ApolloConfig | undefined => {
+const DEFAULT_COMPLEXITY_LIMIT = 15;
+const DEFAULT_DEPTH_LIMIT = 5;
+export const parseApolloConfig = (env: typeof process.env = process.env): ApolloConfig => {
+  const queryConfig: ApolloConfig = {
+    queryComplexityLimit: env.QUERY_COMPLEXITY_LIMIT ? parseInt(env.QUERY_COMPLEXITY_LIMIT) : DEFAULT_COMPLEXITY_LIMIT,
+    queryDepthLimit: env.QUERY_DEPTH_LIMIT ? parseInt(env.QUERY_DEPTH_LIMIT) : DEFAULT_DEPTH_LIMIT,
+  };
+
   if (!env.APOLLO_API_KEY || !env.APOLLO_SCHEMA_TAG) {
-    return undefined;
+    return queryConfig;
   }
 
-  return {
-    apiKey: env.APOLLO_API_KEY,
-    schemaTag: env.APOLLO_SCHEMA_TAG,
+  const engineConfig: Required<Pick<ApolloConfig, 'engineApiKey' | 'engineSchemaTag'>> = {
+    engineApiKey: env.APOLLO_API_KEY,
+    engineSchemaTag: env.APOLLO_SCHEMA_TAG,
   };
+  return { ...engineConfig, ...queryConfig };
 };
 
 export const parseBrowserConfig = (env: typeof process.env = process.env): BrowserConfig => {
@@ -105,13 +107,11 @@ export const parseRedisConfig = (url: string | undefined): RedisConfig | undefin
   return { host, port, path, password };
 };
 
-const DEFAULT_NODE_ENV = 'development';
-const DEFAULT_SERVER_PORT = 8080;
 const DEFAULT_LOG_LEVEL = 'debug';
 export const getConfig = (env: typeof process.env = process.env): Config => {
   return {
-    mode: parseMode(env.NODE_ENV || DEFAULT_NODE_ENV),
-    port: parsePort(env.SERVER_PORT, DEFAULT_SERVER_PORT),
+    mode: parseMode(env.NODE_ENV),
+    port: parsePort(env.SERVER_PORT),
     logLevel: parseLevel(env.LOGGING_LEVEL || DEFAULT_LOG_LEVEL),
     apollo: parseApolloConfig(env),
     browser: parseBrowserConfig(env),

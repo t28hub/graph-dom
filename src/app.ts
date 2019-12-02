@@ -55,13 +55,9 @@ const serverConfig: ServerConfig = {
     const browser = injector.get(DocumentDataSource);
     return { browser };
   },
-  /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */
-  plugins: [queryComplexity(schema, 25)],
-  validationRules: [
-    /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */
-    depthLimit(5),
-  ],
-  engine: apollo ? apollo : false,
+  plugins: [queryComplexity(schema, apollo.queryComplexityLimit)],
+  validationRules: [depthLimit(apollo.queryDepthLimit)],
+  engine: apollo.engineApiKey ? { apiKey: apollo.engineApiKey, schemaTag: apollo.engineSchemaTag } : false,
   debug: mode.debug,
   playground: mode.playground,
   tracing: mode.tracing,
