@@ -2,14 +2,18 @@ version: '3'
 services:
   graphdom:
     build: .
+    tty: true
     environment:
-      - NODE_ENV=development
-      - GRAPH_DOM_REDIS_HOST=redis
-      - GRAPH_DOM_REDIS_PORT=6379
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      REDIS_URL: redis://redis:6379
+      SERVER_PORT: 8080
+    command: yarn start
+    volumes:
+      - ./:/graphdom
+      - /graphdom/node_modules # Exclude node_modules
     ports:
       - 8080:8080
-    links:
-      - redis
 
   redis:
     image: redis:5.0.7
