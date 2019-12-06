@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="GraphDOM" type="NodeJSConfigurationType" node-parameters="--require ts-node/register" path-to-js-file="src/server.ts" working-dir="$PROJECT_DIR$">
+    <envs>
+      <env name="NODE_ENV" value="development" />
+      <env name="SERVER_PORT" value="8081" />
+      <env name="LOG_LEVEL" value="debug" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>

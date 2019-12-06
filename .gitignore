@@ -1,5 +1,6 @@
 ### IntelliJ
 .idea/
+!.idea/runConfigurations/
 .idea_modules/
 out/
 *.iml
