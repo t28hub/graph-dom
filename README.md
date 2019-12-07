@@ -17,9 +17,11 @@ Extract web data by GraphQL and DOM API. [Demo](https://graph-dom.t28.now.sh/)
 * Emulate devices and User-Agent
 * Render JavaScript
 * Support robots.txt
+* Expand short URL
 * Protect your privacy using incognito mode
 
 ## Example
+The following example extracts featured presentations attributes(title, url, thumbnail url and meta) from the SpeakerDeck.
 ```graphql
 {
   page(url: "https://speakerdeck.com/p/featured") {
@@ -40,22 +42,70 @@ Extract web data by GraphQL and DOM API. [Demo](https://graph-dom.t28.now.sh/)
   }
 }
 ```
+* [Extract title](./examples/titleExtractionQuery.graphql)
+* [Extract all links](./examples/linkExtractionQuery.graphql)
+* [Extract OGP data](./examples/openGraphProtocolQuery.graphql) 
+
 See [examples](./examples) for more detailed examples.
 
-## Environment Variables
-Environment variables are the follows and every variable is optional.
-* `NODE_ENV`: `development` or `production`.(Defaults to `development`)
-* `SERVER_PORT`: Port listened by the GraphDOM.(Defaults to `8080`)
-* `LOG_LEVEL`: `DEBUG`, `INFO`, `WARN`, `ERROR` or `TRACE`.(Defaults to `INFO`)
-* `APOLLO_API_KEY`: API key for the Apollo [GraphManager](https://engine.apollographql.com/).
-* `APOLLO_SCHEMA_TAG`: Tag name of a GraphQL schema.
-* `BROWSER_PATH`: Path to a browser.(Defaults to detect automatically)
-* `BROWSER_HEADLESS`: Whether to launch browser in headless mode.(Defaults to `true`) 
-* `QUERY_COMPLEXITY_LIMIT`: Maximum allowed complexity for query.(Defaults to `15`)
-* `QUERY_DEPTH_LIMIT`: Maximum allowed depth for query.(Defaults to `5`)
-* `REDIS_URL`: URL used to connect to Redis. If the environment variable is not set, the GraphDOM uses in-memory as a cache.
+## Supported APIs
+### Document
+* `title`
+* `head`
+* `body`
+* `children`
+* `childNodes`
+* `innerText`
+* `getElementById`
+* `getElementsByClassName`
+* `getElementsByTagName`
+* `querySelector`
+* `querySelectorAl`
 
-See [.env.example](./.env.example) for more detailed variables.
+### Element
+* `attributes`
+* `children`
+* `childNodes`
+* `innerText`
+* `innerHTML`
+* `outerHTML`
+* `getAttribute`
+* `getElementById`
+* `getElementsByClassName`
+* `getElementsByTagName`
+* `querySelector`
+* `querySelectorAl`
+
+### Other APIs
+GraphQL is [introspective](https://graphql.github.io/learn/introspection/). You can query a GraphQL schema using `__schema` and `__type` as below.
+* `__schema` lists all types defined in the schema.
+```graphql
+query {
+  __schema {
+    types {
+      name
+      kind
+      description
+      fields {
+        name
+      }
+    }
+  }
+}
+```
+* `__type` gets details about a specific type.
+```graphql
+query {
+  __type(name: "Document") {
+    name
+    kind
+    description
+    fields {
+      name
+    }
+  }
+}
+```
 
 ## Development
 ```
@@ -82,6 +132,21 @@ The request should receive the following response, if GraphDOM works appropriate
   }
 }
 ```
+
+### Environment Variables
+Environment variables are the follows and every variable is optional.
+* `NODE_ENV`: `development` or `production`.(Defaults to `development`)
+* `SERVER_PORT`: Port listened by the GraphDOM.(Defaults to `8080`)
+* `LOG_LEVEL`: `DEBUG`, `INFO`, `WARN`, `ERROR` or `TRACE`.(Defaults to `INFO`)
+* `APOLLO_API_KEY`: API key for the Apollo [GraphManager](https://engine.apollographql.com/).
+* `APOLLO_SCHEMA_TAG`: Tag name of a GraphQL schema.
+* `BROWSER_PATH`: Path to a browser.(Defaults to detect automatically)
+* `BROWSER_HEADLESS`: Whether to launch browser in headless mode.(Defaults to `true`) 
+* `QUERY_COMPLEXITY_LIMIT`: Maximum allowed complexity for query.(Defaults to `15`)
+* `QUERY_DEPTH_LIMIT`: Maximum allowed depth for query.(Defaults to `5`)
+* `REDIS_URL`: URL used to connect to Redis. If the environment variable is not set, the GraphDOM uses in-memory as a cache.
+
+See [.env.example](./.env.example) for more detailed variables.
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ft28hub%2Fgraph-dom.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ft28hub%2Fgraph-dom?ref=badge_large)
