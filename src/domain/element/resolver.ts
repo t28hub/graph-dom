@@ -16,7 +16,7 @@
 
 import { IResolverObject } from 'graphql-tools';
 import { Attribute, Data, Element, Node, NodeType } from '..';
-import { validateAttributeName, validateClassName, validateSelector, validateTagName } from '../../util';
+import { check } from '../../util';
 
 // noinspection JSUnusedGlobalSymbols
 export const resolver: IResolverObject = {
@@ -74,29 +74,34 @@ export const resolver: IResolverObject = {
   },
   getAttribute: async (element: Element, args: { name: string }): Promise<string | null> => {
     const { name } = args;
-    validateAttributeName(name);
+    check(name.length !== 0, 'Attribute name must contain at least 1 char');
+
     const attribute = await element.getAttribute(name);
     return attribute.orElse(null);
   },
   getElementsByClassName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
-    validateClassName(name);
+    check(name.length !== 0, 'Class name must contain at least 1 char');
+
     return element.getElementsByClassName(name);
   },
   getElementsByTagName: async (element: Element, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
-    validateTagName(name);
+    check(name.length !== 0, 'Tag name must contain at least 1 char');
+
     return element.getElementsByTagName(name);
   },
   querySelector: async (element: Element, args: { selector: string }): Promise<Element | null> => {
     const { selector } = args;
-    validateSelector(selector);
+    check(selector.length !== 0, 'Selector must contain at least 1 char');
+
     const selected = await element.querySelector(selector);
     return selected.orElse(null);
   },
   querySelectorAll: async (element: Element, args: { selector: string }): Promise<Array<Element>> => {
     const { selector } = args;
-    validateSelector(selector);
+    check(selector.length !== 0, 'Selector must contain at least 1 char');
+
     return await element.querySelectorAll(selector);
   },
 };

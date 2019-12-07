@@ -22,7 +22,6 @@ interface Throwable<E extends Error = Error> {
 }
 
 export * from './optional';
-export * from './validator';
 
 export function check(condition: boolean, message: string, throwable: Throwable = UserInputError): void {
   if (!condition) {

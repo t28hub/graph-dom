@@ -16,7 +16,7 @@
 
 import { IResolverObject } from 'graphql-tools';
 import { Document, Element, Node, NodeType } from '..';
-import { validateClassName, validateId, validateSelector, validateTagName } from '../../util/validator';
+import { check } from '../../util';
 
 export const resolver: IResolverObject = {
   head: async (document: Document): Promise<Element | null> => {
@@ -69,29 +69,34 @@ export const resolver: IResolverObject = {
   },
   getElementById: async (document: Document, args: { id: string }): Promise<Element | null> => {
     const { id } = args;
-    validateId(id);
+    check(id.length !== 0, 'ID must contain at least 1 char');
+
     const element = await document.getElementById(id);
     return element.orElse(null);
   },
   getElementsByClassName: async (document: Document, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
-    validateClassName(name);
+    check(name.length !== 0, 'Class name must contain at least 1 char');
+
     return document.getElementsByClassName(name);
   },
   getElementsByTagName: async (document: Document, args: { name: string }): Promise<Array<Element>> => {
     const { name } = args;
-    validateTagName(name);
+    check(name.length !== 0, 'Tag name must contain at least 1 char');
+
     return document.getElementsByTagName(name);
   },
   querySelector: async (document: Document, args: { selector: string }): Promise<Element | null> => {
     const { selector } = args;
-    validateSelector(selector);
+    check(selector.length !== 0, 'Selector must contain at least 1 char');
+
     const selected = await document.querySelector(selector);
     return selected.orElse(null);
   },
   querySelectorAll: async (document: Document, args: { selector: string }): Promise<Array<Element>> => {
     const { selector } = args;
-    validateSelector(selector);
+    check(selector.length !== 0, 'Selector must contain at least 1 char');
+
     return document.querySelectorAll(selector);
   },
 };
