@@ -25,6 +25,7 @@ jobs:
       - run:
           name: Check code format & run lint
           command: yarn lint
+          no_output_timeout: 1m
 
   license:
     docker:
@@ -36,9 +37,11 @@ jobs:
           name: Install fossa-cli
           command: |
             curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash
+          no_output_timeout: 5m
       - run:
           name: Check yarn dependency licenses
           command: fossa test -c .fossa/config.yml
+          no_output_timeout: 1m
 
   test:
     docker:
@@ -51,7 +54,7 @@ jobs:
       - save_cache: *save-cache
       - run:
           name: Run unit tests
-          command: yarn test:unit --ci --runInBand
+          command: yarn test:unit --ci
           no_output_timeout: 5m
       - store_test_results:
           path: ./reports/test
@@ -96,6 +99,7 @@ jobs:
       - run:
           name: Build app
           command: yarn build
+          no_output_timeout: 5m
 
   deploy:
     docker:
@@ -109,9 +113,11 @@ jobs:
       - deploy:
           name: Deploy to ZEIT
           command: yarn deploy --token $ZEIT_TOKEN
+          no_output_timeout: 5m
       - run:
           name: Publish schema to Apollo
           command: yarn apollo:publish --endpoint=https://graph-dom.t28.now.sh/graphql --tag=production
+          no_output_timeout: 5m
 
 workflows:
   version: 2
@@ -134,6 +140,7 @@ workflows:
             - lint
       - build:
           requires:
+            - license
             - lint
             - test
       - e2e:
