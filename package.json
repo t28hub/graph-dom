@@ -70,7 +70,7 @@
     "@types/helmet": "^0.0.45",
     "@types/ioredis": "^4.14.1",
     "@types/jest": "^24.0.23",
-    "@types/node": "^12.12.14",
+    "@types/node": "^12.12.16",
     "@types/node-fetch": "^2.5.4",
     "@types/puppeteer-core": "^2.0.0",
     "@types/source-map-support": "^0.5.0",
