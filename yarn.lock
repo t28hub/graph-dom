@@ -1526,24 +1526,24 @@ apollo-link@^1.2.13, apollo-link@^1.2.3:
     tslib "^1.9.3"
     zen-observable-ts "^0.8.20"
 
-apollo-server-cache-redis@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/apollo-server-cache-redis/-/apollo-server-cache-redis-1.1.4.tgz#f0a712fbc65edeba7221bbac34f9458c8ee00218"
-  integrity sha512-bWZbUTKf2NlLhTnOezLWcdP/h1te5UtEZ+LuMcrtpHidVFeKKImnHo1f9Qlc8eFrumstgBDQTMLfeG9lwWS66A==
+apollo-server-cache-redis@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/apollo-server-cache-redis/-/apollo-server-cache-redis-1.1.5.tgz#dae4fef84d2527eb2f07a430a3b370b78d5caa12"
+  integrity sha512-RPhGbcwfWWgMvr8eHR0yU8H2Zu5n0nuV+M4b0srBxJRxU89r3/3vsr1aU43qZ0i7tsZ1MXZzwn30Vhx8boBtCw==
   dependencies:
-    apollo-server-caching "^0.5.0"
+    apollo-server-caching "^0.5.1"
     apollo-server-env "^2.4.3"
     dataloader "^1.4.0"
     ioredis "^4.0.0"
 
-apollo-server-caching@0.5.0, apollo-server-caching@^0.5.0:
+apollo-server-caching@0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/apollo-server-caching/-/apollo-server-caching-0.5.0.tgz#446a37ce2d4e24c81833e276638330a634f7bd46"
   integrity sha512-l7ieNCGxUaUAVAAp600HjbUJxVaxjJygtPV0tPTe1Q3HkPy6LEWoY6mNHV7T268g1hxtPTxcdRu7WLsJrg7ufw==
   dependencies:
     lru-cache "^5.0.0"
 
-apollo-server-caching@^0.5.1:
+apollo-server-caching@^0.5.0, apollo-server-caching@^0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/apollo-server-caching/-/apollo-server-caching-0.5.1.tgz#5cd0536ad5473abb667cc82b59bc56b96fb35db6"
   integrity sha512-L7LHZ3k9Ao5OSf2WStvQhxdsNVplRQi7kCAPfqf9Z3GBEnQ2uaL0EgO0hSmtVHfXTbk5CTRziMT1Pe87bXrFIw==
