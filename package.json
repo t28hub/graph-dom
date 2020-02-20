@@ -97,7 +97,7 @@
     "ts-jest": "^24.3.0",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.6.2",
-    "typescript": "^3.7.4"
+    "typescript": "^3.8.2"
   },
   "optionalDependencies": {
     "iltorb": "^2.4.4"
