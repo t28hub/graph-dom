@@ -91,7 +91,7 @@
     "now": "^16.7.3",
     "prettier": "^1.19.1",
     "puppeteer": "^2.0.0",
-    "rimraf": "^3.0.0",
+    "rimraf": "^3.0.2",
     "stryker-cli": "^1.0.0",
     "supertest": "^4.0.2",
     "ts-jest": "^24.3.0",
