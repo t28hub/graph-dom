@@ -51,7 +51,7 @@
     "graphql-depth-limit": "^1.1.0",
     "graphql-import": "^0.7.1",
     "graphql-query-complexity": "^0.4.1",
-    "graphql-toolkit": "0.7.4",
+    "graphql-toolkit": "0.7.5",
     "helmet": "^3.21.2",
     "log4js": "^6.1.0",
     "puppeteer-core": "^2.0.0",
