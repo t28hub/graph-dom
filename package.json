@@ -36,7 +36,7 @@
     }
   },
   "dependencies": {
-    "@graphql-modules/core": "^0.7.13",
+    "@graphql-modules/core": "^0.7.15",
     "apollo-datasource": "^0.6.3",
     "apollo-server-cache-redis": "^1.1.5",
     "apollo-server-caching": "^0.5.0",
